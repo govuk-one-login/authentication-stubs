@@ -1,0 +1,3 @@
+rootProject.name = 'di-authentication-stubs'
+
+include "di-ipv-orchestrator-stub"
