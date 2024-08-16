@@ -120,7 +120,7 @@ Mappings:
       authenticationFrontendUrl: "https://signin-sp.build.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
       hostedZoneId: "Z099220113UW2JSCXBNRI"
-      rpClientId: "P5OQvWV21U0OW7U5g27d6MU2LLznYYaM"
+      rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
 
 Resources:
   ApiGateway:
