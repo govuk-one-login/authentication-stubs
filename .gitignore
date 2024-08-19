@@ -1,0 +1,35 @@
+.idea/
+.gradle/
+build/
+.gradle
+build
+!ci/cloudfront-orchestration/*/build
+!ci/stack-orchestration/**/build
+**/.terraform/
+│**/*.tfstate*
+**/out
+**/.classpath
+**/.project
+**/.settings
+**/bin
+.java-version
+**/terraform.log
+ci/terraform/**/*.plan
+ci/terraform/**/*.tfstate*
+logs/
+.vscode/
+.venv/
+.aws-sam
+**/.DS_Store
+
+# Approval Tests
+*.received.txt
+*.received.json
+
+# Contract Tests
+/*/src/test/pact/
+node_modules
+.infracost
+
+*.pem
+*.key

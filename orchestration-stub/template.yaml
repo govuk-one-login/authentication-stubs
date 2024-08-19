@@ -1,0 +1,310 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - local
+      - sandpit
+      - authdev2
+      - buildsp
+
+Mappings:
+  EnvironmentConfiguration:
+    local:
+      cookieDomain: none
+      stubDomain: placeholder
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs41htFRe62BIfwQZ0OCT
+        g5p2NHAekvIAJaNb6ZkLuLXYdLBax+2c9f4ALTrltmLMBpgtS6VQg2zO8UmSE4bX
+        +Nhaw2nf3/VRBIlAi2NiD4cUIwNtxIx5qpBeDxb+YR7NuTJ0nFq6u6jv34RB1RWE
+        J1sEOiv9aSPEt6eK8TGL6uZbPGU8CKJuWwPfW1ko/lyuM1HG0G/KAZ8DaLJzOMWX
+        +2aZatj9RHtOCtGxwMrZlU4n/O1gbVPBfXx9RugTi0W4upmeNFR5CsC+WgENkr0v
+        pXEyIW7edR6lDsSYzJI+yurVFyt82Bn7Vo2x5CIoLiH/1ZcKaApNU02/eK/gMBf+
+        EwIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: placeholder
+      subnetBId: placeholder
+      subnetCId: placeholder
+      endpointSgId: placeholder
+      redisSgId: placeholder
+      vpcId: placeholder
+      privateKey: |
+        -----BEGIN PRIVATE KEY-----
+        MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgSpFQByZAQH3n5lCu
+        0L+foxHzwi/I1RtJ4o8jyTtwj4WhRANCAASyFo4Vo28pL3dLQ7YAqsSBlcxUPZFk
+        q4YeTPS3lxx53aay6jy6I+V3ZYmr3ZGDnR2JRydsa4kXumn2jvfKOvuW
+        -----END PRIVATE KEY-----
+      authenticationBackendUrl: "https://www.example.com/"
+      authenticationFrontendUrl: "https://www.example.com/"
+      redisUrl: "redis://redis-local:6379"
+      hostedZoneId: placeholder
+      rpClientId: "rpclient"
+
+    sandpit:
+      cookieDomain: .sandpit.account.gov.uk
+      stubDomain: orchstub.sandpit.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs41htFRe62BIfwQZ0OCT
+        g5p2NHAekvIAJaNb6ZkLuLXYdLBax+2c9f4ALTrltmLMBpgtS6VQg2zO8UmSE4bX
+        +Nhaw2nf3/VRBIlAi2NiD4cUIwNtxIx5qpBeDxb+YR7NuTJ0nFq6u6jv34RB1RWE
+        J1sEOiv9aSPEt6eK8TGL6uZbPGU8CKJuWwPfW1ko/lyuM1HG0G/KAZ8DaLJzOMWX
+        +2aZatj9RHtOCtGxwMrZlU4n/O1gbVPBfXx9RugTi0W4upmeNFR5CsC+WgENkr0v
+        pXEyIW7edR6lDsSYzJI+yurVFyt82Bn7Vo2x5CIoLiH/1ZcKaApNU02/eK/gMBf+
+        EwIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-0027e271c35f828c1"
+      subnetBId: "subnet-0b648700a8ac43736"
+      subnetCId: "subnet-01b7b1c835828eb3d"
+      endpointSgId: "sg-036acdb59028a0c78"
+      redisSgId: "sg-0e4baa990eaebfb74"
+      vpcId: "vpc-0b6f4a5d72f84ed0c"
+      privateKey: "{{resolve:secretsmanager:sandpit-orchestration-stub-private-key::::4f623556-c691-4352-90f8-33d79b833a79}}"
+      authenticationBackendUrl: "https://48oqh70cm7-vpce-040f33c3489ff777b.execute-api.eu-west-2.amazonaws.com/sandpit/"
+      authenticationFrontendUrl: "https://signin.sandpit.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:sandpit-orchestration-stub-redis-url::::1e143e9d-8b87-4638-a460-66aaf5f60b2d}}"
+      hostedZoneId: placeholder
+      rpClientId: "1Dlz5rYheTqzZASRMmSBtgFIYgZlysnQ"
+
+    authdev2:
+      cookieDomain: .authdev2.sandpit.account.gov.uk
+      stubDomain: orchstub.authdev2.sandpit.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlWwvS/QGYHfu8nufIzgo
+        05G4GEjMHvOXGywV61Inev6+46VF36rAs1+ZtxAhR6D4FFDbyLFhej0Rp/H9PMnk
+        rwaIoRkZq89BHAX/yklx3EYPkdRhsXjfWocL7ZJP/JgFcNZV/eE2ZOf9O3UmcVGy
+        DCQMhKDhYX3XFR5mtd2lCHmu9TtONvodQ2zf0REFPJey1X4M3JYWhtW0lm8lxuFM
+        +wq2LiUkwO6qgTiUcweMzKVNMX55pLajsL9o/wVApm9FiGLB1Ndt4aRT6JIbgG3U
+        G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
+        zwIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-0ef903f65650689d8"
+      subnetBId: "subnet-0a664da1b8fbe815d"
+      subnetCId: "subnet-03533652fb2b7cd75"
+      endpointSgId: "sg-0d64cc026d540b919"
+      redisSgId: "sg-072d47bbcf7f12d00"
+      vpcId: "vpc-07436f099bccc77df"
+      privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::8b04bb6d-e467-47a1-ac4f-2725d7b36e5b}}"
+      authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
+      authenticationFrontendUrl: "https://signin.authdev2.sandpit.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
+      hostedZoneId: "Z062001013DJY2F0YXEJR"
+      rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
+
+    buildsp:
+      cookieDomain: .build.account.gov.uk
+      stubDomain: orchstub.signin.build.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAucvsIWDskK8uk1n5NOG4
+        CgleJGkfl92QwwMYcfLVySqoKOdVfyaoTa9hXNgtIkRFBTWh+bymb7N0Rf69qtOB
+        kpI1Cyvljj19lfAQFT0aBwRdNlRGS+h9uXJb51fgFj3b/JA07PLoGkwY5L++qoVY
+        Ye6BOg5Qoc1cd/uvXID87irUNxGGA4x6dPDROBIpHWe+6NbuFX1BymR+vwUU2r7m
+        H3jXuMjlf1uChMW0FPTCXXpKgT51MU6ciy97oVL7XmQmt7d9CbySYLRwQn2f3SIO
+        gZF+Mx2AfCQAwpnbGcKNhBxqQyYS+8Azf7wTUQUWUh168Q15xDGvaeoFnaWAfcHa
+        RwIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-06431beae9b136e15"
+      subnetBId: "subnet-016db45a259212743"
+      subnetCId: "subnet-0f595928b921f038a"
+      endpointSgId: "sg-0ac202c3d996f3ad8"
+      redisSgId: "sg-05ff2238b12306a34"
+      vpcId: "vpc-03db44fa71b8d00b2"
+      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}"
+      authenticationBackendUrl: "https://fag06zqnve-vpce-02837b184c6538fce.execute-api.eu-west-2.amazonaws.com/build/"
+      authenticationFrontendUrl: "https://signin-sp.build.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
+      hostedZoneId: "Z099220113UW2JSCXBNRI"
+      rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
+
+Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      AlwaysDeploy: true
+      EndpointConfiguration:
+        Type: REGIONAL
+
+  IndexFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: index/index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds:
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetAId]
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetBId]
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetCId]
+      Environment:
+        Variables:
+          REDIS_URL:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisUrl]
+          PRIVATE_KEY:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, privateKey]
+          COOKIE_DOMAIN:
+            !FindInMap [
+              EnvironmentConfiguration,
+              !Ref Environment,
+              cookieDomain,
+            ]
+          STUB_DOMAIN:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+          AUTH_PUB_KEY:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, authPubKey]
+          AUTHENTICATION_FRONTEND_URL:
+            !FindInMap [
+              EnvironmentConfiguration,
+              !Ref Environment,
+              authenticationFrontendUrl,
+            ]
+          RP_CLIENT_ID:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, rpClientId]
+      Architectures:
+        - arm64
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /
+            Method: get
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /
+            Method: post
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - index/index.ts
+        Minify: true
+        Sourcemap: true
+        Target: "es2020"
+
+  CallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: callback/index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds:
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetAId]
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetBId]
+          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetCId]
+      Environment:
+        Variables:
+          REDIS_URL:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisUrl]
+          PRIVATE_KEY:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, privateKey]
+          AUTH_PUB_KEY:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, authPubKey]
+          AUTHENTICATION_BACKEND_URL:
+            !FindInMap [
+              EnvironmentConfiguration,
+              !Ref Environment,
+              authenticationBackendUrl,
+            ]
+      Architectures:
+        - arm64
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /orchestration-redirect
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - callback/index.ts
+        Minify: true
+        Sourcemap: true
+        Target: "es2020"
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Orchestration Stub"
+      VpcId: !FindInMap [EnvironmentConfiguration, !Ref Environment, vpcId]
+      SecurityGroupEgress:
+        - DestinationSecurityGroupId:
+            !FindInMap [
+              EnvironmentConfiguration,
+              !Ref Environment,
+              endpointSgId,
+            ]
+          Description: Allow traffic to VPC endpoints
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+        - DestinationSecurityGroupId:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisSgId]
+          Description: Allow traffic to Redis
+          IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      SecurityPolicy: TLS_1_2
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName:
+            !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+          HostedZoneId:
+            !FindInMap [
+              EnvironmentConfiguration,
+              !Ref Environment,
+              hostedZoneId,
+            ]
+
+  Domain:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, hostedZoneId]
+      Type: A
+      Name: !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      AliasTarget:
+        DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      RestApiId: !Ref ApiGateway
+      Stage: Prod
+    DependsOn: GatewayDomain
