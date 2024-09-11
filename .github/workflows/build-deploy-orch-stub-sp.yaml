@@ -1,0 +1,49 @@
+name: Build and deploy Orchestration stub
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # temporary change
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./orchestration-stub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up SAM cli
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true  # this caches installation but is only available on Linux x86-64 runners
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ORCH_STUB_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: SAM validate
+        run: sam validate
+
+      - name: SAM build and test
+        run: sam build
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@v3.9.1
+        with:
+            artifact-bucket-name: ${{ secrets.ORCH_STUB_ARTIFACT_BUCKET_NAME }}
+            signing-profile-name: ${{ secrets.ORCH_STUB_SIGNING_PROFILE_NAME }}
+            working-directory: ./orchestration-stub/.aws-sam/build
