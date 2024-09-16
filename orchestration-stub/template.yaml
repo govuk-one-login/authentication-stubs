@@ -3,13 +3,48 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
+  CodeSigningConfigArn:
+    Type: String
+    Description: Asserts that lambdas are signed when deployed.
+    Default: "none"
+
   Environment:
     Type: String
     AllowedValues:
       - local
       - sandpit
       - authdev2
-      - buildsp
+      - build
+      - staging
+
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+
+Conditions:
+  UseCodeSigning:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref CodeSigningConfigArn
+          - "none"
+
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
+Globals:
+  Function:
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
 
 Mappings:
   EnvironmentConfiguration:
@@ -96,7 +131,7 @@ Mappings:
       hostedZoneId: "Z062001013DJY2F0YXEJR"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
 
-    buildsp:
+    build:
       cookieDomain: .build.account.gov.uk
       stubDomain: orchstub.signin.build.account.gov.uk
       authPubKey: |
@@ -121,6 +156,32 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
       hostedZoneId: "Z099220113UW2JSCXBNRI"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
+
+    staging:
+      cookieDomain: .staging.account.gov.uk
+      stubDomain: orchstub.signin.staging.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu2w+Ds3JwZm4nAFh/B3F
+        oQWkyWjTLuVVYWoXn9vwMYmriy/OM4r+U9N2/dQAD4wN7GCmOTs0Ze3dQLEIGxoS
+        ogtrDCNJKZEOYX6ELZJQEzdQVZRQ8HhlRGY9V/2eQlxjx4FxOcrlx/hVxHWo94Fq
+        EOVHu7ZqNPZn6b5IVCX++08ogPOcwlgn8DwYYBmlyhOfarivXDYd7vxqsebtMwYJ
+        RzqMqxLdR4T4bPcTLM+qoaUNaQ6riI2x2v5uEOv/5zN0kyF5bHf/H7C49WMIVtUT
+        tDG7fUjUq/PPkimNbP2JTNPvbGjAmbRLp6lLRB85RZ9z6e972C55Y+GBdmOptRYt
+        9wIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-05a8324e95078935b"
+      subnetBId: "subnet-0ab32f8faa3150e2f"
+      subnetCId: "subnet-04526c509b7d3363f"
+      endpointSgId: "sg-0c5c165f4c8cb47af"
+      redisSgId: "sg-0b580ccddb50eb178"
+      vpcId: "vpc-0ca40c7d13490419d"
+      privateKey: "{{resolve:secretsmanager:stagingsp-orchestration-stub-private-key::::a31a76f2-4209-41e5-8f99-7d318f536985}}"
+      authenticationBackendUrl: "https://rr86yg3r28-vpce-0339d04aeb67de9da.execute-api.eu-west-2.amazonaws.com/staging/"
+      authenticationFrontendUrl: "https://signin-sp.staging.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::bc07829a-baee-4063-a971-430a0a7f4650}}"
+      hostedZoneId: "Z02212762LL4X7ZM4JYAT"
+      rpClientId: "3NKFv679oYlMdyrhKErrTGbzBy2h8rrd"
 
 Resources:
   ApiGateway:
@@ -306,5 +367,5 @@ Resources:
       DomainName:
         !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
       RestApiId: !Ref ApiGateway
-      Stage: Prod
+      Stage: !Ref ApiGateway.Stage
     DependsOn: GatewayDomain
