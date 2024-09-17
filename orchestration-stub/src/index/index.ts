@@ -19,6 +19,7 @@ import {
   RequestParameters,
 } from "../services/request-parameters";
 import { credentialTrustToEnum } from "../types/credential-trust";
+import { AccountStateEnum } from "../types/account-state";
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -291,6 +292,7 @@ const createNewSession = async (id: string, config: RequestParameters) => {
     current_credential_strength: credentialTrustToEnum(
       config.authenticatedLevel,
     ),
+    is_new_account: AccountStateEnum.UNKNOWN,
   };
   const client = await getRedisClient();
   await client.setEx(id, 3600, JSON.stringify(session));
