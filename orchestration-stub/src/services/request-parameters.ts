@@ -1,5 +1,6 @@
 import querystring, { ParsedUrlQuery } from "querystring";
 import { CredentialTrustLevel } from "../types/credential-trust";
+import { ChannelEnum } from "../types/channel";
 
 export type RequestParameters = {
   confidence: CredentialTrustLevel;
@@ -47,4 +48,13 @@ const getReauthenticate = (form: ParsedUrlQuery): string | undefined => {
   if (typeof form.reauthenticate === "string" && form.reauthenticate !== "") {
     return form.reauthenticate;
   }
+};
+
+const validateChannel = (
+  channel: string | string[] | undefined,
+): ChannelEnum => {
+  if (channel === ChannelEnum.NONE || channel === ChannelEnum.WEB || channel === ChannelEnum.STRATEGIC_APP ) {
+    return channel;
+  }
+  throw new Error("Unknown channel " + channel);
 };
