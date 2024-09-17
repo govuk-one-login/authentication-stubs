@@ -181,7 +181,7 @@ Mappings:
       authenticationFrontendUrl: "https://signin-sp.staging.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::bc07829a-baee-4063-a971-430a0a7f4650}}"
       hostedZoneId: "Z02212762LL4X7ZM4JYAT"
-      rpClientId: "3NKFv679oYlMdyrhKErrTGbzBy2h8rrd"
+      rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
 
 Resources:
   ApiGateway:
