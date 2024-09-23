@@ -9,6 +9,16 @@ capabilities = "CAPABILITY_IAM"
 parameter_overrides = "Environment=\"sandpit\""
 image_repositories = []
 
+[authdev1.deploy.parameters]
+stack_name = "authdev1-orch-stub"
+resolve_s3 = true
+s3_prefix = "authdev1-orch-stub"
+region = "eu-west-2"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"dev\" SubEnvironment=\"old-authdev1\""
+image_repositories = []
+
 [authdev2.deploy.parameters]
 stack_name = "authdev2-orch-stub"
 resolve_s3 = true
@@ -16,15 +26,15 @@ s3_prefix = "authdev2-orch-stub"
 region = "eu-west-2"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"authdev2\""
+parameter_overrides = "Environment=\"dev\" SubEnvironment=\"old-authdev2\""
 image_repositories = []
 
-[buildsp.deploy.parameters]
-stack_name = "build-sp-orch-stub"
+[build.deploy.parameters]
+stack_name = "build-orch-stub"
 resolve_s3 = true
-s3_prefix = "buildsp-orch-stub"
+s3_prefix = "build-orch-stub"
 region = "eu-west-2"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"buildsp\""
+parameter_overrides = "Environment=\"old-build\""
 image_repositories = []
