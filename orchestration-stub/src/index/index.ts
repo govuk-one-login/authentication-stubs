@@ -231,6 +231,9 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
   }
+  if (form.channel !== "none") {
+    payload["channel"] = form.channel;
+  }
   return payload;
 };
 
