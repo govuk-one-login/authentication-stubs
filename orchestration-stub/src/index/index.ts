@@ -127,6 +127,35 @@ const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
             </div>
         </fieldset>
     </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Channel
+            </h2>
+        </legend>
+        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="channel-none" name="channel" type="radio" value="none" checked>
+                <label class="govuk-label govuk-radios__label" for="channel-none">
+                    None
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="channel-web" name="channel" type="radio" value="web">
+                <label class="govuk-label govuk-radios__label" for="channel-web">
+                    Web
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="channel-strategic-app" name="channel" type="radio" value="strategic_app">
+                <label class="govuk-label govuk-radios__label" for="channel-strategic-app">
+                    Strategic App
+                </label>
+            </div>
+        </div>
+    </fieldset>
+    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
