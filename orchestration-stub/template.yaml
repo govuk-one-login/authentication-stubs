@@ -279,7 +279,7 @@ Mappings:
       endpointSgId: "sg-0ac202c3d996f3ad8"
       redisSgId: "sg-05ff2238b12306a34"
       vpcId: "vpc-03db44fa71b8d00b2"
-      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}" # TODO change this
+      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}"
       authenticationBackendUrl: "https://fag06zqnve-vpce-02837b184c6538fce.execute-api.eu-west-2.amazonaws.com/build/"
       authenticationFrontendUrl: "https://signin.build.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"

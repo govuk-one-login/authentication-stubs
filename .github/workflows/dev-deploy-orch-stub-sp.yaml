@@ -1,9 +1,13 @@
 name: Build and deploy Orchestration stub
+run-name: Build and deploy Orchestration stub to ${{ inputs.environment }}
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run against"
+        type: environment
+        required: true
 
 defaults:
   run:
@@ -14,6 +18,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
