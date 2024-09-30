@@ -27,6 +27,10 @@ Then the private key is in private.pem (this goes into secrets manager) and the 
 
 ## Deploying
 
+authdev1, authdev2 and build in [samconfig.toml](samconfig.toml) correspond to stubs that integrate with old frontend instances, predating Secure Pipelines. In the [template.yaml](template.yaml) mapping, these environments configurations are prefixed with "old-". To build and deploy, run the following command:
+
 ```bash
 sam build && sam deploy --config-env <env>
 ```
+
+To deploy stubs that integrate with secure pipelines deployed frontend instances, use GitHub workflow [Build and deploy Orchestration stub](https://github.com/govuk-one-login/authentication-stubs/actions/workflows/build-deploy-orch-stub-sp.yaml) instead.

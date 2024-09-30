@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform:
   - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
 
 Parameters:
   CodeSigningConfigArn:
@@ -12,10 +13,24 @@ Parameters:
     Type: String
     AllowedValues:
       - local
-      - sandpit
-      - authdev2
+      - sandpit # not a recognizable environment to secure pipelines
+      - old-build # not a recognizable environment to secure pipelines
+      - dev
       - build
       - staging
+
+  SubEnvironment:
+    Type: String
+    Description: >
+      When deploying to dev, optionally configure which sub-environment to deploy to
+      i.e. authdev1, authdev2. This feature is not available for route-to-live environments
+    Default: none
+    AllowedValues:
+      - none
+      - authdev1
+      - authdev2
+      - old-authdev1
+      - old-authdev2
 
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
@@ -34,6 +49,16 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+
+  UseSubEnvironment:
+    Fn::And:
+      - Fn::Equals:
+        - !Ref Environment
+        - dev
+      - Fn::Not:
+          - Fn::Equals:
+            - !Ref SubEnvironment
+            - none
 
 Globals:
   Function:
@@ -105,7 +130,85 @@ Mappings:
       hostedZoneId: placeholder
       rpClientId: "1Dlz5rYheTqzZASRMmSBtgFIYgZlysnQ"
 
+    authdev1:
+      cookieDomain: .dev.account.gov.uk
+      stubDomain: orchstub-authdev1.signin.dev.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlPHzgkKgQ8jXbSoq7jeb
+        Tnj+P/5+zbXgI88Bn60kMyU5XN6w7vuAlmk0pQ3FEGrgfgeiwF9CD//OxLYVRdfW
+        6AE0BMpUjPmb1MiAT7+FZCv7pHCFPR9mGuFNNu0F5k5zySEmDDzFy9NooqgpBqEQ
+        I5ne1rnRksI4qVvIkft3psejuc86Oy9Ztx+CBTr4j5fttGk0SP6xTI8xsOCzn6T3
+        CRRqBJW5gmkOIhqP701LaDapyO/rvCzm/+twIpcM41WxoYBPcvrnb3uuSfggudxw
+        yIlZU3W1Yj9o/QJNDsLYTAvsqsuTR8kL/B4CyRy/mZGcJP0Uq6x96IEhvSwUw56C
+        bQIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-0665fe32d17da80a4"
+      subnetBId: "subnet-021237bf29d8ef36d"
+      subnetCId: "subnet-04f1a57cc631f1a4c"
+      endpointSgId: "sg-01f72755ae88cf3fb"
+      redisSgId: "sg-0def8e4954576c3af"
+      vpcId: "vpc-0301476c3d16323a3"
+      privateKey: "{{resolve:secretsmanager:authdev1-orchestration-stub-private-key::::ca3923ea-99ba-4e9f-8088-f050e45d5aef}}"
+      authenticationBackendUrl: "https://63hwpuzt7g-vpce-08e872b3a5d032112.execute-api.eu-west-2.amazonaws.com/authdev1/"
+      authenticationFrontendUrl: "https://signin.authdev1.dev.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::805bf5c2-85fe-4042-bedc-2d0d93b4b91d}}"
+      hostedZoneId: "Z10132222WVQ7U47816SI"
+      rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
+
+    old-authdev1:
+      cookieDomain: .authdev1.sandpit.account.gov.uk
+      stubDomain: orchstub.authdev1.sandpit.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs0gyWacjheeaMslIDBdf
+        4ljBMyrEzAeJW+ZyvGZlV6KhPPCz6lMx8knb/ar1LqkqX1M2hh1qS+ijYtzz4cCE
+        MP/YWuvIL3CkFEUlw1ITwg6TDH9ixFeFHG0K4keHmmAHms5N4zuUKwZWHUgo6nDt
+        LM3o5PIvdz57A1ewtkzLizLBHIhTMImXeHzFyEDH7LufROfJH9lZ079r2sNzfKSm
+        xhgnWpMKrXtYUkYR/+vmvCJcR4okWS5WK9QKh2PUw+fXBRxnaf09sRvvgh2x/I9A
+        wxACgcz//hhZ9O1h3Kt6BTyvhqZ00FwO//2bdosdX9kjCC+bRCwlUToIY0CmzOFO
+        kwIDAQAB
+        -----END PUBLIC KEY-----      
+      subnetAId: "subnet-0665fe32d17da80a4"
+      subnetBId: "subnet-021237bf29d8ef36d"
+      subnetCId: "subnet-04f1a57cc631f1a4c"
+      endpointSgId: "sg-01f72755ae88cf3fb"
+      redisSgId: "sg-0def8e4954576c3af"
+      vpcId: "vpc-0301476c3d16323a3"
+      privateKey: "{{resolve:secretsmanager:authdev1-orchestration-stub-private-key::::ca3923ea-99ba-4e9f-8088-f050e45d5aef}}"
+      authenticationBackendUrl: "https://63hwpuzt7g-vpce-08e872b3a5d032112.execute-api.eu-west-2.amazonaws.com/authdev1/"
+      authenticationFrontendUrl: "https://signin.authdev1.sandpit.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::805bf5c2-85fe-4042-bedc-2d0d93b4b91d}}"
+      hostedZoneId: "Z062000928I8D7S9X1OVA"
+      rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
+
     authdev2:
+      cookieDomain: .dev.account.gov.uk
+      stubDomain: orchstub-authdev2.signin.dev.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuj8JGjcnMyC8CE2UWPg4
+        Ozwcgj3rgv+PFVEgbSMimmdTr5KJT9qH4RzWDIMImobJgGvuuzPtKIclLhTUvNqC
+        Xz54GOD/hMppF10UwoFtm2KobIo5JY9d5L7GhmTqNbzVsBtK7aKIqEliq+hBsrlu
+        cRfxc9wZHLc/eVhtdL03RZ6N3lHTQnekXtW99aMN1HT9LmeNRBlDyHhHHqUXPd96
+        JorcJMShJkIk2W+0KZhPSIZU4oxy9pmafGrmNnDSIS1N2tqQxe4Hwe3fjLxStN82
+        tUD70RRaVyOxsijHs4Ym8HKcPZdBt+bjfiiAlTEEiaIpUvlQXgq8sm2b9djOnCzH
+        UQIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-0ef903f65650689d8"
+      subnetBId: "subnet-0a664da1b8fbe815d"
+      subnetCId: "subnet-03533652fb2b7cd75"
+      endpointSgId: "sg-0d64cc026d540b919"
+      redisSgId: "sg-072d47bbcf7f12d00"
+      vpcId: "vpc-07436f099bccc77df"
+      privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
+      authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
+      authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
+      hostedZoneId: "Z10132222WVQ7U47816SI"
+      rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
+
+    old-authdev2:
       cookieDomain: .authdev2.sandpit.account.gov.uk
       stubDomain: orchstub.authdev2.sandpit.account.gov.uk
       authPubKey: |
@@ -124,12 +227,64 @@ Mappings:
       endpointSgId: "sg-0d64cc026d540b919"
       redisSgId: "sg-072d47bbcf7f12d00"
       vpcId: "vpc-07436f099bccc77df"
-      privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::8b04bb6d-e467-47a1-ac4f-2725d7b36e5b}}"
+      privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
       authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.sandpit.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z062001013DJY2F0YXEJR"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
+
+    dev:
+      cookieDomain: .dev.account.gov.uk
+      stubDomain: orchstub.signin.dev.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0PcOHuVXOuexYZmpOlCo
+        vFcGfezObHnnVTTfnCrS5TBmAEC9JNwH/YFmE/zx84I1dy5fEjll+2GIe8Hcue+W
+        ubQMToFaAAeaqowqjgJYIPjgTubJ+baAP7+6GFPBWkk+LntBRQaoF7YkICT6im9h
+        JTrFb5KxyDNT/j4SCCXlkMTzqmeMVM59NM66MSS7OXsUny9GinG6xhDovUswvU99
+        N7GtGZBYIDmG6IrT/rS9ZosBLeLqCvRAfaYjq0/2EKHcudyeYjPDkkGpBNt7vXJJ
+        A+Ud3Nx8MmuKS3kb8NoDhQJxKxg7lgjAj+Lhb9xr+Y074hdTs5ju2Jx2tmP1y9vl
+        RwIDAQAB
+        -----END PUBLIC KEY-----        
+      subnetAId: "subnet-04234e8fb1ee28d2c"
+      subnetBId: "subnet-0c91be3c7426cf2e6"
+      subnetCId: "subnet-078749ec82aa5af94"
+      endpointSgId: "sg-0e554161114407ce2"
+      redisSgId: "sg-0d16b5ae8a12d3785"
+      vpcId: "vpc-04918b35a66969280"
+      privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::3f46ca2a-0b75-41e1-847a-cbab9f54d821}}"
+      authenticationBackendUrl: "https://txat8ipxf8-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/dev/"
+      authenticationFrontendUrl: "https://signin.dev.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::0e1bdd6f-def0-4276-b6fd-c4b67e29250a}}"
+      hostedZoneId: "Z10132222WVQ7U47816SI"
+      rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
+
+    old-build:
+      cookieDomain: .build.account.gov.uk
+      stubDomain: orchstub-old.signin.build.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApLJWOHz7uHLinSJr8XM0
+        fhyq0aLm8HP06lCT7csGUoRav2xybsCsypufvJHbuD5SLkg25/VGFt21KH2g60u8
+        6mV7ULLG/m4hvAiXbwSGdcRTToPS+UULX3YDnDXZHvd+3ypane82+XLjVZ9B2V0i
+        1MGCJ7kiRurXCuE+9Kx/MQYBCqhz/OwHlCe3FJZXKvgnqqpO5ZtyjrxDJSZJpxbi
+        KsVnLksPKV10Z0/XvpJ6oHtOjseetk8TRdekRWBvqCX5MqLjdi1TfiaDu2Tjg2N0
+        dqhoDR3/THktb4KThc+U5EOWCWpH4OIAetYtjFChnkR8kU05Ol9zfdR08uO0RxMk
+        1wIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-06431beae9b136e15"
+      subnetBId: "subnet-016db45a259212743"
+      subnetCId: "subnet-0f595928b921f038a"
+      endpointSgId: "sg-0ac202c3d996f3ad8"
+      redisSgId: "sg-05ff2238b12306a34"
+      vpcId: "vpc-03db44fa71b8d00b2"
+      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}"
+      authenticationBackendUrl: "https://fag06zqnve-vpce-02837b184c6538fce.execute-api.eu-west-2.amazonaws.com/build/"
+      authenticationFrontendUrl: "https://signin.build.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
+      hostedZoneId: "Z099220113UW2JSCXBNRI"
+      rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
 
     build:
       cookieDomain: .build.account.gov.uk
@@ -203,33 +358,78 @@ Resources:
         SecurityGroupIds:
           - !Ref SecurityGroup
         SubnetIds:
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetAId]
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetBId]
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetCId]
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetAId
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetBId
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetCId
       Environment:
         Variables:
-          REDIS_URL:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisUrl]
-          PRIVATE_KEY:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, privateKey]
-          COOKIE_DOMAIN:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              cookieDomain,
-            ]
-          STUB_DOMAIN:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
-          AUTH_PUB_KEY:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, authPubKey]
-          AUTHENTICATION_FRONTEND_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              authenticationFrontendUrl,
-            ]
-          RP_CLIENT_ID:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, rpClientId]
+          REDIS_URL: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - redisUrl
+          PRIVATE_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - privateKey
+          COOKIE_DOMAIN: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - cookieDomain
+          STUB_DOMAIN: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - stubDomain
+          AUTH_PUB_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authPubKey
+          AUTHENTICATION_FRONTEND_URL: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authenticationFrontendUrl
+          RP_CLIENT_ID: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - rpClientId
       Architectures:
         - arm64
       Events:
@@ -265,23 +465,57 @@ Resources:
         SecurityGroupIds:
           - !Ref SecurityGroup
         SubnetIds:
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetAId]
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetBId]
-          - !FindInMap [EnvironmentConfiguration, !Ref Environment, subnetCId]
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetAId
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetBId
+          - !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - subnetCId
       Environment:
         Variables:
-          REDIS_URL:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisUrl]
-          PRIVATE_KEY:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, privateKey]
-          AUTH_PUB_KEY:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, authPubKey]
-          AUTHENTICATION_BACKEND_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              authenticationBackendUrl,
-            ]
+          REDIS_URL: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - redisUrl
+          PRIVATE_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - privateKey
+          AUTH_PUB_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authPubKey
+          AUTHENTICATION_BACKEND_URL: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authenticationBackendUrl
       Architectures:
         - arm64
       Events:
@@ -304,20 +538,32 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: "Orchestration Stub"
-      VpcId: !FindInMap [EnvironmentConfiguration, !Ref Environment, vpcId]
+      VpcId: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - vpcId
       SecurityGroupEgress:
-        - DestinationSecurityGroupId:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              endpointSgId,
-            ]
+        - DestinationSecurityGroupId: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - endpointSgId
           Description: Allow traffic to VPC endpoints
           IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-        - DestinationSecurityGroupId:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, redisSgId]
+        - DestinationSecurityGroupId: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - redisSgId
           Description: Allow traffic to Redis
           IpProtocol: tcp
           FromPort: 6379
@@ -326,8 +572,13 @@ Resources:
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      DomainName:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      DomainName: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - stubDomain
       SecurityPolicy: TLS_1_2
       RegionalCertificateArn: !Ref Certificate
       EndpointConfiguration:
@@ -337,26 +588,48 @@ Resources:
   Certificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      DomainName: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - stubDomain
       ValidationMethod: DNS
       DomainValidationOptions:
-        - DomainName:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
-          HostedZoneId:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              hostedZoneId,
-            ]
+        - DomainName: !FindInMap
+          - EnvironmentConfiguration
+          - !If
+            - UseSubEnvironment
+            - !Ref SubEnvironment
+            - !Ref Environment
+          - stubDomain
+          HostedZoneId: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - hostedZoneId
 
   Domain:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, hostedZoneId]
+      HostedZoneId: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - hostedZoneId
       Type: A
-      Name: !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      Name: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - stubDomain
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
         HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
@@ -364,8 +637,13 @@ Resources:
   BasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      DomainName:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubDomain]
+      DomainName: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - stubDomain
       RestApiId: !Ref ApiGateway
       Stage: !Ref ApiGateway.Stage
     DependsOn: GatewayDomain
