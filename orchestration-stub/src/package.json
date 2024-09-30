@@ -12,7 +12,7 @@
     "@types/aws-lambda": "8.10.102",
     "@types/aws-sdk": "2.7.0",
     "@types/jest": "29.5.4",
-    "@types/node": "20.14.0",
+    "@types/node": "22.7.4",
     "@types/redis": "^4.0.10",
     "@typescript-eslint/eslint-plugin": "7.15.0",
     "@typescript-eslint/parser": "7.15.0",
