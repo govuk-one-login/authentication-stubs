@@ -9,7 +9,7 @@
     "@babel/core": "7.24.0",
     "@babel/preset-env": "7.24.0",
     "@babel/preset-typescript": "7.24.1",
-    "@types/aws-lambda": "8.10.102",
+    "@types/aws-lambda": "8.10.145",
     "@types/aws-sdk": "2.7.0",
     "@types/jest": "29.5.4",
     "@types/node": "20.14.0",
