@@ -11,7 +11,7 @@
     "@babel/preset-typescript": "7.24.7",
     "@types/aws-lambda": "8.10.145",
     "@types/aws-sdk": "2.7.0",
-    "@types/jest": "29.5.4",
+    "@types/jest": "29.5.13",
     "@types/node": "20.14.0",
     "@types/redis": "^4.0.11",
     "@typescript-eslint/eslint-plugin": "7.15.0",
