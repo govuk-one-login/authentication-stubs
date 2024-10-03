@@ -198,6 +198,7 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
     client_id: "orchestrationAuth",
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
+    authenticated: form.authenticated ?? false
   };
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
