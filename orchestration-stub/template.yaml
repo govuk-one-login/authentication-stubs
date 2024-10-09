@@ -53,12 +53,12 @@ Conditions:
   UseSubEnvironment:
     Fn::And:
       - Fn::Equals:
-        - !Ref Environment
-        - dev
+          - !Ref Environment
+          - dev
       - Fn::Not:
           - Fn::Equals:
-            - !Ref SubEnvironment
-            - none
+              - !Ref SubEnvironment
+              - none
 
 Globals:
   Function:
@@ -135,13 +135,13 @@ Mappings:
       stubDomain: orchstub-authdev1.signin.dev.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlPHzgkKgQ8jXbSoq7jeb
-        Tnj+P/5+zbXgI88Bn60kMyU5XN6w7vuAlmk0pQ3FEGrgfgeiwF9CD//OxLYVRdfW
-        6AE0BMpUjPmb1MiAT7+FZCv7pHCFPR9mGuFNNu0F5k5zySEmDDzFy9NooqgpBqEQ
-        I5ne1rnRksI4qVvIkft3psejuc86Oy9Ztx+CBTr4j5fttGk0SP6xTI8xsOCzn6T3
-        CRRqBJW5gmkOIhqP701LaDapyO/rvCzm/+twIpcM41WxoYBPcvrnb3uuSfggudxw
-        yIlZU3W1Yj9o/QJNDsLYTAvsqsuTR8kL/B4CyRy/mZGcJP0Uq6x96IEhvSwUw56C
-        bQIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs0gyWacjheeaMslIDBdf
+        4ljBMyrEzAeJW+ZyvGZlV6KhPPCz6lMx8knb/ar1LqkqX1M2hh1qS+ijYtzz4cCE
+        MP/YWuvIL3CkFEUlw1ITwg6TDH9ixFeFHG0K4keHmmAHms5N4zuUKwZWHUgo6nDt
+        LM3o5PIvdz57A1ewtkzLizLBHIhTMImXeHzFyEDH7LufROfJH9lZ079r2sNzfKSm
+        xhgnWpMKrXtYUkYR/+vmvCJcR4okWS5WK9QKh2PUw+fXBRxnaf09sRvvgh2x/I9A
+        wxACgcz//hhZ9O1h3Kt6BTyvhqZ00FwO//2bdosdX9kjCC+bRCwlUToIY0CmzOFO
+        kwIDAQAB
         -----END PUBLIC KEY-----
       subnetAId: "subnet-0665fe32d17da80a4"
       subnetBId: "subnet-021237bf29d8ef36d"
@@ -168,7 +168,7 @@ Mappings:
         xhgnWpMKrXtYUkYR/+vmvCJcR4okWS5WK9QKh2PUw+fXBRxnaf09sRvvgh2x/I9A
         wxACgcz//hhZ9O1h3Kt6BTyvhqZ00FwO//2bdosdX9kjCC+bRCwlUToIY0CmzOFO
         kwIDAQAB
-        -----END PUBLIC KEY-----      
+        -----END PUBLIC KEY-----
       subnetAId: "subnet-0665fe32d17da80a4"
       subnetBId: "subnet-021237bf29d8ef36d"
       subnetCId: "subnet-04f1a57cc631f1a4c"
@@ -187,13 +187,13 @@ Mappings:
       stubDomain: orchstub-authdev2.signin.dev.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuj8JGjcnMyC8CE2UWPg4
-        Ozwcgj3rgv+PFVEgbSMimmdTr5KJT9qH4RzWDIMImobJgGvuuzPtKIclLhTUvNqC
-        Xz54GOD/hMppF10UwoFtm2KobIo5JY9d5L7GhmTqNbzVsBtK7aKIqEliq+hBsrlu
-        cRfxc9wZHLc/eVhtdL03RZ6N3lHTQnekXtW99aMN1HT9LmeNRBlDyHhHHqUXPd96
-        JorcJMShJkIk2W+0KZhPSIZU4oxy9pmafGrmNnDSIS1N2tqQxe4Hwe3fjLxStN82
-        tUD70RRaVyOxsijHs4Ym8HKcPZdBt+bjfiiAlTEEiaIpUvlQXgq8sm2b9djOnCzH
-        UQIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlWwvS/QGYHfu8nufIzgo
+        05G4GEjMHvOXGywV61Inev6+46VF36rAs1+ZtxAhR6D4FFDbyLFhej0Rp/H9PMnk
+        rwaIoRkZq89BHAX/yklx3EYPkdRhsXjfWocL7ZJP/JgFcNZV/eE2ZOf9O3UmcVGy
+        DCQMhKDhYX3XFR5mtd2lCHmu9TtONvodQ2zf0REFPJey1X4M3JYWhtW0lm8lxuFM
+        +wq2LiUkwO6qgTiUcweMzKVNMX55pLajsL9o/wVApm9FiGLB1Ndt4aRT6JIbgG3U
+        G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
+        zwIDAQAB
         -----END PUBLIC KEY-----
       subnetAId: "subnet-0ef903f65650689d8"
       subnetBId: "subnet-0a664da1b8fbe815d"
@@ -246,7 +246,7 @@ Mappings:
         N7GtGZBYIDmG6IrT/rS9ZosBLeLqCvRAfaYjq0/2EKHcudyeYjPDkkGpBNt7vXJJ
         A+Ud3Nx8MmuKS3kb8NoDhQJxKxg7lgjAj+Lhb9xr+Y074hdTs5ju2Jx2tmP1y9vl
         RwIDAQAB
-        -----END PUBLIC KEY-----        
+        -----END PUBLIC KEY-----
       subnetAId: "subnet-04234e8fb1ee28d2c"
       subnetBId: "subnet-0c91be3c7426cf2e6"
       subnetCId: "subnet-078749ec82aa5af94"
@@ -291,13 +291,13 @@ Mappings:
       stubDomain: orchstub.signin.build.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAucvsIWDskK8uk1n5NOG4
-        CgleJGkfl92QwwMYcfLVySqoKOdVfyaoTa9hXNgtIkRFBTWh+bymb7N0Rf69qtOB
-        kpI1Cyvljj19lfAQFT0aBwRdNlRGS+h9uXJb51fgFj3b/JA07PLoGkwY5L++qoVY
-        Ye6BOg5Qoc1cd/uvXID87irUNxGGA4x6dPDROBIpHWe+6NbuFX1BymR+vwUU2r7m
-        H3jXuMjlf1uChMW0FPTCXXpKgT51MU6ciy97oVL7XmQmt7d9CbySYLRwQn2f3SIO
-        gZF+Mx2AfCQAwpnbGcKNhBxqQyYS+8Azf7wTUQUWUh168Q15xDGvaeoFnaWAfcHa
-        RwIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApLJWOHz7uHLinSJr8XM0
+        fhyq0aLm8HP06lCT7csGUoRav2xybsCsypufvJHbuD5SLkg25/VGFt21KH2g60u8
+        6mV7ULLG/m4hvAiXbwSGdcRTToPS+UULX3YDnDXZHvd+3ypane82+XLjVZ9B2V0i
+        1MGCJ7kiRurXCuE+9Kx/MQYBCqhz/OwHlCe3FJZXKvgnqqpO5ZtyjrxDJSZJpxbi
+        KsVnLksPKV10Z0/XvpJ6oHtOjseetk8TRdekRWBvqCX5MqLjdi1TfiaDu2Tjg2N0
+        dqhoDR3/THktb4KThc+U5EOWCWpH4OIAetYtjFChnkR8kU05Ol9zfdR08uO0RxMk
+        1wIDAQAB
         -----END PUBLIC KEY-----
       subnetAId: "subnet-06431beae9b136e15"
       subnetBId: "subnet-016db45a259212743"
@@ -317,13 +317,13 @@ Mappings:
       stubDomain: orchstub.signin.staging.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu2w+Ds3JwZm4nAFh/B3F
-        oQWkyWjTLuVVYWoXn9vwMYmriy/OM4r+U9N2/dQAD4wN7GCmOTs0Ze3dQLEIGxoS
-        ogtrDCNJKZEOYX6ELZJQEzdQVZRQ8HhlRGY9V/2eQlxjx4FxOcrlx/hVxHWo94Fq
-        EOVHu7ZqNPZn6b5IVCX++08ogPOcwlgn8DwYYBmlyhOfarivXDYd7vxqsebtMwYJ
-        RzqMqxLdR4T4bPcTLM+qoaUNaQ6riI2x2v5uEOv/5zN0kyF5bHf/H7C49WMIVtUT
-        tDG7fUjUq/PPkimNbP2JTNPvbGjAmbRLp6lLRB85RZ9z6e972C55Y+GBdmOptRYt
-        9wIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzZGTSE8TLLtQjdmD6SiF
+        SKbfv63JPCV+acPLQc4MjAKK7yT/QhERkemky+oPBIqCJgUq1gmOzdCAje/QEFlD
+        qwry65oEaUBlWmGlNTPBnUzy/d6mYMfZObsr+yI1HszZE193ABAwtPttCFhFZWov
+        +rF2Oc9dmiAKXuT0whbOXaj1+751w5qJpsMWgHj91at9gdOZ31huoxnLkuAK/rus
+        wEBMjmuOzy5osorLg9RCJQVN91Bp932vQS7hXirDpfBhCuQfYQMjFXv4MhCKnk42
+        pi0FWWzbnn9UcbdcS/Sl5UeuTyCQ+MrunV/XGjIrPMWaFUIQomX1+pCMHkthbQ0J
+        AQIDAQAB
         -----END PUBLIC KEY-----
       subnetAId: "subnet-05a8324e95078935b"
       subnetBId: "subnet-0ab32f8faa3150e2f"
@@ -598,12 +598,12 @@ Resources:
       ValidationMethod: DNS
       DomainValidationOptions:
         - DomainName: !FindInMap
-          - EnvironmentConfiguration
-          - !If
-            - UseSubEnvironment
-            - !Ref SubEnvironment
-            - !Ref Environment
-          - stubDomain
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - stubDomain
           HostedZoneId: !FindInMap
             - EnvironmentConfiguration
             - !If

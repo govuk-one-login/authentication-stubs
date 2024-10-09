@@ -1,4 +1,4 @@
-name: Build and deploy Orchestration stub
+name: Build and deploy Orchestration stub to Dev
 run-name: Build and deploy Orchestration stub to ${{ inputs.environment }}
 
 on:
