@@ -113,8 +113,9 @@ Mappings:
       redisUrl: "redis://redis-local:6379"
       hostedZoneId: placeholder
       rpClientId: "rpclient"
+      rpSectorHost: "a.example.com"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: 128
+      lambdaMemorySize: "128"
 
     sandpit:
       cookieDomain: .sandpit.account.gov.uk
@@ -141,8 +142,9 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:sandpit-orchestration-stub-redis-url::::1e143e9d-8b87-4638-a460-66aaf5f60b2d}}"
       hostedZoneId: placeholder
       rpClientId: "1Dlz5rYheTqzZASRMmSBtgFIYgZlysnQ"
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: 128
+      lambdaMemorySize: "128"
 
     authdev1:
       cookieDomain: .dev.account.gov.uk
@@ -169,7 +171,8 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::805bf5c2-85fe-4042-bedc-2d0d93b4b91d}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
-      lambdaMemorySize: 128
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
+      lambdaMemorySize: "128"
 
     old-authdev1:
       cookieDomain: .authdev1.sandpit.account.gov.uk
@@ -196,7 +199,8 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::805bf5c2-85fe-4042-bedc-2d0d93b4b91d}}"
       hostedZoneId: "Z062000928I8D7S9X1OVA"
       rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
-      lambdaMemorySize: 128
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
+      lambdaMemorySize: "128"
 
     authdev2:
       cookieDomain: .dev.account.gov.uk
@@ -223,7 +227,8 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
-      lambdaMemorySize: 128
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
+      lambdaMemorySize: "128"
 
     old-authdev2:
       cookieDomain: .authdev2.sandpit.account.gov.uk
@@ -250,7 +255,8 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z062001013DJY2F0YXEJR"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
-      lambdaMemorySize: 128
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
+      lambdaMemorySize: "128"
 
     dev:
       cookieDomain: .dev.account.gov.uk
@@ -277,8 +283,9 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::0e1bdd6f-def0-4276-b6fd-c4b67e29250a}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: 128
+      lambdaMemorySize: "128"
 
     old-build:
       cookieDomain: .build.account.gov.uk
@@ -305,8 +312,9 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
       hostedZoneId: "Z099220113UW2JSCXBNRI"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
+      rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: 128
+      lambdaMemorySize: "128"
 
     build:
       cookieDomain: .build.account.gov.uk
@@ -333,8 +341,9 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
       hostedZoneId: "Z099220113UW2JSCXBNRI"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
+      rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: 512
+      lambdaMemorySize: "512"
 
     staging:
       cookieDomain: .staging.account.gov.uk
@@ -361,8 +370,9 @@ Mappings:
       redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::bc07829a-baee-4063-a971-430a0a7f4650}}"
       hostedZoneId: "Z02212762LL4X7ZM4JYAT"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
+      rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 3
-      lambdaMemorySize: 1536
+      lambdaMemorySize: "1536"
 
 Resources:
   ApiGateway:
@@ -468,6 +478,13 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - rpClientId
+          RP_SECTOR_HOST: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - rpSectorHost
       Events:
         Get:
           Type: Api

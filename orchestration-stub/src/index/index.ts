@@ -214,7 +214,7 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
   };
   let payload: JWTPayload = {
     rp_client_id: process.env.RP_CLIENT_ID,
-    rp_sector_host: "a.example.com",
+    rp_sector_host: process.env.RP_SECTOR_HOST,
     rp_redirect_uri: "https://a.example.com/redirect",
     rp_state: "state",
     client_name: "client",
