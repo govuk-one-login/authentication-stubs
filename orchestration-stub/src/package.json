@@ -6,7 +6,7 @@
   },
   "description": "Orchestration stub for Authentication",
   "devDependencies": {
-    "@babel/core": "7.25.2",
+    "@babel/core": "7.26.0",
     "@babel/preset-env": "7.25.4",
     "@babel/preset-typescript": "7.24.7",
     "@types/aws-lambda": "8.10.145",
