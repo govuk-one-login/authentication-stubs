@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "ENVIRONMENT": "local",
+    "IPV_AUTHORIZE_PUBLIC_SIGNING_KEY": ""
+  }
+}
