@@ -1,5 +1,5 @@
-// import pino from "pino";
-//
-// const logger = pino({});
-//
-// export { logger };
+import pino from "pino";
+
+const logger = pino({});
+
+export { logger };

@@ -3,7 +3,7 @@ import {
   APIGatewayProxyResult,
   Handler,
 } from "aws-lambda";
-// import { logger } from "./logger";
+import { logger } from "../helper/logger";
 import renderIPVAuthorize from "./render-ipv-authorize";
 import {
   CodedError,
@@ -28,7 +28,7 @@ export const handler: Handler = async (
 async function get(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  // logger.info("IPV Authorize GET endpoint invoked!");
+  logger.info("IPV Authorize GET endpoint invoked!");
 
   if (event.queryStringParameters == null) {
     throw new CodedError(400, "Query string parameters are null");

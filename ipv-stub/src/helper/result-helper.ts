@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-// import { logger } from "../logger";
+import { logger } from "./logger";
 
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
@@ -45,7 +45,7 @@ export async function handleErrors(
     return await getResult();
   } catch (error) {
     if (error instanceof CodedError) {
-      // logger.error(error.message);
+      logger.error(error.message);
       return {
         statusCode: error.code,
         body: JSON.stringify({
@@ -56,7 +56,7 @@ export async function handleErrors(
 
     const errorStr =
       error instanceof Error ? error.message : JSON.stringify(error);
-    // logger.error(errorStr);
+    logger.error(errorStr);
     return {
       statusCode: 500,
       body: JSON.stringify({
