@@ -1,0 +1,40 @@
+{
+  "description": "Authentication stub for IPV",
+  "license": "MIT",
+  "main": "index.js",
+  "name": "auth-ipv-stub",
+  "version": "1.0.0",
+  "dependencies": {
+    "esbuild": "0.24.0",
+    "jose": "5.6.2",
+    "pino": "^9.4.0"
+  },
+  "scripts": {
+    "build": "sam build --template template.yml --build-dir build/ipv",
+    "clean": "rm -rf build/ipv & rm -rf build/build.toml",
+    "start:local": "sam local start-api --template build/ipv/template.yaml --env-vars parameters.json -p 3000",
+    "compile": "tsc",
+    "pretty": "prettier --write '**/*.ts' '**/*.js'"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": true
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.145",
+    "@types/aws-sdk": "2.7.0",
+    "@types/node": "20.14.0",
+    "@typescript-eslint/eslint-plugin": "7.15.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "prettier": "3.3.3",
+    "ts-node": "10.9.2",
+    "typescript": "5.6.3"
+  },
+  "engines": {
+    "node": ">=20.0.0 <21"
+  }
+}
