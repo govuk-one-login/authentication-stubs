@@ -9,6 +9,10 @@ updates:
   - package-ecosystem: npm
     directory: "/orchestration-stub/src"
     open-pull-requests-limit: 10
+    groups:
+      npm-babel-dependencies:
+        patterns:
+          - "@babel/*"
     target-branch: main
     schedule:
       interval: daily
