@@ -24,7 +24,7 @@ Mappings:
   EnvironmentConfiguration:
     dev:
       #TODO
-      ipvStubDomainName:
+      ipvStubDomainName: authipvstub.dev.account.gov.uk
 
 
 Conditions:
@@ -96,8 +96,7 @@ Resources:
   IPVAuthorizeLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      # TODO
-      LogGroupName:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-authorize"
       RetentionInDays: 30
 
   PublicHostedZone:
