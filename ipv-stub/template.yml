@@ -23,8 +23,8 @@ Parameters:
 Mappings:
   EnvironmentConfiguration:
     dev:
-      #TODO
-      ipvStubDomainName: authipvstub.dev.account.gov.uk
+      ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
+      hostedZoneId: "Z10132222WVQ7U47816SI"
 
 
 Conditions:
@@ -50,6 +50,8 @@ Resources:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
       AlwaysDeploy: true
+      EndpointConfiguration:
+        Type: REGIONAL
 
   IPVAuthorizeLambda:
     Type: AWS::Serverless::Function
@@ -99,9 +101,43 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-authorize"
       RetentionInDays: 30
 
-  PublicHostedZone:
-    Type: AWS::Route53::HostedZone
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
     Properties:
-      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      SecurityPolicy: TLS_1_2
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+          HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+
+# todo ,
+# currently records set and ACM vadiladation is done Manaully in old dev account 
+# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 
+  
+  #Domain:
+    #Type: AWS::Route53::RecordSet
+    #Properties:
+      #HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+      #Type: A
+      #Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      #AliasTarget:
+        #DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        #HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      RestApiId: !Ref ApiGateway
+      Stage: !Ref ApiGateway.Stage
+    DependsOn: GatewayDomain
