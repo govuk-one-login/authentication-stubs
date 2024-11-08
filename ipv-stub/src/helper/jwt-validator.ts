@@ -1,21 +1,43 @@
-export function isValidRequest(requestString: string): boolean {
-  const requestAsJson = JSON.parse(requestString);
+import {
+  DecodedRequest,
+  DecodedStorageAccessToken,
+  EncodedUserInfoClaim,
+} from "./types";
 
-  const hasUserInfoClaim = requestAsJson.claims?.userinfo != undefined;
-  return (
-    requestAsJson["scope"] === "reverification" &&
-    hasUserInfoClaim &&
-    validateUserInfoClaim(requestAsJson.claims.userinfo)
+export function parseRequest(jwtString: string): DecodedRequest | string {
+  const jwtAsJson = JSON.parse(jwtString);
+
+  if (jwtAsJson.scope !== "reverification") {
+    return "Scope in request payload must be verification";
+  }
+  const hasUserInfoClaim = jwtAsJson.claims?.userinfo != undefined;
+
+  if (!hasUserInfoClaim) {
+    return "Request payload is missing user info claim";
+  }
+
+  const parsedUserInfoClaimOrErrorString = parseStorageAccessToken(
+    jwtAsJson.claims.userinfo
   );
+  if (typeof parsedUserInfoClaimOrErrorString === "string") {
+    return parsedUserInfoClaimOrErrorString;
+  } else {
+    return {
+      scope: "reverification",
+      claims: {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [parsedUserInfoClaimOrErrorString],
+          },
+        },
+      },
+    };
+  }
 }
 
-type EncodedUserInfoClaim = {
-  "https://vocab.account.gov.uk/v1/storageAccessToken": {
-    values: string;
-  };
-};
-
-function validateUserInfoClaim(userInfo: EncodedUserInfoClaim): boolean {
+function parseStorageAccessToken(
+  userInfo: EncodedUserInfoClaim
+): DecodedStorageAccessToken | string {
   const hasAccessTokenValues =
     userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"]?.values !=
     undefined;
@@ -26,7 +48,7 @@ function validateUserInfoClaim(userInfo: EncodedUserInfoClaim): boolean {
       ].values[0].split(".");
 
     if (parts.length !== 3) {
-      return false;
+      return "Storage access token is not a valid jwt (does not contain three parts)";
     }
 
     //TODO: need to validate the signature, that to follow this PR
@@ -36,10 +58,13 @@ function validateUserInfoClaim(userInfo: EncodedUserInfoClaim): boolean {
 
     try {
       const payloadAsJson = JSON.parse(decodedPayload);
+      if (payloadAsJson.scope !== "reverification") {
+        return "Storage access token scope is not reverification";
+      }
 
-      return payloadAsJson.scope === "reverification";
+      return payloadAsJson as DecodedStorageAccessToken;
     } catch (e) {
-      return false;
+      return "Storage access token payload is not valid json";
     }
-  } else return false;
+  } else return "Storage access token does not contain values field";
 }

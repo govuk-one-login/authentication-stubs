@@ -1,8 +1,9 @@
 import { renderPage } from "../helper/template";
+import { DecodedRequest } from "../helper/types";
 
 export default function renderIPVAuthorize(
   decodedHeader: string,
-  decodedPayload: string
+  decodedPayload: DecodedRequest
 ) {
   return renderPage(
     `<h1 class="govuk-heading-l">IPV stub</h1>
@@ -23,7 +24,7 @@ export default function renderIPVAuthorize(
       Decrypted JAR payload
     </dt>
     <dd class="govuk-summary-list__value" id="user-info-core-identity-claim">
-    <textarea class="govuk-textarea" rows="10" id="identity_claim" name="identity_claim" type="text">${JSON.stringify(JSON.parse(decodedPayload), null, 2)}</textarea>
+    <textarea class="govuk-textarea" rows="10" id="identity_claim" name="identity_claim" type="text">${JSON.stringify(decodedPayload, null, 2)}</textarea>
     </dd>
   </div>
   </dl>`

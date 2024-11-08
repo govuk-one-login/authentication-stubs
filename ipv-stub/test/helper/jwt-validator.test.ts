@@ -1,6 +1,6 @@
 import chai from "chai";
 import { describe } from "mocha";
-import { isValidRequest } from "../../src/helper/jwt-validator";
+import { parseRequest } from "../../src/helper/jwt-validator";
 
 const expect = chai.expect;
 
@@ -54,17 +54,31 @@ const validSampleJwt = {
 
 describe("isValidJwt", () => {
   it("returns true for a valid jwt", () => {
-    expect(isValidRequest(JSON.stringify(validSampleJwt))).to.be.true;
+    const expectedParsedJwt = {
+      scope: "reverification",
+      claims: {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [storageAccessTokenPayload],
+          },
+        },
+      },
+    };
+    expect(parseRequest(JSON.stringify(validSampleJwt))).to.be.deep.eq(
+      expectedParsedJwt
+    );
   });
 
   const INVALID_CLAIMS_AND_DESCRIPTIONS = [
     {
       claims: { claims: validClaims },
       invalidCaseDescription: "the jwt does not contain a scope field",
+      expectedErrorMessage: "Scope in request payload must be verification",
     },
     {
       claims: { scope: "reverification" },
       invalidCaseDescription: "the jwt does not contain a claims field",
+      expectedErrorMessage: "Request payload is missing user info claim",
     },
     {
       claims: {
@@ -72,6 +86,7 @@ describe("isValidJwt", () => {
         claims: {},
       },
       invalidCaseDescription: "the jwt does not contain a userinfo claim",
+      expectedErrorMessage: "Request payload is missing user info claim",
     },
     {
       claims: {
@@ -82,37 +97,60 @@ describe("isValidJwt", () => {
       },
       invalidCaseDescription:
         "the jwt does not contain a storage access token field",
+      expectedErrorMessage:
+        "Storage access token does not contain values field",
     },
   ];
 
   INVALID_CLAIMS_AND_DESCRIPTIONS.forEach((testCase) => {
     it(`returns false if ${testCase.invalidCaseDescription}`, () => {
-      expect(isValidRequest(JSON.stringify(testCase.claims))).to.be.false;
+      expect(parseRequest(JSON.stringify(testCase.claims))).to.eq(
+        testCase.expectedErrorMessage
+      );
     });
   });
 
   it("returns false if the jwt contains an invalid storage access token field", () => {
     const invalidStorageAccessTokenValues = [
-      "no-dot-separation",
-      "not.enough-parts",
-      "too.many.parts.to.be.valid",
-      "not.base64.encoded",
-      `${encodedStorageAccessHeader}.${base64Encode({ foo: "bar" })}.${encodedSignature}`,
+      {
+        value: "no-dot-separation",
+        expectedError:
+          "Storage access token is not a valid jwt (does not contain three parts)",
+      },
+      {
+        value: "not.enough-parts",
+        expectedError:
+          "Storage access token is not a valid jwt (does not contain three parts)",
+      },
+      {
+        value: "too.many.parts.to.be.valid",
+        expectedError:
+          "Storage access token is not a valid jwt (does not contain three parts)",
+      },
+      {
+        value: "not.base64.encoded",
+        expectedError: "Storage access token payload is not valid json",
+      },
+      {
+        value: `${encodedStorageAccessHeader}.${base64Encode({ foo: "bar" })}.${encodedSignature}`,
+        expectedError: "Storage access token scope is not reverification",
+      },
     ];
-    invalidStorageAccessTokenValues.forEach((invalidStorageAccessToken) => {
+    invalidStorageAccessTokenValues.forEach((testCase) => {
       const jwtWithInvalidStorageAccessToken = {
         scope: "reverification",
         claims: {
           userinfo: {
             "https://vocab.account.gov.uk/v1/storageAccessToken": {
-              values: [invalidStorageAccessToken],
+              values: [testCase.value],
             },
           },
         },
       };
 
-      expect(isValidRequest(JSON.stringify(jwtWithInvalidStorageAccessToken)))
-        .to.be.false;
+      expect(
+        parseRequest(JSON.stringify(jwtWithInvalidStorageAccessToken))
+      ).to.eq(testCase.expectedError);
     });
   });
 });
