@@ -65,6 +65,7 @@ Resources:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
+          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: ""
       Events:
         Get:
           Type: Api
