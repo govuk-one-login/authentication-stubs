@@ -116,9 +116,6 @@ Resources:
     Properties:
       DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
       ValidationMethod: DNS
-      DomainValidationOptions:
-        - DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-          HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
 
 # todo ,
 # currently records set and ACM vadiladation is done Manaully in old dev account 
