@@ -11,7 +11,7 @@ import {
   methodNotAllowedError,
   successfulHtmlResult,
 } from "../helper/result-helper";
-import {compactDecrypt, importPKCS8} from "jose";
+import { compactDecrypt, importPKCS8 } from "jose";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
