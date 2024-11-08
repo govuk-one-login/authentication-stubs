@@ -40,6 +40,7 @@
     "compile": "tsc",
     "lint": "eslint . --fix",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
+    "pretty-check": "prettier --check '**/*.ts' '**/*.js'",
     "unit": "jest",
     "unit-ci": "jest --ci --silent --colors --config jest.config.ci.ts --testLocationInResults",
     "unit:watch": "jest --watch"
