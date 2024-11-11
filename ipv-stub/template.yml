@@ -64,8 +64,13 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
+          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
-          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: ""
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
       Events:
         Get:
           Type: Api
