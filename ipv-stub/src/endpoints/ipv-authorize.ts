@@ -11,6 +11,7 @@ import {
   methodNotAllowedError,
   successfulHtmlResult,
 } from "../helper/result-helper";
+import {compactDecrypt, importPKCS8} from "jose";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -34,13 +35,21 @@ async function get(
     throw new CodedError(400, "Query string parameters are null");
   }
 
-  //This is a first pass, will be changed to encrypted
-  const plaintextJwt = event.queryStringParameters["request"] as string;
-  if (!plaintextJwt) {
+  const encryptedJwt = event.queryStringParameters["request"] as string;
+  if (!encryptedJwt) {
     throw new CodedError(400, "Request query string parameter not found");
   }
+  const ipvPrivateKeyPem = process.env.IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY;
+  if (!ipvPrivateKeyPem) {
+    throw new CodedError(500, "Private key not found");
+  }
+  const privateKey = await importPKCS8(ipvPrivateKeyPem, "RSA-OAEP-256");
 
-  const parts = plaintextJwt.split(".");
+  const { plaintext } = await compactDecrypt(encryptedJwt, privateKey);
+  const encodedJwt = plaintext.toString();
+
+  const parts = encodedJwt.split(".");
+
   if (parts.length !== 3) {
     throw new CodedError(400, "Decrypted JWT is in invalid format");
   }
