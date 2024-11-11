@@ -1,4 +1,4 @@
-const { CompactEncrypt, importSPKI } = require('jose');
+const { CompactEncrypt, importSPKI } = require("jose");
 
 //This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
@@ -12,22 +12,67 @@ const publicKeyPem = `-----BEGIN PUBLIC KEY-----
   6wIDAQAB
   -----END PUBLIC KEY-----`;
 
-const algorithm = { alg: "some-alg" };
-const payload = { foo: "bar" }
-const signature = { sig: "a-signature" };
+const base64Encode = (s) => {
+  return Buffer.from(s, "utf-8").toString("base64");
+};
 
-const stringToEncrypt = [algorithm, payload, signature]
-    .map(e => JSON.stringify(e))
-    .map(element => Buffer.from(element.toString(), "utf-8").toString("base64"))
-    .join('.');
+const createJwt = (header, payload, signature) => {
+  return [header, payload, signature]
+    .map((e) => base64Encode(JSON.stringify(e)))
+    .join(".");
+};
 
-const dataToEncrypt = Uint8Array.from(stringToEncrypt, c => c.charCodeAt(0));
+const createUserInfoClaims = () => {
+  const storageAccessTokenSignature = {
+    sig: "a-storage-access-token-signature",
+  };
+
+  const storageAccessTokenAlgorithm = { alg: "some-storage-access-alg" };
+  const storageAccessTokenPayload = {
+    scope: "reverification",
+    aud: [
+      "https://credential-store.test.account.gov.uk",
+      "https://identity.test.account.gov.uk",
+    ],
+    sub: "someSub",
+    iss: "https://oidc.test.account.gov.uk/",
+    exp: 1709051163,
+    iat: 1709047563,
+    jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
+  };
+  return {
+    userinfo: {
+      "https://vocab.account.gov.uk/v1/storageAccessToken": {
+        values: [
+          createJwt(
+            storageAccessTokenAlgorithm,
+            storageAccessTokenPayload,
+            storageAccessTokenSignature
+          ),
+        ],
+      },
+    },
+  };
+};
+
+const createRequestJwt = () => {
+  const algorithm = { alg: "some-alg" };
+  const payload = { scope: "reverification", claims: createUserInfoClaims() };
+  const signature = { sig: "a-signature" };
+
+  return createJwt(algorithm, payload, signature);
+};
+
 (async () => {
-    const publicKey = await importSPKI(publicKeyPem, "RSA-OAEP-256");
+  const dataToEncrypt = Uint8Array.from(createRequestJwt(), (c) =>
+    c.charCodeAt(0)
+  );
 
-    const jwe = await new CompactEncrypt(dataToEncrypt)
-        .setProtectedHeader({alg: "RSA-OAEP-256", enc: "A256GCM"})
-        .encrypt(publicKey);
+  const publicKey = await importSPKI(publicKeyPem, "RSA-OAEP-256");
 
-    console.log("Encrypted (JWE Compact):", jwe);
-})()
+  const encryptedRequest = await new CompactEncrypt(dataToEncrypt)
+    .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+    .encrypt(publicKey);
+
+  console.log(`Encrypted request:\n------\n${encryptedRequest}`);
+})();

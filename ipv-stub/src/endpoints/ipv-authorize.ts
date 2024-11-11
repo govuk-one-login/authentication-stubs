@@ -11,7 +11,8 @@ import {
   methodNotAllowedError,
   successfulHtmlResult,
 } from "../helper/result-helper";
-import {compactDecrypt, importPKCS8} from "jose";
+import { compactDecrypt, importPKCS8 } from "jose";
+import { parseRequest } from "../helper/jwt-validator";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -58,10 +59,15 @@ async function get(
     Buffer.from(part, "base64url").toString("utf8")
   );
 
-  //here in the orch stub they save a code to dynamo. We don't need to do this yet I don't think
+  const parsedRequestOrError = parseRequest(decodedPayload);
 
-  return successfulHtmlResult(
-    200,
-    renderIPVAuthorize(decodedHeader, decodedPayload)
-  );
+  if (typeof parsedRequestOrError === "string") {
+    //here in the orch stub they save a code to dynamo. We don't need to do this yet I don't think
+    throw new CodedError(400, parsedRequestOrError);
+  } else {
+    return successfulHtmlResult(
+      200,
+      renderIPVAuthorize(decodedHeader, parsedRequestOrError)
+    );
+  }
 }

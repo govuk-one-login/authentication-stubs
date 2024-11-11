@@ -15,7 +15,8 @@
     "start:local": "sam local start-api --template build/ipv/template.yaml --env-vars parameters.json -p 3000",
     "compile": "tsc",
     "encryptSampleRequest": "node scripts/encrypt-message-locally.js",
-    "pretty": "prettier --write '**/*.ts' '**/*.js'"
+    "pretty": "prettier --write '**/*.ts' '**/*.js'",
+    "test": "mocha"
   },
   "prettier": {
     "trailingComma": "es5",
@@ -25,17 +26,34 @@
   "devDependencies": {
     "@types/aws-lambda": "8.10.145",
     "@types/aws-sdk": "2.7.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.7",
     "@types/node": "20.14.0",
     "@typescript-eslint/eslint-plugin": "7.15.0",
     "@typescript-eslint/parser": "7.18.0",
+    "chai": "^4.3.6",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
+    "mocha": "10.8.2",
     "prettier": "3.3.3",
-    "ts-node": "10.9.2",
+    "ts-node": "^10.9.2",
     "typescript": "5.6.3"
   },
   "engines": {
     "node": ">=20.0.0 <21"
+  },
+  "mocha": {
+    "diff": true,
+    "extension": [
+      "js",
+      "ts"
+    ],
+    "timeout": 20000,
+    "recursive": true,
+    "require": [
+      "ts-node/register"
+    ],
+    "exit": true
   }
 }
