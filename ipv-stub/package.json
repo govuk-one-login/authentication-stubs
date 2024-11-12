@@ -16,6 +16,7 @@
     "compile": "tsc",
     "encryptSampleRequest": "node scripts/encrypt-message-locally.js",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
+    "lint": "eslint '**/*.ts' --quiet --fix",
     "test": "mocha"
   },
   "prettier": {

@@ -3,14 +3,14 @@ import { logger } from "./logger";
 
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
-type JsonEntity =
+type _JsonEntity =
   | string
   | number
   | boolean
   | null
   | undefined
   | object
-  | JsonEntity[];
+  | _JsonEntity[];
 type Headers = { [header: string]: boolean | number | string };
 
 export class CodedError extends Error {
