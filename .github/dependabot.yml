@@ -13,12 +13,19 @@ updates:
       npm-babel-dependencies:
         patterns:
           - "@babel/*"
+      npm-typescript-eslint-dependencies:
+        patterns:
+          - "@typescript-eslint/*"
     target-branch: main
     schedule:
       interval: daily
   - package-ecosystem: npm
     directory: "/ipv-stub/src"
     open-pull-requests-limit: 10
+    groups:
+      npm-typescript-eslint-dependencies:
+        patterns:
+          - "@typescript-eslint/*"
     target-branch: main
     schedule:
       interval: daily

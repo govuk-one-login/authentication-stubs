@@ -1,5 +1,5 @@
 export type DecodedRequest = {
-  scope: String;
+  scope: string;
   claims: DecodedUserInfoClaim;
 };
 

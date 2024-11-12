@@ -155,6 +155,6 @@ describe("isValidJwt", () => {
   });
 });
 
-function base64Encode(json: Object): String {
+function base64Encode(json: object): string {
   return Buffer.from(JSON.stringify(json), "utf-8").toString("base64");
 }

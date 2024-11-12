@@ -41,7 +41,7 @@ export const handler = async (
   }
 };
 
-const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
+const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
   const form = `<h1 class="govuk-heading-xl">Orchestration stub</h1>
 <form method='post'>
     <div class="govuk-form-group">
@@ -212,7 +212,7 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
       legacy_account_id: "",
     },
   };
-  let payload: JWTPayload = {
+  const payload: JWTPayload = {
     rp_client_id: process.env.RP_CLIENT_ID,
     rp_sector_host: process.env.RP_SECTOR_HOST,
     rp_redirect_uri: "https://a.example.com/redirect",
@@ -227,7 +227,7 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
     client_id: "orchestrationAuth",
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
-    authenticated: form.authenticated ?? false
+    authenticated: form.authenticated ?? false,
   };
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
@@ -248,7 +248,7 @@ const signRequestObject = async (
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: "ES256" })
     .setIssuer("orchestrationAuth")
-    .setAudience(process.env.AUTHENTICATION_FRONTEND_URL!!)
+    .setAudience(process.env.AUTHENTICATION_FRONTEND_URL!)
     .setNotBefore("-1s")
     .setIssuedAt("-1s")
     .setExpirationTime("2h")
@@ -275,7 +275,7 @@ const setUpSession = async (
     const sessionId = idParts[0];
     try {
       await renameExistingSession(sessionId, newSessionId, config);
-    } catch (e) {
+    } catch (_e) {
       await createNewSession(newSessionId, config);
     }
   } else {
@@ -304,7 +304,7 @@ const createNewClientSession = async (
       state: ["dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY"],
       prompt: ["none"],
       nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
-      client_id: [process.env.RP_CLIENT_ID!!],
+      client_id: [process.env.RP_CLIENT_ID!],
     },
     effective_vector_of_trust: {
       credential_trust_level: credentialTrustToEnum(config.confidence),

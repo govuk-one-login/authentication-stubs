@@ -63,7 +63,7 @@ function parseStorageAccessToken(
       }
 
       return payloadAsJson as DecodedStorageAccessToken;
-    } catch (e) {
+    } catch (_e) {
       return "Storage access token payload is not valid json";
     }
   } else return "Storage access token does not contain values field";
