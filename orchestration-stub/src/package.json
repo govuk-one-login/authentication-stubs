@@ -36,7 +36,7 @@
   "name": "orch-stub",
   "scripts": {
     "compile": "tsc",
-    "lint": "eslint '*.ts' --quiet --fix",
+    "lint": "eslint '**/*.ts' --quiet --fix",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
     "unit": "jest",
     "unit-ci": "jest --ci --silent --colors --config jest.config.ci.ts --testLocationInResults",

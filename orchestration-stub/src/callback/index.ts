@@ -99,7 +99,7 @@ function getAuthCode(event: APIGatewayProxyEvent) {
 }
 
 const buildClientAssertion = async () => {
-  let payload: JWTPayload = {};
+  const payload: JWTPayload = {};
 
   const privateKey = await getPrivateKey();
   return await new jose.SignJWT(payload)
@@ -141,7 +141,10 @@ const getToken = async (authCode: string, clientAssertion: string) => {
 const getUserInfo = async (accessToken: string, sessionId: string) => {
   const userInfoUrl = new URL(USER_INFO_URL);
   const response = await fetch(userInfoUrl, {
-    headers: { Authorization: `Bearer ${accessToken}`, [SESSION_ID_HEADER] : sessionId },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      [SESSION_ID_HEADER]: sessionId,
+    },
   });
   if (!response.ok) {
     throw new Error(

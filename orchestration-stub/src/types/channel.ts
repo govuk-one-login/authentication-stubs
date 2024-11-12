@@ -1,1 +1,5 @@
-export enum ChannelEnum { NONE = "none", WEB = "web" , STRATEGIC_APP = "strategic_app" } ;
+export enum ChannelEnum {
+  NONE = "none",
+  WEB = "web",
+  STRATEGIC_APP = "strategic_app",
+}
