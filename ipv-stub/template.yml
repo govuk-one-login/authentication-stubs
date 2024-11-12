@@ -78,6 +78,12 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: get
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /authorize
+            Method: post
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

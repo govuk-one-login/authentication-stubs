@@ -27,6 +27,12 @@ export default function renderIPVAuthorize(
     <textarea class="govuk-textarea" rows="10" id="identity_claim" name="identity_claim" type="text">${JSON.stringify(decodedPayload, null, 2)}</textarea>
     </dd>
   </div>
-  </dl>`
+  </dl>
+
+  <form action="/authorize" method="post">
+    <div class="govuk-summary-list__row">
+      <button name="continue" value="continue" class="govuk-button">Continue</button>
+    </div>
+  </form>\``
   );
 }

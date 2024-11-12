@@ -10,9 +10,11 @@ import {
   handleErrors,
   methodNotAllowedError,
   successfulHtmlResult,
+  successfulJsonResult,
 } from "../helper/result-helper";
 import { compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
+import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -21,7 +23,9 @@ export const handler: Handler = async (
     switch (event.httpMethod) {
       case "GET":
         return await get(event);
-      default: //The orch stub also handles posts. I don't know that we need this yet
+      case "POST":
+        return await post(event);
+      default:
         throw methodNotAllowedError(event.httpMethod);
     }
   });
@@ -70,4 +74,25 @@ async function get(
       renderIPVAuthorize(decodedHeader, parsedRequestOrError)
     );
   }
+}
+
+async function post(
+  _event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  const redirectUri = `${ROOT_URI}/ipv-callback`;
+
+  const url = new URL(redirectUri);
+  url.searchParams.append("code", AUTH_CODE);
+
+  return Promise.resolve(
+    successfulJsonResult(
+      302,
+      {
+        message: `Redirecting to ${url.toString()}`,
+      },
+      {
+        Location: url.toString(),
+      }
+    )
+  );
 }

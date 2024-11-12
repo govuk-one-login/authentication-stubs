@@ -3,14 +3,14 @@ import { logger } from "./logger";
 
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
-type _JsonEntity =
+type JsonEntity =
   | string
   | number
   | boolean
   | null
   | undefined
   | object
-  | _JsonEntity[];
+  | JsonEntity[];
 type Headers = { [header: string]: boolean | number | string };
 
 export class CodedError extends Error {
@@ -31,6 +31,18 @@ export function successfulHtmlResult(
     statusCode: code,
     headers: { ...headers, "Content-Type": "text/html" },
     body: body,
+  };
+}
+
+export function successfulJsonResult(
+  code: SuccessCode,
+  body: JsonEntity,
+  headers?: Headers | undefined
+): APIGatewayProxyResult {
+  return {
+    statusCode: code,
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   };
 }
 
