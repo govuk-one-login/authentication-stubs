@@ -14,7 +14,7 @@
     "clean": "rm -rf build/ipv & rm -rf build/build.toml",
     "start:local": "sam local start-api --template build/ipv/template.yaml --env-vars parameters.json -p 3000",
     "compile": "tsc",
-    "encryptSampleRequest": "node scripts/encrypt-message-locally.js",
+    "encryptSampleRequest": "node scripts/encrypt-message-locally.mjs",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
     "lint": "eslint '**/*.ts' --quiet --fix",
     "test": "mocha"
