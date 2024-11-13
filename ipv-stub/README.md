@@ -8,7 +8,7 @@ npm run build && npm run start:local
 
 You can hit the /authorize endpoint on the locally running stub with a valid request param.
 
-To construct an appropriately encrypted request param for use locally, you can use the helper script (/scripts/encrypt-message-locally.js).
+To construct an appropriately encrypted request param for use locally, you can use the helper script (/scripts/encrypt-message-locally.mjs).
 Manually adjust the algorithm, payload and data to be base 64 encoded and encrypted directly in the script, and run it via
 
 ```bash

@@ -1,4 +1,4 @@
-const { CompactEncrypt, importSPKI } = require("jose");
+import { CompactEncrypt, importSPKI } from "jose";
 
 //This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
