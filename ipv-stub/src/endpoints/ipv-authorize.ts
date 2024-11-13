@@ -79,7 +79,7 @@ async function get(
 async function post(
   _event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  const redirectUri = `${ROOT_URI}/ipv-callback`;
+  const redirectUri = `${ROOT_URI}/ipv/callback/authorize`;
 
   const url = new URL(redirectUri);
   url.searchParams.append("code", AUTH_CODE);
