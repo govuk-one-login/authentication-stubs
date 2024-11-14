@@ -71,6 +71,7 @@ Resources:
             - Effect: Allow
               Action: secretsmanager:GetSecretValue
               Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
+        - !Ref UserIdentityTableWriteAccessPolicy
       Events:
         Get:
           Type: Api
@@ -89,9 +90,42 @@ Resources:
       BuildProperties:
         EntryPoints:
           - src/endpoints/ipv-authorize.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
         Target: node20
+
+  UserIdentityTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-AuthIpvStub-UserIdentity
+      KeySchema:
+        - AttributeName: UserIdentityId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: UserIdentityId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Name
+          Value: UserIdentity
+
+  UserIdentityTableWriteAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowUserIdentityTableWriteAccess
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt UserIdentityTable.Arn
 
   IPVAuthorizeLambdaLogGroup:
     Type: AWS::Logs::LogGroup

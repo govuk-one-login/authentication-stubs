@@ -57,7 +57,7 @@ const createUserInfoClaims = () => {
 
 const createRequestJwt = () => {
   const algorithm = { alg: "some-alg" };
-  const payload = { scope: "reverification", claims: createUserInfoClaims() };
+  const payload = { scope: "reverification", claims: createUserInfoClaims(), state: "test-state" };
   const signature = { sig: "a-signature" };
 
   return createJwt(algorithm, payload, signature);

@@ -15,6 +15,7 @@ import {
 import { compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
 import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
+import { putStateWithAuthCode } from "../services/dynamodb-form-response-service";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -69,6 +70,12 @@ async function get(
     //here in the orch stub they save a code to dynamo. We don't need to do this yet I don't think
     throw new CodedError(400, parsedRequestOrError);
   } else {
+    try {
+      await putStateWithAuthCode(AUTH_CODE, parsedRequestOrError.state);
+    } catch (error) {
+      throw new CodedError(500, `dynamoDb error: ${error}`);
+    }
+
     return successfulHtmlResult(
       200,
       renderIPVAuthorize(decodedHeader, parsedRequestOrError)
