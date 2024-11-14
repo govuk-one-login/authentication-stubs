@@ -10,6 +10,9 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
   if (jwtAsJson.scope !== "reverification") {
     return "Scope in request payload must be verification";
   }
+  if (jwtAsJson.state === undefined) {
+    return "Payload must contain state";
+  }
   const hasUserInfoClaim = jwtAsJson.claims?.userinfo != undefined;
 
   if (!hasUserInfoClaim) {
@@ -24,6 +27,7 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
   } else {
     return {
       scope: "reverification",
+      state: jwtAsJson.state,
       claims: {
         userinfo: {
           "https://vocab.account.gov.uk/v1/storageAccessToken": {

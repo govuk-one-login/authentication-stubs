@@ -56,6 +56,7 @@ describe("isValidJwt", () => {
   it("returns true for a valid jwt", () => {
     const expectedParsedJwt = {
       scope: "reverification",
+      state: "test-state",
       claims: {
         userinfo: {
           "https://vocab.account.gov.uk/v1/storageAccessToken": {
@@ -71,18 +72,19 @@ describe("isValidJwt", () => {
 
   const INVALID_CLAIMS_AND_DESCRIPTIONS = [
     {
-      claims: { claims: validClaims },
+      claims: { claims: validClaims, state: "test-state" },
       invalidCaseDescription: "the jwt does not contain a scope field",
       expectedErrorMessage: "Scope in request payload must be verification",
     },
     {
-      claims: { scope: "reverification" },
+      claims: { scope: "reverification", state: "test-state" },
       invalidCaseDescription: "the jwt does not contain a claims field",
       expectedErrorMessage: "Request payload is missing user info claim",
     },
     {
       claims: {
         scope: "reverification",
+        state: "test-state",
         claims: {},
       },
       invalidCaseDescription: "the jwt does not contain a userinfo claim",
@@ -91,6 +93,7 @@ describe("isValidJwt", () => {
     {
       claims: {
         scope: "reverification",
+        state: "test-state",
         claims: {
           userinfo: {},
         },
@@ -99,6 +102,14 @@ describe("isValidJwt", () => {
         "the jwt does not contain a storage access token field",
       expectedErrorMessage:
         "Storage access token does not contain values field",
+    },
+    {
+      claims: {
+        scope: "reverification",
+        claims: validClaims,
+      },
+      invalidCaseDescription: "the payload does not contain a state field",
+      expectedErrorMessage: "Payload must contain state",
     },
   ];
 
@@ -139,6 +150,7 @@ describe("isValidJwt", () => {
     invalidStorageAccessTokenValues.forEach((testCase) => {
       const jwtWithInvalidStorageAccessToken = {
         scope: "reverification",
+        state: "test-state",
         claims: {
           userinfo: {
             "https://vocab.account.gov.uk/v1/storageAccessToken": {
