@@ -23,14 +23,12 @@ Parameters:
 Mappings:
   EnvironmentConfiguration:
     dev:
-      #TODO
-      ipvStubDomainName:
-
+      ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
+      hostedZoneId: "Z10132222WVQ7U47816SI"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
   UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
-  IsNotProduction: !Not [!Equals [!Ref Environment, production]]
 
 Globals:
   Function:
@@ -50,14 +48,73 @@ Resources:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
       AlwaysDeploy: true
+      EndpointConfiguration: REGIONAL
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: "Auth Team IPV Stub"
+          version: "1.0"
+        paths:
+          /authorize:
+            get:
+              responses:
+                "200": 
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+        x-amazon-apigateway-policy:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal: "*"
+              Action: "execute-api:Invoke"
+              Resource: "*"
 
-  IPVAuthorizeLambda:
+  ApiGatewayInvokePermissionForLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+        FunctionName: !GetAtt IPVStubLambda.Arn
+        Action: lambda:InvokeFunction
+        Principal: apigateway.amazonaws.com
+
+  ApiGatewayMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      Stage: Live
+      DomainName: !Ref GatewayDomain
+      RestApiId: !Ref ApiGateway
+
+  IPVStubLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
       Handler: src/ipv-authorize.handler
       LoggingConfig:
-        LogGroup: !Ref IPVAuthorizeLambdaLogGroup
+        LogGroup: !Ref IPVStubLambdaLogGroup
       Runtime: nodejs20.x
       Architectures:
         - arm64
@@ -67,6 +124,7 @@ Resources:
           IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
       Policies:
+        - AWSLambdaBasicExecutionRole
         - Statement:
             - Effect: Allow
               Action: secretsmanager:GetSecretValue
@@ -93,11 +151,10 @@ Resources:
         Sourcemap: true
         Target: node20
 
-  IPVAuthorizeLambdaLogGroup:
+  IPVStubLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      # TODO
-      LogGroupName:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub"
       RetentionInDays: 30
 
   PublicHostedZone:
@@ -106,3 +163,34 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      SecurityPolicy: TLS_1_2
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      ValidationMethod: DNS
+
+# todo ,
+# currently records set and ACM vadiladation is done Manaully in old dev account 
+# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 
+  
+  #Domain:
+    #Type: AWS::Route53::RecordSet
+    #Properties:
+      #HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+      #Type: A
+      #Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      #AliasTarget:
+        #DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        #HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
