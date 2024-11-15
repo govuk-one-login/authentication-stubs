@@ -1,5 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { UserIdentity } from "../interfaces/user-identity-interface";
 
 const client =
   process.env.ENVIRONMENT === "local"
@@ -33,6 +34,20 @@ export const getStateWithAuthCode = async (
   });
 
   return response.Item?.state;
+};
+
+export const putUserIdentityWithAuthCode = async (
+  authCode: string,
+  userIdentity: UserIdentity
+) => {
+  return await dynamo.put({
+    TableName: tableName,
+    Item: {
+      UserIdentityId: authCode,
+      userIdentity,
+      ttl: getOneDayTimestamp(),
+    },
+  });
 };
 
 function getOneDayTimestamp() {

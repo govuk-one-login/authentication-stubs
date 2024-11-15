@@ -14,10 +14,15 @@ import {
 } from "../helper/result-helper";
 import { compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
-import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
+import {
+  AUTH_CODE,
+  ROOT_URI,
+  USER_IDENTITY,
+} from "../data/ipv-dummy-constants";
 import {
   getStateWithAuthCode,
   putStateWithAuthCode,
+  putUserIdentityWithAuthCode,
 } from "../services/dynamodb-form-response-service";
 
 export const handler: Handler = async (
@@ -93,6 +98,12 @@ async function post(
 
   const url = new URL(redirectUri);
   url.searchParams.append("code", AUTH_CODE);
+
+  try {
+    await putUserIdentityWithAuthCode(AUTH_CODE, USER_IDENTITY);
+  } catch (error) {
+    throw new CodedError(500, `dynamoDb error: ${error}`);
+  }
 
   try {
     const state = await getStateWithAuthCode(AUTH_CODE);
