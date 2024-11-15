@@ -15,7 +15,10 @@ import {
 import { compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
 import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
-import { putStateWithAuthCode } from "../services/dynamodb-form-response-service";
+import {
+  getStateWithAuthCode,
+  putStateWithAuthCode,
+} from "../services/dynamodb-form-response-service";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -90,6 +93,18 @@ async function post(
 
   const url = new URL(redirectUri);
   url.searchParams.append("code", AUTH_CODE);
+
+  try {
+    const state = await getStateWithAuthCode(AUTH_CODE);
+    if (state) {
+      logger.info("state: " + state);
+      url.searchParams.append("state", state);
+    } else {
+      console.log("State not found or is not a string.");
+    }
+  } catch (error) {
+    throw new CodedError(500, `dynamoDb error: ${error}`);
+  }
 
   return Promise.resolve(
     successfulJsonResult(

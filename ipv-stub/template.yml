@@ -72,6 +72,7 @@ Resources:
               Action: secretsmanager:GetSecretValue
               Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
         - !Ref UserIdentityTableWriteAccessPolicy
+        - !Ref UserIdentityTableReadAccessPolicy
       Events:
         Get:
           Type: Api
@@ -125,6 +126,19 @@ Resources:
             Effect: Allow
             Action:
               - dynamodb:PutItem
+            Resource: !GetAtt UserIdentityTable.Arn
+
+  UserIdentityTableReadAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowUserIdentityTableReadAccess
+            Effect: Allow
+            Action:
+              - dynamodb:DescribeTable
+              - dynamodb:Get*
             Resource: !GetAtt UserIdentityTable.Arn
 
   IPVAuthorizeLambdaLogGroup:

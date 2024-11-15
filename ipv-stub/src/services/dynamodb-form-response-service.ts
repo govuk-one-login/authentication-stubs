@@ -24,6 +24,17 @@ export const putStateWithAuthCode = async (authCode: string, state: string) => {
   });
 };
 
+export const getStateWithAuthCode = async (
+  authCode: string
+): Promise<string> => {
+  const response = await dynamo.get({
+    TableName: tableName,
+    Key: { UserIdentityId: authCode + "-state" },
+  });
+
+  return response.Item?.state;
+};
+
 function getOneDayTimestamp() {
   const date = new Date();
   date.setDate(date.getDate() + 1);
