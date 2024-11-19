@@ -68,7 +68,7 @@ Resources:
                 type: "aws_proxy"
                 httpMethod: "POST"
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubLambda.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
             post:
@@ -83,7 +83,7 @@ Resources:
                 type: "aws_proxy"
                 httpMethod: "POST"
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubLambda.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
@@ -97,7 +97,7 @@ Resources:
   ApiGatewayInvokePermissionForLambda:
     Type: AWS::Lambda::Permission
     Properties:
-        FunctionName: !GetAtt IPVStubLambda.Arn
+        FunctionName: !GetAtt IPVStubAuthorizeLambda.Arn
         Action: lambda:InvokeFunction
         Principal: apigateway.amazonaws.com
 
@@ -108,13 +108,13 @@ Resources:
       DomainName: !Ref GatewayDomain
       RestApiId: !Ref ApiGateway
 
-  IPVStubLambda:
+  IPVStubAuthorizeLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
       Handler: src/ipv-authorize.handler
       LoggingConfig:
-        LogGroup: !Ref IPVStubLambdaLogGroup
+        LogGroup: !Ref IPVStubAuthorizeLambdaLogGroup
       Runtime: nodejs20.x
       Architectures:
         - arm64
@@ -151,10 +151,10 @@ Resources:
         Sourcemap: true
         Target: node20
 
-  IPVStubLambdaLogGroup:
+  IPVStubAuthorizeLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-authorize"
       RetentionInDays: 30
 
   PublicHostedZone:
