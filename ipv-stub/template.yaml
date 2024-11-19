@@ -62,7 +62,7 @@ Resources:
           /authorize:
             get:
               responses:
-                "200": 
+                "200":
                   description: OK
                   content:
                     application/json:
@@ -86,6 +86,22 @@ Resources:
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+          /reverification:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "GET"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
@@ -179,6 +195,39 @@ Resources:
     Properties:
       DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
       ValidationMethod: DNS
+
+  IPVStubReverificationLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/ipv-reverification.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubReverificationLambdaLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !Sub ${Environment}
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /reverification
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/ipv-reverification.ts
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
+  IPVStubReverificationLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-reverification"
+      RetentionInDays: 30
 
 # todo ,
 # currently records set and ACM vadiladation is done Manaully in old dev account 
