@@ -40,6 +40,10 @@ Globals:
       - UsePermissionsBoundary
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
+    CodeUri: .
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
 
 Resources:
   ApiGateway:
@@ -111,13 +115,9 @@ Resources:
   IPVStubAuthorizeLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: .
       Handler: src/ipv-authorize.handler
       LoggingConfig:
         LogGroup: !Ref IPVStubAuthorizeLambdaLogGroup
-      Runtime: nodejs20.x
-      Architectures:
-        - arm64
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
