@@ -1,0 +1,18 @@
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+      - "4569:4569"
+    environment:
+      - SERVICES=dynamodb
+      - LOCALSTACK_HOST=localhost
+      - DYNAMODB_SHARE_DB=1 # Removes regions and allows NoSQL Workbench to work.
+      - DEBUG=${DEBUG:-0}
+      - AWS_ACCESS_KEY_ID=na
+      - AWS_SECRET_ACCESS_KEY=na
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./localstack/provision.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
