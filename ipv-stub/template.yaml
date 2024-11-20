@@ -145,6 +145,7 @@ Resources:
             - Effect: Allow
               Action: secretsmanager:GetSecretValue
               Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
+        - !Ref ReverificationTableWriteAccessPolicy
       Events:
         Get:
           Type: Api
@@ -163,6 +164,9 @@ Resources:
       BuildProperties:
         EntryPoints:
           - src/endpoints/ipv-authorize.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
         Target: node20
@@ -228,6 +232,36 @@ Resources:
     Properties:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-reverification"
       RetentionInDays: 30
+
+  ReverificationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-AuthIpvStub-Reverification
+      KeySchema:
+        - AttributeName: ReverificationId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: ReverificationId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Name
+          Value: Reverification
+
+  ReverificationTableWriteAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowReverificationWriteAccess
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt ReverificationTable.Arn
 
 # todo ,
 # currently records set and ACM vadiladation is done Manaully in old dev account 
