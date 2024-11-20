@@ -81,7 +81,7 @@ async function get(
 
     return successfulHtmlResult(
       200,
-      renderIPVAuthorize(decodedHeader, parsedRequestOrError)
+      renderIPVAuthorize(decodedHeader, parsedRequestOrError, authCode)
     );
   }
 }
