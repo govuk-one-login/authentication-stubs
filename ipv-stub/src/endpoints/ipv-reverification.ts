@@ -25,5 +25,8 @@ export const handler: Handler = async (
 async function get(
   _event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  return successfulJsonResult(200, {});
+  return successfulJsonResult(200, {
+    sub: "urn:fdc:gov.uk:2022:fake_common_subject_identifier",
+    success: true,
+  });
 }
