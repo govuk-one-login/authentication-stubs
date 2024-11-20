@@ -7,7 +7,7 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: npm
-    directory: "/orchestration-stub/src"
+    directory: "/orchestration-stub"
     open-pull-requests-limit: 10
     groups:
       npm-babel-dependencies:
@@ -20,7 +20,7 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: npm
-    directory: "/ipv-stub/src"
+    directory: "/ipv-stub"
     open-pull-requests-limit: 10
     groups:
       npm-eslint-dependencies:

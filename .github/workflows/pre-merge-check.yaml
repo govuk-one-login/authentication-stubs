@@ -1,22 +1,60 @@
 name: Pre-merge checks
 
 on:
-  pull-request:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      matrix:
+        module: [ orchestration-stub, ipv-stub ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Set up SAM cli
         uses: aws-actions/setup-sam@v2
         with:
           use-installer: true  # this caches installation but is only available on Linux x86-64 runners
+      - name: SAM build
+        run: |
+          cd ${{ matrix.module }}
+          sam build -t template.yaml
 
-      - name: SAM build and test
-        run: sam build
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        module: [ orchestration-stub, ipv-stub ]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.17.0
+      - name: Install dependencies
+        run: npm install
+        working-directory: ${{ matrix.module }}
+      - name: Run linter
+        run: npm run lint
+        working-directory: ${{ matrix.module }}
+      - name: Run prettier
+        run: npm run pretty-check
+        working-directory: ${{ matrix.module }}
+      - name: Run unit tests
+#       todo: add orch-stub unit tests to pre-merge-checks when any are created
+        if: matrix.module == 'ipv-stub'
+        run: npm run test-unit
+        working-directory: ${{ matrix.module }}

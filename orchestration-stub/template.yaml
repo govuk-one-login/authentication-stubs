@@ -77,7 +77,7 @@ Globals:
       - !Ref AWS::NoValue
     Runtime: nodejs20.x
     Timeout: 30
-    CodeUri: src/
+    CodeUri: .
     Architectures:
       - arm64
 
@@ -386,7 +386,7 @@ Resources:
   IndexFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index/index.handler
+      Handler: src/index/index.handler
       AutoPublishAlias: latest
       ProvisionedConcurrencyConfig: !If
         - EnableProvisionedConcurrency
@@ -502,7 +502,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - index/index.ts
+          - src/index/index.ts
         Minify: true
         Sourcemap: true
         Target: "es2020"
@@ -510,7 +510,7 @@ Resources:
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: callback/index.handler
+      Handler: src/callback/index.handler
       AutoPublishAlias: latest
       ProvisionedConcurrencyConfig: !If
         - EnableProvisionedConcurrency
@@ -592,7 +592,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
-          - callback/index.ts
+          - src/callback/index.ts
         Minify: true
         Sourcemap: true
         Target: "es2020"
