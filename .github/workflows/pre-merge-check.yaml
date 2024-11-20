@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: npm install
         working-directory: ${{ matrix.module }}
+      - name: Run linter
+        run: npm run lint
+        working-directory: ${{ matrix.module }}
       - name: Run prettier
         run: npm run pretty-check
         working-directory: ${{ matrix.module }}

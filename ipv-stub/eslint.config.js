@@ -42,6 +42,8 @@ module.exports = [
     {
         ignores: [
             "eslint.config.js",
+            ".aws-sam/",
+            "build/"
         ],
     },
 ];
