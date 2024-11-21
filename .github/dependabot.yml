@@ -17,6 +17,9 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 20" ]
     target-branch: main
     schedule:
       interval: daily
@@ -28,6 +31,9 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 20" ]
     target-branch: main
     schedule:
       interval: daily
