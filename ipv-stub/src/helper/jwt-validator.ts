@@ -13,6 +13,9 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
   if (jwtAsJson.state === undefined) {
     return "Payload must contain state";
   }
+  if (jwtAsJson.sub === undefined) {
+    return "Payload must contain sub";
+  }
   const hasUserInfoClaim = jwtAsJson.claims?.userinfo != undefined;
 
   if (!hasUserInfoClaim) {
@@ -26,6 +29,7 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
     return parsedUserInfoClaimOrErrorString;
   } else {
     return {
+      sub: jwtAsJson.sub,
       scope: "reverification",
       state: jwtAsJson.state,
       claims: {

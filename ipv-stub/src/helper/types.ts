@@ -1,4 +1,5 @@
 export type DecodedRequest = {
+  sub: string;
   scope: string;
   state: string;
   claims: DecodedUserInfoClaim;

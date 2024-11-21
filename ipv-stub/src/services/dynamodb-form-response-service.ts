@@ -5,7 +5,7 @@ import { Reverification } from "../interfaces/reverification-interface";
 const client =
   process.env.ENVIRONMENT === "local"
     ? new DynamoDBClient({
-        endpoint: "http://host.docker.internal:8000",
+        endpoint: "http://host.docker.internal:4566",
         region: "localhost", // Set a dummy region for local development
       })
     : new DynamoDBClient({});

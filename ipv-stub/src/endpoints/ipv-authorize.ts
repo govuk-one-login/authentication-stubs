@@ -96,13 +96,14 @@ async function post(
   }
 
   const authCode = base64url.encode(randomBytes(32));
+  const sub = parsedBody["sub"];
 
   const url = new URL(redirectUri);
   url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
   const reverification = {
-    sub: "urn:fdc:gov.uk:2022:fake_common_subject_identifier",
+    sub,
     success: true,
   };
 
