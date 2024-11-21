@@ -6,6 +6,7 @@ updates:
     target-branch: main
     schedule:
       interval: daily
+      time: "03:00"
   - package-ecosystem: npm
     directory: "/orchestration-stub"
     open-pull-requests-limit: 10
@@ -16,9 +17,13 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 20" ]
     target-branch: main
     schedule:
       interval: daily
+      time: "03:00"
   - package-ecosystem: npm
     directory: "/ipv-stub"
     open-pull-requests-limit: 10
@@ -26,6 +31,10 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 20" ]
     target-branch: main
     schedule:
       interval: daily
+      time: "03:00"
