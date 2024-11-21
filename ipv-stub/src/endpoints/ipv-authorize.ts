@@ -73,7 +73,6 @@ async function get(
   const authCode = base64url.encode(randomBytes(32));
 
   if (typeof parsedRequestOrError === "string") {
-    //here in the orch stub they save a code to dynamo. We don't need to do this yet I don't think
     throw new CodedError(400, parsedRequestOrError);
   } else {
     try {
