@@ -30,6 +30,8 @@ export default function renderIPVAuthorize(
   </dl>
 
   <form action="/authorize" method="post">
+    <input type="hidden" name="state" value=${decodedPayload.state}>
+
     <div class="govuk-summary-list__row">
       <button name="continue" value="continue" class="govuk-button">Continue</button>
     </div>

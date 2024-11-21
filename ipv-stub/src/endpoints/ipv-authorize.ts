@@ -90,8 +90,15 @@ async function post(
     ? Object.fromEntries(new URLSearchParams(event.body))
     : {};
 
-  const url = new URL(redirectUri);
+  const state = parsedBody["state"];
+  if (!state) {
+    throw new CodedError(500, "state not found");
+  }
+
   const authCode = base64url.encode(randomBytes(32));
+
+  const url = new URL(redirectUri);
+  url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
   const reverification = {
