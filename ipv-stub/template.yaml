@@ -139,6 +139,15 @@ Resources:
           ENVIRONMENT: !Sub ${Environment}
           IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
+          AUTH_PUBLIC_SIGNING_KEY: "-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnRChwy7JoZOGUplm55Fc
+VnuWNeKuK4hLMM4JQpC+LaMfE+Oriy1SHjTFhNJ1GhKS+8Xw6iSOda3wQEKHQiay
+TUWltQMjNVL5llqaFWKIDmi6Qew3vXCheUCTW6f+PL94w2phhA6pzT6yUFLmVgG0
+rbt9sWj2flqI+xMrAnh0ChXvx8HlKBmww81GDeOg1dJ6lzBcGH5PkGxbypXKJJvw
+208hQlfiAmVliBDk5w2salTXcXcRno0LyzKgb2lM6bmf/w+hg9GBhnmOhhYu2ljk
+7NVUVEh+yeMoPk1d2hB4N2RlYe8wtp/+r2EnHSKmb+xZyx8F5VdU3S2J/78q2fYx
+mQIDAQAB
+-----END PUBLIC KEY-----"
       Policies:
         - AWSLambdaBasicExecutionRole
         - Statement:

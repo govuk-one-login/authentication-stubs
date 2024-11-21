@@ -18,6 +18,8 @@ Manually adjust the algorithm, payload and data to be base 64 encoded and encryp
 npm run encryptSampleRequest
 ```
 
+http://localhost:3000/authorize?request=eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIn0.dbuL0oXOGtSHhp4sqV8R3o7scisk_fvCFEDLJ2EwmkzwQMshgd7vAHKXN-x-U_zUSzP0Mqa2doEHiPeuNMbLlm-5hNWIbKXclmKjwA-Etcvx-eI-_3EUYVRLmkV8rH__W_918yldZ-wUc6wO40GXKmrLWhLdruWI8Lul2AfECrWJrwnz92mZ_EnxoXpHTBPiWQ5SarJhW8hSWbqm5OqQCUrtDb0Q5-uQT_1dFv7VaKVsUQ6Bh1b0zljLJ1HkYGFESShTXkbu8qX8Hczz2OGhdcsZeoMoe4YogZ7pSrv5Bd3a2QpPLJYfI1zx-29J9rBqESIYqdsKpOnkNWMZKn9YwQ.o60AucUjZ2boWPZO..sLagDigiDnAL_I6v1dM9dQ
+
 Then use the output to construct a request e.g. `http://localhost:3000/authorize?request=[your-encrypted-jwe]`
 
 ## Private and public keys
