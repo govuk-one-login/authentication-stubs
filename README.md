@@ -1,9 +1,6 @@
 # di-authentication-stubs
 
-## Test
+We have two projects in this repo:
 
-Run localstack and execute localstack/provision.sh when starting to create resources.
-
-```bash
-docker compose up
-```
+- [ipv-stub](./ipv-stub)
+- [orchestration-stub](./orchestration-stub)

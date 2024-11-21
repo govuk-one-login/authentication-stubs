@@ -40,6 +40,13 @@ create_ipv_stub_table() {
             "S": "test"
           }
         }'
+
+  aws --endpoint-url=$ENDPOINT_URL dynamodb create-table \
+      --table-name local-AuthIpvStub-Reverification \
+      --attribute-definitions AttributeName=ReverificationId,AttributeType=S \
+      --key-schema AttributeName=ReverificationId,KeyType=HASH \
+      --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+      --region "$REGION"
 }
 
 

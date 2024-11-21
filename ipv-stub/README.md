@@ -2,17 +2,9 @@
 
 ## Running Locally
 
-For now, you will need a local dynamo db instance running on port 8000, and the table manually created to the following specification:
-
-Name: local-AuthIpvStub-Reverification
-PartitionKey: ReverificationId (string)
-
-There is no sort key or GSIs currently.
-
-It is straightforward to do this via NoSqlWorkbench, via the "DDB local" option.
-
-Future improvements to this should mean we can spin this up via docker and localstack and remove the need for manual configuration.
-
+```bash
+(cd localstack && docker compose up)
+```
 ```bash
 npm run build && npm run start:local
 ```
@@ -36,3 +28,24 @@ The local private key (in _parameters.json_) as well as its public key (in the e
 The key pair was generated fresh and should only be used for testing, both locally and as part of the pre-merge GitHub workflow.
 
 In deployed environments, the private key will be retrieved from AWS Secrets Manager, and the public key from AWS Parameter Store. This key pair is different from the one which has been commited here.
+
+
+## Connect to DynamoDB with IntelliJ Database Explorer
+
+1) Create a `localstack` AWS profile
+
+```
+> aws configure --profile localstack
+AWS Access Key ID [None]: na
+AWS Secret Access Key [None]: na
+Default region name [None]: eu-west-2
+```
+
+2) Navigate File > New > Datasource > DynamoDB
+3) Submit with:
+    - Host: `localhost`
+    - Port: `4566`
+    - Region: `eu-west-2`
+    - Authentication: `AWS Profile`
+    - Profile: `localstack`
+4) Navigate View > Tool Windows > Database
