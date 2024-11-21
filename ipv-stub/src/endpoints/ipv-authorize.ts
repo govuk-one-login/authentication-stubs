@@ -15,7 +15,10 @@ import {
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
 import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
-import { putStateWithAuthCode } from "../services/dynamodb-form-response-service";
+import {
+  getStateWithAuthCode,
+  putStateWithAuthCode,
+} from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 
 export const handler: Handler = async (
@@ -87,12 +90,34 @@ async function get(
 }
 
 async function post(
-  _event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
   const redirectUri = `${ROOT_URI}/ipv/callback/authorize`;
 
+  if (event.body == null) {
+    throw new CodedError(400, "Missing request body");
+  }
+
+  const parsedBody = event.body
+    ? Object.fromEntries(new URLSearchParams(event.body))
+    : {};
+  const authCode = parsedBody["authCode"];
+
   const url = new URL(redirectUri);
-  url.searchParams.append("code", AUTH_CODE);
+  url.searchParams.append("code", authCode);
+
+  try {
+    const state = await getStateWithAuthCode(authCode);
+    if (state) {
+      logger.info("state: " + state);
+      url.searchParams.append("state", state);
+    } else {
+      logger.info("State not found or is not a string.");
+      throw new CodedError(400, "State not found");
+    }
+  } catch (error) {
+    throw new CodedError(500, `dynamoDb error: ${error}`);
+  }
 
   return Promise.resolve(
     successfulJsonResult(
