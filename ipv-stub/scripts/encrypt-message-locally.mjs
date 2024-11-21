@@ -57,7 +57,12 @@ const createUserInfoClaims = () => {
 
 const createRequestJwt = () => {
   const algorithm = { alg: "some-alg" };
-  const payload = { scope: "reverification", claims: createUserInfoClaims(), state: "test-state" };
+  const payload = {
+    sub: `urn:fdc:gov.uk:2022:fake_common_subject_identifier_${Math.floor(Math.random() * 100000)}`,
+    scope: "reverification",
+    claims: createUserInfoClaims(),
+    state: "test-state",
+  };
   const signature = { sig: "a-signature" };
 
   return createJwt(algorithm, payload, signature);

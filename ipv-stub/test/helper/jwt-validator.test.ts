@@ -55,6 +55,7 @@ const validSampleJwt = {
 describe("isValidJwt", () => {
   it("returns true for a valid jwt", () => {
     const expectedParsedJwt = {
+      sub: "commonSubjectIdentifier",
       scope: "reverification",
       state: "test-state",
       claims: {
@@ -72,17 +73,26 @@ describe("isValidJwt", () => {
 
   const INVALID_CLAIMS_AND_DESCRIPTIONS = [
     {
-      claims: { claims: validClaims, state: "test-state" },
+      claims: {
+        sub: "commonSubjectIdentifier",
+        claims: validClaims,
+        state: "test-state",
+      },
       invalidCaseDescription: "the jwt does not contain a scope field",
       expectedErrorMessage: "Scope in request payload must be verification",
     },
     {
-      claims: { scope: "reverification", state: "test-state" },
+      claims: {
+        sub: "commonSubjectIdentifier",
+        scope: "reverification",
+        state: "test-state",
+      },
       invalidCaseDescription: "the jwt does not contain a claims field",
       expectedErrorMessage: "Request payload is missing user info claim",
     },
     {
       claims: {
+        sub: "commonSubjectIdentifier",
         scope: "reverification",
         state: "test-state",
         claims: {},
@@ -92,6 +102,7 @@ describe("isValidJwt", () => {
     },
     {
       claims: {
+        sub: "commonSubjectIdentifier",
         scope: "reverification",
         state: "test-state",
         claims: {
@@ -105,11 +116,21 @@ describe("isValidJwt", () => {
     },
     {
       claims: {
+        sub: "commonSubjectIdentifier",
         scope: "reverification",
         claims: validClaims,
       },
       invalidCaseDescription: "the payload does not contain a state field",
       expectedErrorMessage: "Payload must contain state",
+    },
+    {
+      claims: {
+        scope: "reverification",
+        state: "test-state",
+        claims: validClaims,
+      },
+      invalidCaseDescription: "the payload does not contain a sub field",
+      expectedErrorMessage: "Payload must contain sub",
     },
   ];
 
@@ -149,6 +170,7 @@ describe("isValidJwt", () => {
     ];
     invalidStorageAccessTokenValues.forEach((testCase) => {
       const jwtWithInvalidStorageAccessToken = {
+        sub: "commonSubjectIdentifier",
         scope: "reverification",
         state: "test-state",
         claims: {
