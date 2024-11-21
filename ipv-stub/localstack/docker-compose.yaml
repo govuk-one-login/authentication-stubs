@@ -14,5 +14,5 @@ services:
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ./localstack/provision.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - ./provision.sh:/etc/localstack/init/ready.d/init-aws.sh
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
