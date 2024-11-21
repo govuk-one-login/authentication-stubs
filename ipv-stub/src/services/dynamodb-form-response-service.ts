@@ -20,7 +20,7 @@ export const putStateWithAuthCode = async (authCode: string, state: string) => {
     Item: {
       ReverificationId: authCode + "-state",
       state,
-      ttl: getOneDayTimestamp(),
+      ttl: oneHourFromNow(),
     },
   });
 };
@@ -49,12 +49,6 @@ export const putReverificationWithAuthCode = async (
     },
   });
 };
-
-function getOneDayTimestamp() {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  return Math.floor(date.getTime() / 1000);
-}
 
 function oneHourFromNow() {
   return Math.floor(Date.now() / 1000) + 3600;
