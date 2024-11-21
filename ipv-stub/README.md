@@ -2,6 +2,17 @@
 
 ## Running Locally
 
+For now, you will need a local dynamo db instance running on port 8000, and the table manually created to the following specification:
+
+Name: local-AuthIpvStub-Reverification
+PartitionKey: ReverificationId (string)
+
+There is no sort key or GSIs currently.
+
+It is straightforward to do this via NoSqlWorkbench, via the "DDB local" option.
+
+Future improvements to this should mean we can spin this up via docker and localstack and remove the need for manual configuration.
+
 ```bash
 npm run build && npm run start:local
 ```
