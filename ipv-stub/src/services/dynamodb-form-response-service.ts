@@ -1,5 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { Reverification } from "../interfaces/reverification-interface";
 
 const client =
   process.env.ENVIRONMENT === "local"
@@ -19,13 +20,36 @@ export const putStateWithAuthCode = async (authCode: string, state: string) => {
     Item: {
       ReverificationId: authCode + "-state",
       state,
-      ttl: getOneDayTimestamp(),
+      ttl: oneHourFromNow(),
     },
   });
 };
 
-function getOneDayTimestamp() {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  return Math.floor(date.getTime() / 1000);
+export const getStateWithAuthCode = async (
+  authCode: string
+): Promise<string> => {
+  const response = await dynamo.get({
+    TableName: tableName,
+    Key: { ReverificationId: authCode + "-state" },
+  });
+
+  return response.Item?.state;
+};
+
+export const putReverificationWithAuthCode = async (
+  authCode: string,
+  reverification: Reverification
+) => {
+  return await dynamo.put({
+    TableName: tableName,
+    Item: {
+      ReverificationId: authCode,
+      reverification,
+      ttl: oneHourFromNow(),
+    },
+  });
+};
+
+function oneHourFromNow() {
+  return Math.floor(Date.now() / 1000) + 3600;
 }
