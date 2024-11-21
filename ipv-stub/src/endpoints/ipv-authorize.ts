@@ -14,10 +14,11 @@ import {
 } from "../helper/result-helper";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
-import { AUTH_CODE, ROOT_URI } from "../data/ipv-dummy-constants";
+import { ROOT_URI } from "../data/ipv-dummy-constants";
 import {
   getStateWithAuthCode,
   putStateWithAuthCode,
+  putReverificationWithAuthCode,
 } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 
@@ -116,6 +117,20 @@ async function post(
     }
   } catch (error) {
     throw new CodedError(500, `dynamoDb error: ${error}`);
+  }
+
+  const reverification = {
+    sub: "urn:fdc:gov.uk:2022:fake_common_subject_identifier",
+    success: true,
+  };
+
+  try {
+    await putReverificationWithAuthCode(authCode, reverification);
+  } catch (error) {
+    throw new CodedError(
+      500,
+      `dynamoDb error on storing reverification with auth code: ${error}`
+    );
   }
 
   return Promise.resolve(
