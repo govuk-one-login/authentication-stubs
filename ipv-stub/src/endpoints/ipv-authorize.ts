@@ -15,11 +15,7 @@ import {
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
 import { parseRequest } from "../helper/jwt-validator";
 import { ROOT_URI } from "../data/ipv-dummy-constants";
-import {
-  getStateWithAuthCode,
-  putStateWithAuthCode,
-  putReverificationWithAuthCode,
-} from "../services/dynamodb-form-response-service";
+import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 
 export const handler: Handler = async (
@@ -71,22 +67,14 @@ async function get(
 
   const parsedRequestOrError = parseRequest(decodedPayload);
 
-  const authCode = base64url.encode(randomBytes(32));
-
   if (typeof parsedRequestOrError === "string") {
     throw new CodedError(400, parsedRequestOrError);
-  } else {
-    try {
-      await putStateWithAuthCode(authCode, parsedRequestOrError.state);
-    } catch (error) {
-      throw new CodedError(500, `dynamoDb error: ${error}`);
-    }
-
-    return successfulHtmlResult(
-      200,
-      renderIPVAuthorize(decodedHeader, parsedRequestOrError, authCode)
-    );
   }
+
+  return successfulHtmlResult(
+    200,
+    renderIPVAuthorize(decodedHeader, parsedRequestOrError)
+  );
 }
 
 async function post(
@@ -101,23 +89,17 @@ async function post(
   const parsedBody = event.body
     ? Object.fromEntries(new URLSearchParams(event.body))
     : {};
-  const authCode = parsedBody["authCode"];
+
+  const state = parsedBody["state"];
+  if (!state) {
+    throw new CodedError(500, "state not found");
+  }
+
+  const authCode = base64url.encode(randomBytes(32));
 
   const url = new URL(redirectUri);
+  url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
-
-  try {
-    const state = await getStateWithAuthCode(authCode);
-    if (state) {
-      logger.info("state: " + state);
-      url.searchParams.append("state", state);
-    } else {
-      logger.info("State not found or is not a string.");
-      throw new CodedError(400, "State not found");
-    }
-  } catch (error) {
-    throw new CodedError(500, `dynamoDb error: ${error}`);
-  }
 
   const reverification = {
     sub: "urn:fdc:gov.uk:2022:fake_common_subject_identifier",

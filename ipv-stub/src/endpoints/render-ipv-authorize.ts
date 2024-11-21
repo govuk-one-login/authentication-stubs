@@ -3,8 +3,7 @@ import { DecodedRequest } from "../helper/types";
 
 export default function renderIPVAuthorize(
   decodedHeader: string,
-  decodedPayload: DecodedRequest,
-  authCode: string
+  decodedPayload: DecodedRequest
 ) {
   return renderPage(
     `<h1 class="govuk-heading-l">IPV stub</h1>
@@ -31,7 +30,8 @@ export default function renderIPVAuthorize(
   </dl>
 
   <form action="/authorize" method="post">
-    <input type="hidden" name="authCode" value=${authCode}>
+    <input type="hidden" name="state" value=${decodedPayload.state}>
+
     <div class="govuk-summary-list__row">
       <button name="continue" value="continue" class="govuk-button">Continue</button>
     </div>

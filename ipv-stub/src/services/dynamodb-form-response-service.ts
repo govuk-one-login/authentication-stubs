@@ -14,28 +14,6 @@ const dynamo = DynamoDBDocument.from(client);
 
 const tableName = `${process.env.ENVIRONMENT}-AuthIpvStub-Reverification`;
 
-export const putStateWithAuthCode = async (authCode: string, state: string) => {
-  return await dynamo.put({
-    TableName: tableName,
-    Item: {
-      ReverificationId: authCode + "-state",
-      state,
-      ttl: oneHourFromNow(),
-    },
-  });
-};
-
-export const getStateWithAuthCode = async (
-  authCode: string
-): Promise<string> => {
-  const response = await dynamo.get({
-    TableName: tableName,
-    Key: { ReverificationId: authCode + "-state" },
-  });
-
-  return response.Item?.state;
-};
-
 export const putReverificationWithAuthCode = async (
   authCode: string,
   reverification: Reverification
