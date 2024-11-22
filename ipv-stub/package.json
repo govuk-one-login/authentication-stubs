@@ -8,7 +8,7 @@
     "esbuild": "0.24.0",
     "jose": "5.9.6",
     "pino": "^9.4.0",
-    "@aws-sdk/client-dynamodb": "^3.679.0",
+    "@aws-sdk/client-dynamodb": "^3.696.0",
     "@aws-sdk/lib-dynamodb": "^3.650.0"
   },
   "scripts": {
