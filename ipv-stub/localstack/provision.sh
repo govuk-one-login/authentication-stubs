@@ -25,23 +25,6 @@ setup_environment() {
 
 create_ipv_stub_table() {
   aws --endpoint-url=$ENDPOINT_URL dynamodb create-table \
-      --table-name local-AuthIpvStub-UserIdentity \
-      --attribute-definitions AttributeName=UserIdentityId,AttributeType=S \
-      --key-schema AttributeName=UserIdentityId,KeyType=HASH \
-      --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
-      --region "$REGION"
-
-  aws --endpoint-url=$ENDPOINT_URL dynamodb put-item \
-      --table-name local-AuthIpvStub-UserIdentity  \
-      --region "$REGION" \
-      --item '
-        {
-          "UserIdentityId": {
-            "S": "test"
-          }
-        }'
-
-  aws --endpoint-url=$ENDPOINT_URL dynamodb create-table \
       --table-name local-AuthIpvStub-Reverification \
       --attribute-definitions AttributeName=ReverificationId,AttributeType=S \
       --key-schema AttributeName=ReverificationId,KeyType=HASH \
