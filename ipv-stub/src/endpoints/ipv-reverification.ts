@@ -5,9 +5,12 @@ import {
 } from "aws-lambda";
 import {
   handleErrors,
+  invalidAccessTokenResult,
   methodNotAllowedError,
   successfulJsonResult,
 } from "../helper/result-helper";
+import { getReverificationWithAccessToken } from "../services/dynamodb-form-response-service";
+import { logger } from "../helper/logger";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -23,10 +26,27 @@ export const handler: Handler = async (
 };
 
 async function get(
-  _event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  return successfulJsonResult(200, {
-    sub: "urn:fdc:gov.uk:2022:fake_common_subject_identifier",
-    success: true,
-  });
+  const accessToken = getAccessToken(event);
+  if (!accessToken) {
+    logger.info("No access token found in event");
+    return invalidAccessTokenResult();
+  }
+
+  const reverification = await getReverificationWithAccessToken(accessToken);
+  if (!reverification) {
+    logger.info("No reverification result found for access token");
+    return invalidAccessTokenResult();
+  }
+
+  return successfulJsonResult(200, reverification);
+}
+
+function getAccessToken(event: APIGatewayProxyEvent): string | undefined {
+  const authorization = event.headers["Authorization"];
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return undefined;
+  }
+  return authorization.replace("Bearer ", "");
 }

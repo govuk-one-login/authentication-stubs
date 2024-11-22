@@ -46,6 +46,16 @@ export function successfulJsonResult(
   };
 }
 
+export function invalidAccessTokenResult(): APIGatewayProxyResult {
+  return {
+    statusCode: 401,
+    body: "",
+    headers: {
+      "WWW-Authenticate": `Bearer realm="ipv-stub", error="invalid_token"`,
+    },
+  };
+}
+
 export function methodNotAllowedError(method: string) {
   return new CodedError(405, `Method ${method} not allowed`);
 }
