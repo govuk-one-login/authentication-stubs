@@ -9,7 +9,7 @@
     "jose": "5.9.6",
     "pino": "^9.4.0",
     "@aws-sdk/client-dynamodb": "^3.679.0",
-    "@aws-sdk/lib-dynamodb": "^3.650.0"
+    "@aws-sdk/lib-dynamodb": "^3.698.0"
   },
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/ipv",
