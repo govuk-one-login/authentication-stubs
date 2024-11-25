@@ -11,10 +11,8 @@ import {
 } from "../helper/result-helper";
 import { logger } from "../helper/logger";
 import {
-  getReverificationWithAccessToken, getReverificationWithAuthCode, putReverificationWithAccessToken,
-  putReverificationWithAuthCode
+  getReverificationWithAuthCode, putReverificationWithAccessToken
 } from "../services/dynamodb-form-response-service";
-import { Reverification } from "../interfaces/reverification-interface";
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 
@@ -44,11 +42,19 @@ async function handle(
   var code;
   try {
     params = new URLSearchParams(event.body || '');
-    const grant_type = params.get('grant_type');
+
     code = params.get('code');
-    const redirect_uri = params.get('redirect_uri');
+    var result = checkDefinedOrError(code, 'code');
+    if (!result.success) return result.errorResponse;
+
     const client_id = params.get('client_id');
+    result = checkDefinedOrError(client_id, 'client_id');
+    if (!result.success) return result.errorResponse;
+
     const client_assertion_type = params.get('client_assertion_type');
+    result = checkDefinedOrError(client_assertion_type, 'client_assertion_type');
+    if (!result.success) return result.errorResponse;
+
     client_assertion = params.get('client_assertion');
 
     if (!client_assertion) {
@@ -125,5 +131,17 @@ const verifyJWT = async (token: string): Promise<JwtPayload> => {
     return decoded as JwtPayload;
   } else {
     throw new Error('Invalid token payload');
+  }
+}
+
+type ResultOrError<T> =
+  | {success: true; data: T}
+  | {success: false; errorResponse: { statusCode: number; body: string}};
+
+function checkDefinedOrError<T>(variable: T | undefined, name: string): ResultOrError<T> {
+  if (variable === undefined) {
+    return {success: false, errorResponse: { statusCode: 400, body: `${name} is missing.`}};
+  } else {
+    return {success: true, data: variable};
   }
 }
