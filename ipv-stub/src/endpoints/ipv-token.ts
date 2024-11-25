@@ -85,20 +85,18 @@ async function handle(
     logger.info("no claims")
   }
 
-  // Extract auth_code code
-  // Extract sub claims['sub']
-  // Query Dynamo for record with PK = sub and item auth_code
   const reverificationResult = await getReverificationWithAuthCode(code as string);
   
   logger.info(`reverification result: ${reverificationResult}`);
-  
+
+  var accessToken;
   if (reverificationResult) {
     logger.info("Found reverification result record")
     const reverification = {
       sub: claims['sub'] as string,
       success: true,
     }
-    const accessToken = base64url.encode(randomBytes(32));
+    accessToken = base64url.encode(randomBytes(32));
     await putReverificationWithAccessToken(accessToken, reverification);
   } else {
     logger.info("Did not find reverification result record");
@@ -107,7 +105,7 @@ async function handle(
   // If exists return an access token.
 
   return successfulJsonResult(200, {
-    access_token: 'access-token',
+    access_token: accessToken,
     token_type: 'Bearer',
     expires_in: 3600,
   });
