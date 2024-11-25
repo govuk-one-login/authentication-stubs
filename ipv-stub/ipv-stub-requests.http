@@ -1,0 +1,13 @@
+### AUTHORIZE
+GET https://ipvstub.signin.dev.account.gov.uk/authorize
+
+
+### TOKEN
+POST https://ipvstub.signin.dev.account.gov.uk/token
+Content-Type: application/json
+
+{
+}
+
+### REVERIFICATION
+GET https://ipvstub.signin.dev.account.gov.uk/reverification

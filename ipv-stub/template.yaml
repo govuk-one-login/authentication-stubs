@@ -90,6 +90,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /token:
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubTokenLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
           /reverification:
             get:
               responses:
@@ -177,10 +193,8 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-authorize"
       RetentionInDays: 30
 
-  PublicHostedZone:
-    Type: AWS::Route53::HostedZone
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+  IPVStubTokenLambda:
+    Type: AWS::Serverless::Function
     Properties:
       Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
 
@@ -193,12 +207,36 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
+      Handler: src/ipv-token.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubTokenLambdaLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !Sub ${Environment}
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /token
+            Method: post
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/ipv-token.ts
+        Minify: true
+        Sourcemap: true
+        Target: node20
 
-  Certificate:
-    Type: AWS::CertificateManager::Certificate
+  IPVStubTokenLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-      ValidationMethod: DNS
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-token"
+      RetentionInDays: 30
 
   IPVStubReverificationLambda:
     Type: AWS::Serverless::Function

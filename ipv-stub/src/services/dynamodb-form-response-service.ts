@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { Reverification } from "../interfaces/reverification-interface";
+import { logger } from "../helper/logger";
 
 const client =
   process.env.ENVIRONMENT === "local"
@@ -30,9 +31,38 @@ export const putReverificationWithAuthCode = async (
   });
 };
 
+export const getReverificationWithAuthCode = async (
+    authCode: string
+): Promise<string | undefined> => {
+  logger.info(`Looking up ${authCode}`);
+  const result = await dynamo.get({
+    TableName: tableName,
+    Key: {
+      ReverificationId: [authCodePrefix, authCode].join("-"),
+    },
+  });
+
+  return result.Item?.reverification;
+};
+
+export const putReverificationWithAccessToken = async (
+    accessToken: string,
+    reverification: Reverification
+) => {
+  return await dynamo.put({
+    TableName: tableName,
+    Item: {
+      ReverificationId: [accessTokenPrefix, accessToken].join("-"),
+      reverification,
+      ttl: oneHourFromNow(),
+    },
+  });
+};
+
 export const getReverificationWithAccessToken = async (
   accessToken: string
 ): Promise<string | undefined> => {
+  logger.info(`Looking up ${accessToken}`);
   const result = await dynamo.get({
     TableName: tableName,
     Key: {
