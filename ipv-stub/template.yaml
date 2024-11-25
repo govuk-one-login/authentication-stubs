@@ -157,11 +157,10 @@ Resources:
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
       Policies:
         - AWSLambdaBasicExecutionRole
-        - Statement:
-            - Effect: Allow
-              Action: secretsmanager:GetSecretValue
-              Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
-        - !Ref ReverificationTableWriteAccessPolicy
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReverificationTable
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
       Events:
         Get:
           Type: Api
@@ -196,17 +195,6 @@ Resources:
   IPVStubTokenLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-
-  GatewayDomain:
-    Type: AWS::ApiGateway::DomainName
-    Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-      SecurityPolicy: TLS_1_2
-      RegionalCertificateArn: !Ref Certificate
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
       Handler: src/ipv-token.handler
       LoggingConfig:
         LogGroup: !Ref IPVStubTokenLambdaLogGroup
@@ -216,6 +204,7 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
+            TableName: !Ref ReverificationTable
       Events:
         Post:
           Type: Api
@@ -249,6 +238,8 @@ Resources:
           ENVIRONMENT: !Sub ${Environment}
       Policies:
         - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReverificationTable
       Events:
         Get:
           Type: Api
@@ -313,6 +304,23 @@ Resources:
               - dynamodb:DescribeTable
               - dynamodb:Get*
             Resource: !GetAtt ReverificationTable.Arn
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      SecurityPolicy: TLS_1_2
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      ValidationMethod: DNS
+
 # todo ,
 # currently records set and ACM vadiladation is done Manaully in old dev account 
 # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 

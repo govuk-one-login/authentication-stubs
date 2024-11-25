@@ -34,6 +34,8 @@ async function get(
     return invalidAccessTokenResult();
   }
 
+  logger.info(`Acess token: ${accessToken}`);
+
   const reverification = await getReverificationWithAccessToken(accessToken);
   if (!reverification) {
     logger.info("No reverification result found for access token");

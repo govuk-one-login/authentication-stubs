@@ -57,6 +57,7 @@ export function invalidAccessTokenResult(): APIGatewayProxyResult {
 }
 
 export function methodNotAllowedError(method: string) {
+  logger.info(`${method} not allowed`)
   return new CodedError(405, `Method ${method} not allowed`);
 }
 
