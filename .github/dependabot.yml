@@ -17,6 +17,9 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+      npm-aws-dependencies:
+        patterns:
+          - "@aws-sdk/*"
     ignore:
       - dependency-name: "@types/node"
         versions: [ "> 20" ]
