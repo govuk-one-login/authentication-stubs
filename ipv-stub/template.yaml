@@ -101,9 +101,9 @@ Resources:
                         type: object
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
-                httpMethod: "GET"
+                httpMethod: "POST"
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
