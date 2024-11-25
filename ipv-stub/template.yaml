@@ -280,31 +280,6 @@ Resources:
         - Key: Name
           Value: Reverification
 
-  ReverificationTableWriteAccessPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AllowReverificationWriteAccess
-            Effect: Allow
-            Action:
-              - dynamodb:PutItem
-            Resource: !GetAtt ReverificationTable.Arn
-
-  ReverificationTableReadAccessPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AllowReverificationTableReadAccess
-            Effect: Allow
-            Action:
-              - dynamodb:DescribeTable
-              - dynamodb:Get*
-            Resource: !GetAtt ReverificationTable.Arn
-
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
