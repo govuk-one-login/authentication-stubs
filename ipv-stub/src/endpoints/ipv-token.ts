@@ -7,6 +7,8 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import {
   handleErrors,
   methodNotAllowedError,
+  obfuscate,
+  shouldObfuscate,
   successfulJsonResult,
 } from "../helper/result-helper";
 import { logger } from "../helper/logger";
@@ -16,11 +18,124 @@ import {
 } from "../services/dynamodb-form-response-service";
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
+import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
 
+const public_key = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE
+IKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==
+-----END PUBLIC KEY-----
+`.trim();
+
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: APIGatewayProxyResult };
+
+function ok<T>(value: T): Result<T> {
+  return { ok: true, value };
+}
+
+function error<T>(message: string): Result<T> {
+  return { ok: false, error: { statusCode: 400, body: message } };
+}
+
+type ValidatedParams = Record<
+  "code" | "client_id" | "client_assertion" | "client_assertion_type",
+  string
+>;
+
+function parseBody(body: string): Result<Partial<ValidatedParams>> {
+  const params = new URLSearchParams(body);
+  const requiredParameters: (keyof ValidatedParams)[] = [
+    "code",
+    "client_id",
+    "client_assertion",
+    "client_assertion_type",
+  ];
+  const missingParamaters: string[] = [];
+
+  const validParameters: Partial<ValidatedParams> = {};
+  for (const param of requiredParameters) {
+    const value = params.get(param);
+    if (!value || value === "undefined") {
+      missingParamaters.push(param);
+    } else {
+      validParameters[param] = value;
+    }
+  }
+
+  logger.info("Handling token request with parameters:");
+  for (const [key, value] of Object.entries(validParameters)) {
+    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    logger.info(`${key}::${loggedValue}`);
+  }
+
+  if (missingParamaters.length > 0) {
+    const missingParametersErrorMessgae = `Missing or empty parameters: ${missingParamaters.join(", ")}`;
+    logger.info(missingParametersErrorMessgae);
+    return error(missingParametersErrorMessgae);
+  }
+
+  return ok(validParameters);
+}
+
+type ValidatedClaims = Record<"iss" | "sub" | "aud" | "jti" | "exp", string>;
+
+async function parsePayload(
+  clientAssertion: string
+): Promise<Result<JwtPayload>> {
+  const claims: JwtPayload = await verifyJWT(clientAssertion);
+  const obfuscatedClientAssertion = {
+    ...claims,
+    sub: claims.sub ? `${claims.sub.slice(0, 4)}` : undefined,
+  };
+  logger.info(
+    `decrypted client assertion ${JSON.stringify(obfuscatedClientAssertion, null, 2)}`
+  );
+
+  const requiredClaims: (keyof ValidatedClaims)[] = [
+    "iss",
+    "sub",
+    "aud",
+    "jti",
+    "exp",
+  ];
+  const missingClaims: string[] = [];
+
+  const validClaims: Partial<ValidatedClaims> = {};
+  for (const claim of requiredClaims) {
+    const value = claims[claim];
+    if (!value || value === "undefined") {
+      missingClaims.push(claim);
+    } else {
+      validClaims[claim] = value as string;
+    }
+  }
+
+  logger.info("Handling token request with claims:");
+  for (const [key, value] of Object.entries(validClaims)) {
+    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    logger.info(`${key}::${loggedValue}`);
+  }
+
+  if (missingClaims.length > 0) {
+    const missingClaimsErrorMessage = `Missing or empty parameters: ${missingClaims.join(", ")}`;
+    logger.info(missingClaimsErrorMessage);
+    return error(missingClaimsErrorMessage);
+  }
+
+  return ok(validClaims as JwtPayload);
+}
+
+/**
+ * Entry point.
+ *
+ * @param event
+ */
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  logger.info("Reached the token endpoint!!!");
+  logger.info("Reached the token endpoint.");
   return await handleErrors(async () => {
     switch (event.httpMethod) {
       case "POST":
@@ -32,88 +147,58 @@ export const handler: Handler = async (
   });
 };
 
+/**
+ * Handle the event.
+ *
+ * @param event
+ */
 async function handle(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  logger.info(`handle event: ${event}`);
-
-  var params;
-  var client_assertion;
-  var code;
-  try {
-    params = new URLSearchParams(event.body || "");
-
-    code = params.get("code");
-    var result = checkDefinedOrError(code, "code");
-    if (!result.success) return result.errorResponse;
-
-    const client_id = params.get("client_id");
-    result = checkDefinedOrError(client_id, "client_id");
-    if (!result.success) return result.errorResponse;
-
-    const client_assertion_type = params.get("client_assertion_type");
-    result = checkDefinedOrError(
-      client_assertion_type,
-      "client_assertion_type"
-    );
-    if (!result.success) return result.errorResponse;
-
-    client_assertion = params.get("client_assertion");
-
-    if (!client_assertion) {
-      return {
-        statusCode: 400,
-        headers: {},
-        body: "Missing client_assertion",
-      };
-    }
-  } catch (e) {
-    logger.info(`Error ${e} checking event contents.`);
+  if (!event.body) {
+    return { statusCode: 400, body: "Missing request body." };
   }
 
-  if (params) {
-    logger.info(">>>PARAMS>>>");
-    params.forEach((value, key) => {
-      logger.info(`${key}: ${value}`);
-    });
-    logger.info("<<<PARAMS<<<");
-  } else {
-    logger.info("no params");
-  }
+  const parsedBody: Result<Partial<ValidatedParams>> = parseBody(event.body);
+  if (!parsedBody.ok) return parsedBody.error;
 
-  const decoded = await verifyJWT(client_assertion as string);
-  const claims = decoded as JwtPayload;
-
-  if (client_assertion) {
-    logger.info(">>>CLAIMS>>>");
-    Object.entries(claims).forEach(([key, value]) => {
-      logger.info(`${key}: ${value}`);
-    });
-    logger.info("<<<CLAIMS<<<");
-  } else {
-    logger.info("no claims");
-  }
+  const validatedParameters: Partial<ValidatedParams> = parsedBody.value;
 
   const reverificationResult = await getReverificationWithAuthCode(
-    code as string
+    validatedParameters["code"] as string
   );
 
-  logger.info(`reverification result: ${reverificationResult}`);
-
-  var accessToken;
-  if (reverificationResult) {
-    logger.info("Found reverification result record");
-    const reverification = {
-      sub: claims["sub"] as string,
-      success: true,
-    };
-    accessToken = base64url.encode(randomBytes(32));
-    await putReverificationWithAccessToken(accessToken, reverification);
-  } else {
+  if (!reverificationResult) {
     logger.info("Did not find reverification result record");
+    return { statusCode: 400, body: "Missing reverification record." };
   }
 
-  // If exists return an access token.
+  var accessToken = base64url.encode(randomBytes(32));
+
+  // Claims
+  const parsedClaims: Result<JwtPayload> = await parsePayload(
+    validatedParameters["client_assertion"] as string
+  );
+  if (!parsedClaims.ok) return parsedClaims.error;
+
+  const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
+
+  const reverification = {
+    sub: validatedClaims["sub"] as string,
+    success: true,
+  };
+
+  const result: PutCommandOutput = await putReverificationWithAccessToken(
+    accessToken,
+    reverification
+  );
+  if (!result || result.$metadata.httpStatusCode != 200) {
+    return { statusCode: 500, body: "Failed to write access token record." };
+  }
+
+  logger.info(
+    `Created access token ${obfuscate(accessToken)} for ${validatedClaims["sub"]}`
+  );
 
   return successfulJsonResult(200, {
     access_token: accessToken,
@@ -121,13 +206,6 @@ async function handle(
     expires_in: 3600,
   });
 }
-
-const public_key = `
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE
-IKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==
------END PUBLIC KEY-----
-`.trim();
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
   const decoded = jwt.verify(token, public_key, { algorithms: ["ES256"] });
@@ -138,21 +216,3 @@ const verifyJWT = async (token: string): Promise<JwtPayload> => {
     throw new Error("Invalid token payload");
   }
 };
-
-type ResultOrError<T> =
-  | { success: true; data: T }
-  | { success: false; errorResponse: { statusCode: number; body: string } };
-
-function checkDefinedOrError<T>(
-  variable: T | undefined,
-  name: string
-): ResultOrError<T> {
-  if (variable === undefined) {
-    return {
-      success: false,
-      errorResponse: { statusCode: 400, body: `${name} is missing.` },
-    };
-  } else {
-    return { success: true, data: variable };
-  }
-}
