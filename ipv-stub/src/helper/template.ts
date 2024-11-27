@@ -1,4 +1,4 @@
-import { govukStyles } from "./style";
+import { govukStyles } from "./style.ts";
 
 export const renderPage = (mainContent: string) => {
   return `<!DOCTYPE html>

@@ -4,6 +4,7 @@
   "main": "index.js",
   "name": "auth-ipv-stub",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "esbuild": "0.24.0",
     "jose": "5.9.6",
@@ -50,6 +51,7 @@
     "node": ">=20.0.0 <21"
   },
   "mocha": {
+    "spec": ["test/**/*.ts"],
     "diff": true,
     "extension": [
       "js",

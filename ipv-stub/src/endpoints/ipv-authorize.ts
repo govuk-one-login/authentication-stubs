@@ -3,19 +3,19 @@ import {
   APIGatewayProxyResult,
   Handler,
 } from "aws-lambda";
-import { logger } from "../helper/logger";
-import renderIPVAuthorize from "./render-ipv-authorize";
+import { logger } from "../helper/logger.ts";
+import renderIPVAuthorize from "./render-ipv-authorize.ts";
 import {
   CodedError,
   handleErrors,
   methodNotAllowedError,
   successfulHtmlResult,
   successfulJsonResult,
-} from "../helper/result-helper";
+} from "../helper/result-helper.ts";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
-import { parseRequest } from "../helper/jwt-validator";
-import { ROOT_URI } from "../data/ipv-dummy-constants";
-import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
+import { parseRequest } from "../helper/jwt-validator.ts";
+import { ROOT_URI } from "../data/ipv-dummy-constants.ts";
+import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service.ts";
 import { randomBytes } from "crypto";
 
 export const handler: Handler = async (
