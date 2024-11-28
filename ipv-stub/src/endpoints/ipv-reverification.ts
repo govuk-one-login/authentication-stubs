@@ -7,6 +7,7 @@ import {
   handleErrors,
   invalidAccessTokenResult,
   methodNotAllowedError,
+  obfuscate,
   successfulJsonResult,
 } from "../helper/result-helper";
 import { getReverificationWithAccessToken } from "../services/dynamodb-form-response-service";
@@ -33,6 +34,8 @@ async function get(
     logger.info("No access token found in event");
     return invalidAccessTokenResult();
   }
+
+  logger.info(`Acess token: ${obfuscate(accessToken)}`);
 
   const reverification = await getReverificationWithAccessToken(accessToken);
   if (!reverification) {

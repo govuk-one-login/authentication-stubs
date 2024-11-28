@@ -57,6 +57,7 @@ export function invalidAccessTokenResult(): APIGatewayProxyResult {
 }
 
 export function methodNotAllowedError(method: string) {
+  logger.info(`${method} not allowed`);
   return new CodedError(405, `Method ${method} not allowed`);
 }
 
@@ -85,5 +86,17 @@ export async function handleErrors(
         message: `Encountered an unhandled exception: ${errorStr}`,
       }),
     };
+  }
+}
+
+export function shouldObfuscate(paramName: string): boolean {
+  return ["code", "jti", "client_assertion"].includes(paramName);
+}
+
+export function obfuscate(value: string): string {
+  if (value.length <= 8) {
+    return value; // don't obfuscate if value is very short
+  } else {
+    return `${value.slice(0, 4)}...${value.slice(-4)}`;
   }
 }

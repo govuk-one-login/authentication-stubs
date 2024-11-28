@@ -90,6 +90,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /token:
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubTokenLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
           /reverification:
             get:
               responses:
@@ -101,9 +117,9 @@ Resources:
                         type: object
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
-                httpMethod: "GET"
+                httpMethod: "POST"
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubAuthorizeLambda.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
@@ -141,11 +157,10 @@ Resources:
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
       Policies:
         - AWSLambdaBasicExecutionRole
-        - Statement:
-            - Effect: Allow
-              Action: secretsmanager:GetSecretValue
-              Resource: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
-        - !Ref ReverificationTableWriteAccessPolicy
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReverificationTable
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
       Events:
         Get:
           Type: Api
@@ -177,28 +192,40 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-authorize"
       RetentionInDays: 30
 
-  PublicHostedZone:
-    Type: AWS::Route53::HostedZone
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+  IPVStubTokenLambda:
+    Type: AWS::Serverless::Function
     Properties:
-      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      Handler: src/ipv-token.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubTokenLambdaLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !Sub ${Environment}
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReverificationTable
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /token
+            Method: post
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/ipv-token.ts
+        Minify: true
+        Sourcemap: true
+        Target: node20
 
-  GatewayDomain:
-    Type: AWS::ApiGateway::DomainName
+  IPVStubTokenLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-      SecurityPolicy: TLS_1_2
-      RegionalCertificateArn: !Ref Certificate
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-
-  Certificate:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-      ValidationMethod: DNS
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-token"
+      RetentionInDays: 30
 
   IPVStubReverificationLambda:
     Type: AWS::Serverless::Function
@@ -211,6 +238,8 @@ Resources:
           ENVIRONMENT: !Sub ${Environment}
       Policies:
         - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReverificationTable
       Events:
         Get:
           Type: Api
@@ -251,30 +280,22 @@ Resources:
         - Key: Name
           Value: Reverification
 
-  ReverificationTableWriteAccessPolicy:
-    Type: AWS::IAM::ManagedPolicy
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
     Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AllowReverificationWriteAccess
-            Effect: Allow
-            Action:
-              - dynamodb:PutItem
-            Resource: !GetAtt ReverificationTable.Arn
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      SecurityPolicy: TLS_1_2
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
 
-  ReverificationTableReadAccessPolicy:
-    Type: AWS::IAM::ManagedPolicy
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
     Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AllowReverificationTableReadAccess
-            Effect: Allow
-            Action:
-              - dynamodb:DescribeTable
-              - dynamodb:Get*
-            Resource: !GetAtt ReverificationTable.Arn
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      ValidationMethod: DNS
+
 # todo ,
 # currently records set and ACM vadiladation is done Manaully in old dev account 
 # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 
