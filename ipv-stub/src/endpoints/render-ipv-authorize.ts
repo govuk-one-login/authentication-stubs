@@ -1,5 +1,5 @@
-import { renderPage } from "../helper/template";
-import { DecodedRequest } from "../helper/types";
+import { renderPage } from "../helper/template.ts";
+import { DecodedRequest } from "../helper/types.ts";
 
 export default function renderIPVAuthorize(
   decodedHeader: string,

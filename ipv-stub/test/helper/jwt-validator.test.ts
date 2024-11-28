@@ -1,8 +1,6 @@
-import chai from "chai";
+import { expect } from "chai";
 import { describe } from "mocha";
-import { parseRequest } from "../../src/helper/jwt-validator";
-
-const expect = chai.expect;
+import { parseRequest } from "../../src/helper/jwt-validator.ts";
 
 const storageAccessTokenPayload = {
   scope: "reverification",

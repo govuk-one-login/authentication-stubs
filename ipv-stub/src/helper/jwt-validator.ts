@@ -2,7 +2,7 @@ import {
   DecodedRequest,
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
-} from "./types";
+} from "./types.ts";
 
 export function parseRequest(jwtString: string): DecodedRequest | string {
   const jwtAsJson = JSON.parse(jwtString);

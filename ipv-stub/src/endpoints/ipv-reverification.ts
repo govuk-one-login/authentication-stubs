@@ -8,9 +8,9 @@ import {
   invalidAccessTokenResult,
   methodNotAllowedError,
   successfulJsonResult,
-} from "../helper/result-helper";
-import { getReverificationWithAccessToken } from "../services/dynamodb-form-response-service";
-import { logger } from "../helper/logger";
+} from "../helper/result-helper.ts";
+import { getReverificationWithAccessToken } from "../services/dynamodb-form-response-service.ts";
+import { logger } from "../helper/logger.ts";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent

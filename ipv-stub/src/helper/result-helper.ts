@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { logger } from "./logger";
+import { logger } from "./logger.ts";
 
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
