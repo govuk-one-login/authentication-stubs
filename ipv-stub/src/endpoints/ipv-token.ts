@@ -7,7 +7,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import {
   handleErrors,
   methodNotAllowedError,
-  obfuscate,
+  truncate,
   shouldObfuscate,
   successfulJsonResult,
 } from "../helper/result-helper";
@@ -66,7 +66,7 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
 
   logger.info("Handling token request with parameters:");
   for (const [key, value] of Object.entries(validParameters)) {
-    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    const loggedValue = shouldObfuscate(key) ? truncate(value) : value;
     logger.info(`${key}::${loggedValue}`);
   }
 
@@ -114,7 +114,7 @@ async function parsePayload(
 
   logger.info("Handling token request with claims:");
   for (const [key, value] of Object.entries(validClaims)) {
-    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    const loggedValue = shouldObfuscate(key) ? truncate(value) : value;
     logger.info(`${key}::${loggedValue}`);
   }
 
@@ -197,7 +197,7 @@ async function handle(
   }
 
   logger.info(
-    `Created access token ${obfuscate(accessToken)} for ${validatedClaims["sub"]}`
+    `Created access token ${truncate(accessToken)} for ${validatedClaims["sub"]}`
   );
 
   return successfulJsonResult(200, {

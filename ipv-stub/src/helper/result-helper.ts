@@ -93,7 +93,7 @@ export function shouldObfuscate(paramName: string): boolean {
   return ["code", "jti", "client_assertion"].includes(paramName);
 }
 
-export function obfuscate(value: string): string {
+export function truncate(value: string): string {
   if (value.length <= 8) {
     return value; // don't obfuscate if value is very short
   } else {
