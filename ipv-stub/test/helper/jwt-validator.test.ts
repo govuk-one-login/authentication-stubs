@@ -1,6 +1,6 @@
 import chai from "chai";
 import { describe } from "mocha";
-import { parseRequest } from "../../src/helper/jwt-validator";
+import { validateNestedJwt } from "../../src/helper/jwt-validator";
 
 const expect = chai.expect;
 
@@ -66,7 +66,7 @@ describe("isValidJwt", () => {
         },
       },
     };
-    expect(parseRequest(JSON.stringify(validSampleJwt))).to.be.deep.eq(
+    expect(validateNestedJwt(JSON.stringify(validSampleJwt))).to.be.deep.eq(
       expectedParsedJwt
     );
   });
@@ -136,7 +136,7 @@ describe("isValidJwt", () => {
 
   INVALID_CLAIMS_AND_DESCRIPTIONS.forEach((testCase) => {
     it(`returns false if ${testCase.invalidCaseDescription}`, () => {
-      expect(parseRequest(JSON.stringify(testCase.claims))).to.eq(
+      expect(validateNestedJwt(JSON.stringify(testCase.claims))).to.eq(
         testCase.expectedErrorMessage
       );
     });
@@ -183,7 +183,7 @@ describe("isValidJwt", () => {
       };
 
       expect(
-        parseRequest(JSON.stringify(jwtWithInvalidStorageAccessToken))
+        validateNestedJwt(JSON.stringify(jwtWithInvalidStorageAccessToken))
       ).to.eq(testCase.expectedError);
     });
   });

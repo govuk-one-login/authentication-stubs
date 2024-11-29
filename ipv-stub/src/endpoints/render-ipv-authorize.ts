@@ -14,7 +14,7 @@ export default function renderIPVAuthorize(
   Algorithm
   </dt>
   <dd class="govuk-summary-list__value" id="user-info-core-identity-claim-present">
-  ${JSON.parse(decodedHeader).alg}
+  ${decodedHeader}
   </dd>
   </dl>
 

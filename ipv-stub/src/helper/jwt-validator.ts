@@ -3,9 +3,25 @@ import {
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
 } from "./types";
+import * as jose from "jose";
+import { logger } from "./logger";
+import { CodedError } from "./result-helper";
+import process from "node:process";
 
-export function parseRequest(jwtString: string): DecodedRequest | string {
-  const jwtAsJson = JSON.parse(jwtString);
+export async function validateNestedJwt(
+  nestedJws: string
+): Promise<DecodedRequest | string> {
+  const authSignaturePublicKeyIpv = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
+  if (!authSignaturePublicKeyIpv) {
+    throw new CodedError(500, "Auth IPV signing public key not found");
+  }
+
+  const publicJwk = await jose.importSPKI(authSignaturePublicKeyIpv, "ES256");
+  const { payload } = await jose.compactVerify(nestedJws, publicJwk);
+
+  const decodedPayload = new TextDecoder().decode(payload);
+
+  const jwtAsJson = JSON.parse(decodedPayload);
 
   if (jwtAsJson.scope !== "reverification") {
     return "Scope in request payload must be verification";
@@ -22,7 +38,7 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
     return "Request payload is missing user info claim";
   }
 
-  const parsedUserInfoClaimOrErrorString = parseStorageAccessToken(
+  const parsedUserInfoClaimOrErrorString = await validateStorageAccessToken(
     jwtAsJson.claims.userinfo
   );
   if (typeof parsedUserInfoClaimOrErrorString === "string") {
@@ -43,34 +59,49 @@ export function parseRequest(jwtString: string): DecodedRequest | string {
   }
 }
 
-function parseStorageAccessToken(
+async function validateStorageAccessToken(
   userInfo: EncodedUserInfoClaim
-): DecodedStorageAccessToken | string {
+): Promise<DecodedStorageAccessToken | string> {
   const hasAccessTokenValues =
     userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"]?.values !=
     undefined;
-  if (hasAccessTokenValues) {
-    const parts =
-      userInfo[
-        "https://vocab.account.gov.uk/v1/storageAccessToken"
-      ].values[0].split(".");
 
-    if (parts.length !== 3) {
-      return "Storage access token is not a valid jwt (does not contain three parts)";
+  let payload;
+  let decodedPayloadAsJson;
+
+  if (hasAccessTokenValues) {
+    const storageTokenJws =
+      userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"].values[0];
+
+    const authSignaturePublicKey = process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS;
+    if (!authSignaturePublicKey) {
+      throw new CodedError(500, "Auth EVCS signing public key not found");
     }
 
-    //TODO: need to validate the signature, that to follow this PR
-    const [_decodedHeader, decodedPayload, _decodedSignature] = parts.map(
-      (part) => Buffer.from(part, "base64url").toString("utf8")
-    );
+    const publicJwk = await jose.importSPKI(authSignaturePublicKey, "ES256");
+    try {
+      ({ payload: payload } = await jose.compactVerify(
+        storageTokenJws,
+        publicJwk
+      ));
+      const textDecoder = new TextDecoder();
+      decodedPayloadAsJson = JSON.parse(textDecoder.decode(payload));
+    } catch (error) {
+      if (error instanceof jose.errors.JOSEError) {
+        logger.error(error.message);
+        throw new CodedError(400, error.code);
+      } else {
+        logger.error(error);
+        throw new CodedError(400, "Unknown error.");
+      }
+    }
 
     try {
-      const payloadAsJson = JSON.parse(decodedPayload);
-      if (payloadAsJson.scope !== "reverification") {
+      if (decodedPayloadAsJson.scope !== "reverification") {
         return "Storage access token scope is not reverification";
       }
 
-      return payloadAsJson as DecodedStorageAccessToken;
+      return decodedPayloadAsJson as DecodedStorageAccessToken;
     } catch (_e) {
       return "Storage access token payload is not valid json";
     }
