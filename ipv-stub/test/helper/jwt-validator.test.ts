@@ -1,10 +1,14 @@
 import chai from "chai";
 import { describe } from "mocha";
 import { validateNestedJwt } from "../../src/helper/jwt-validator";
+import * as jose from "jose";
+import { CompactSign } from "jose";
 
 const expect = chai.expect;
 
-const storageAccessTokenPayload = {
+const validSigningAlg = "ES256";
+
+const validStorageAccessTokenPayload = {
   scope: "reverification",
   aud: [
     "https://credential-store.test.account.gov.uk",
@@ -17,178 +21,263 @@ const storageAccessTokenPayload = {
   jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
 };
 
-const encodedStorageAccessTokenPayload = base64Encode(
-  storageAccessTokenPayload
-);
-const encodedStorageAccessHeader =
-  "eyJraWQiOiIwOWRkYjY1ZWIzY2U0MWEzYjczYTJhOTM0ZTM5NDg4NmQyYTIyYjU0ZmQwMzVmYWJlZWM3YWMxYzllYzliNzBiIiwiYWxnIjoiRVMyNTYifQ";
-const encodedSignature =
-  "rpZ2IqMwlFLbZ8a7En-EuQ480zcorvNd-GZcwjlxlK3Twq9J1GNiuj9teSLINP_zmeirx7Y8p3DUYWk_hyRhww";
+const authPrivateSigningKeyEVCS = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgksszURcCxE4v8xSA
+O9uwvvKDnntEb+2OBxQnsPs7vfKhRANCAAQnVd6isHfIQ7MlVbiy0wjl0gERdnca
+j0qCr6EzRoVnxYW0/4WJVr0Pz5kd2wJkSVPsX/vKDEanPgh7XmH+rehn
+-----END PRIVATE KEY-----
+`;
 
-const validClaims = {
-  userinfo: {
-    "https://vocab.account.gov.uk/v1/storageAccessToken": {
-      values: [
-        `${encodedStorageAccessHeader}.${encodedStorageAccessTokenPayload}.${encodedSignature}`,
-      ],
+const authPrivateSigningKeyIPV = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgSaOnCpAfj31OwM9+
+IPuc+xPQZ6iCJHP+c3n4gOof+kihRANCAASZgtxRT+cjvTXQvGCl6Kst6k5m95C8
+E66Lggy4GZsCn3tNfuUpbdbSeBRdiNs2J1wif/VGcj+6o/RoTa+IzP3C
+-----END PRIVATE KEY-----
+`;
+
+async function createJWS(
+  sub: string | undefined,
+  scope: string | undefined,
+  state: string | undefined,
+  claims:
+    | {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [string | null];
+          };
+        };
+      }
+    | null
+    | unknown
+) {
+  return createSignedJwt(
+    validSigningAlg,
+    {
+      sub: sub,
+      scope: scope,
+      claims: claims,
+      state: state,
     },
-  },
-};
+    authPrivateSigningKeyIPV
+  );
+}
 
-const validSampleJwt = {
-  sub: "commonSubjectIdentifier",
-  iss: "https://signin.account.gov.uk",
-  response_type: "code",
-  client_id: "authReverification",
-  govuk_signin_journey_id: "journey-id",
-  aud: "https://identity.account.gov.uk",
-  nbf: 1196676930,
-  scope: "reverification",
-  claims: validClaims,
-  state: "test-state",
-  redirect_uri: "https://signin.account.gov.uk/reverification-callback",
-  exp: 1196677110,
-  iat: 1196676930,
-  jti: "uuid",
-};
+describe("isValidJwt", async () => {
+  beforeEach(() => {
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV =
+      "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmYLcUU/nI7010LxgpeirLepOZveQvBOui4IMuBmbAp97TX7lKW3W0ngUXYjbNidcIn/1RnI/uqP0aE2viMz9wg==-----END PUBLIC KEY-----";
+    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS =
+      "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJ1XeorB3yEOzJVW4stMI5dIBEXZ3Go9Kgq+hM0aFZ8WFtP+FiVa9D8+ZHdsCZElT7F/7ygxGpz4Ie15h/q3oZw==-----END PUBLIC KEY-----";
+  });
 
-describe("isValidJwt", () => {
-  it("returns true for a valid jwt", () => {
+  it("returns true for a valid jwt", async () => {
+    const sub = `urn:fdc:gov.uk:2022:fake_common_subject_identifier_${Math.floor(Math.random() * 100000)}`;
+
+    const validSampleJws = await createSignedJwt(
+      validSigningAlg,
+      {
+        sub: sub,
+        scope: "reverification",
+        claims: {
+          userinfo: {
+            "https://vocab.account.gov.uk/v1/storageAccessToken": {
+              values: [
+                await createSignedJwt(
+                  validSigningAlg,
+                  validStorageAccessTokenPayload,
+                  authPrivateSigningKeyEVCS
+                ),
+              ],
+            },
+          },
+        },
+        state: "test-state",
+      },
+      authPrivateSigningKeyIPV
+    );
+
     const expectedParsedJwt = {
-      sub: "commonSubjectIdentifier",
-      scope: "reverification",
-      state: "test-state",
       claims: {
         userinfo: {
           "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [storageAccessTokenPayload],
+            values: [
+              {
+                aud: [
+                  "https://credential-store.test.account.gov.uk",
+                  "https://identity.test.account.gov.uk",
+                ],
+                exp: 1709051163,
+                iat: 1709047563,
+                iss: "https://oidc.test.account.gov.uk/",
+                jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
+                scope: "reverification",
+                sub: "someSub",
+              },
+            ],
           },
         },
       },
+      scope: "reverification",
+      state: "test-state",
+      sub: sub,
     };
-    expect(validateNestedJwt(JSON.stringify(validSampleJwt))).to.be.deep.eq(
+
+    expect(await validateNestedJwt(validSampleJws)).to.be.deep.eq(
       expectedParsedJwt
     );
   });
 
-  const INVALID_CLAIMS_AND_DESCRIPTIONS = [
-    {
-      claims: {
-        sub: "commonSubjectIdentifier",
-        claims: validClaims,
-        state: "test-state",
-      },
-      invalidCaseDescription: "the jwt does not contain a scope field",
-      expectedErrorMessage: "Scope in request payload must be verification",
-    },
-    {
-      claims: {
-        sub: "commonSubjectIdentifier",
-        scope: "reverification",
-        state: "test-state",
-      },
-      invalidCaseDescription: "the jwt does not contain a claims field",
-      expectedErrorMessage: "Request payload is missing user info claim",
-    },
-    {
-      claims: {
-        sub: "commonSubjectIdentifier",
-        scope: "reverification",
-        state: "test-state",
-        claims: {},
-      },
-      invalidCaseDescription: "the jwt does not contain a userinfo claim",
-      expectedErrorMessage: "Request payload is missing user info claim",
-    },
-    {
-      claims: {
-        sub: "commonSubjectIdentifier",
-        scope: "reverification",
-        state: "test-state",
-        claims: {
-          userinfo: {},
-        },
-      },
-      invalidCaseDescription:
-        "the jwt does not contain a storage access token field",
-      expectedErrorMessage:
-        "Storage access token does not contain values field",
-    },
-    {
-      claims: {
-        sub: "commonSubjectIdentifier",
-        scope: "reverification",
-        claims: validClaims,
-      },
-      invalidCaseDescription: "the payload does not contain a state field",
-      expectedErrorMessage: "Payload must contain state",
-    },
-    {
-      claims: {
-        scope: "reverification",
-        state: "test-state",
-        claims: validClaims,
-      },
-      invalidCaseDescription: "the payload does not contain a sub field",
-      expectedErrorMessage: "Payload must contain sub",
-    },
-  ];
-
-  INVALID_CLAIMS_AND_DESCRIPTIONS.forEach((testCase) => {
-    it(`returns false if ${testCase.invalidCaseDescription}`, () => {
-      expect(validateNestedJwt(JSON.stringify(testCase.claims))).to.eq(
-        testCase.expectedErrorMessage
-      );
-    });
-  });
-
-  it("returns false if the jwt contains an invalid storage access token field", () => {
-    const invalidStorageAccessTokenValues = [
+  it("returns false if the jwt does not contain a scope field", async () => {
+    const jws = await createJWS(
+      "commonSubjectIdentifier",
+      undefined,
+      "test-state",
       {
-        value: "no-dot-separation",
-        expectedError:
-          "Storage access token is not a valid jwt (does not contain three parts)",
-      },
-      {
-        value: "not.enough-parts",
-        expectedError:
-          "Storage access token is not a valid jwt (does not contain three parts)",
-      },
-      {
-        value: "too.many.parts.to.be.valid",
-        expectedError:
-          "Storage access token is not a valid jwt (does not contain three parts)",
-      },
-      {
-        value: "not.base64.encoded",
-        expectedError: "Storage access token payload is not valid json",
-      },
-      {
-        value: `${encodedStorageAccessHeader}.${base64Encode({ foo: "bar" })}.${encodedSignature}`,
-        expectedError: "Storage access token scope is not reverification",
-      },
-    ];
-    invalidStorageAccessTokenValues.forEach((testCase) => {
-      const jwtWithInvalidStorageAccessToken = {
-        sub: "commonSubjectIdentifier",
-        scope: "reverification",
-        state: "test-state",
-        claims: {
-          userinfo: {
-            "https://vocab.account.gov.uk/v1/storageAccessToken": {
-              values: [testCase.value],
-            },
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [
+              await createSignedJwt(
+                validSigningAlg,
+                validStorageAccessTokenPayload,
+                authPrivateSigningKeyEVCS
+              ),
+            ],
           },
         },
-      };
+      }
+    );
+    const expectedErrorMessage =
+      "Scope in request payload must be verification";
+    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+  });
 
-      expect(
-        validateNestedJwt(JSON.stringify(jwtWithInvalidStorageAccessToken))
-      ).to.eq(testCase.expectedError);
+  it("the jwt does not contain a claims field", async () => {
+    const jws = await createJWS(
+      "commonSubjectIdentifier",
+      "reverification",
+      "test-state",
+      undefined
+    );
+    const expectedErrorMessage = "Request payload is missing user info claim";
+    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+  });
+
+  it("the jwt does not contain a userinfo claim", async () => {
+    const jws = await createJWS(
+      "commonSubjectIdentifier",
+      "reverification",
+      "test-state",
+      {}
+    );
+    const expectedErrorMessage = "Request payload is missing user info claim";
+    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+  });
+
+  it("the storage access token is not a string or Uint8Array", async () => {
+    const jws = await createJWS(
+      "commonSubjectIdentifier",
+      "reverification",
+      "test-state",
+      {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [undefined],
+          },
+        },
+      }
+    );
+    try {
+      await validateNestedJwt(jws);
+    } catch (e) {
+      if (e instanceof jose.errors.JOSEError) {
+        expect(e.message).to.eq(jose.errors.JWSInvalid.code);
+      }
+    }
+  });
+
+  it("the payload does not contain a state field", async () => {
+    const jws = await createJWS(
+      "commonSubjectIdentifier",
+      "reverification",
+      undefined,
+      {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [
+              await createSignedJwt(
+                validSigningAlg,
+                validStorageAccessTokenPayload,
+                authPrivateSigningKeyEVCS
+              ),
+            ],
+          },
+        },
+      }
+    );
+    const expectedErrorMessage = "Payload must contain state";
+    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+  });
+
+  it("the payload does not contain a sub field", async () => {
+    const jws = await createJWS(undefined, "reverification", "test-state", {
+      userinfo: {
+        "https://vocab.account.gov.uk/v1/storageAccessToken": {
+          values: [
+            await createSignedJwt(
+              validSigningAlg,
+              validStorageAccessTokenPayload,
+              authPrivateSigningKeyEVCS
+            ),
+          ],
+        },
+      },
     });
+    const expectedErrorMessage = "Payload must contain sub";
+    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+  });
+
+  it("should return false if access token payload scope is not reverification", async () => {
+    const invalidStorageAccessTokenPayload = {
+      scope: "not-reverification",
+      aud: [
+        "https://credential-store.test.account.gov.uk",
+        "https://identity.test.account.gov.uk",
+      ],
+      sub: "someSub",
+      iss: "https://oidc.test.account.gov.uk/",
+      exp: 1709051163,
+      iat: 1709047563,
+      jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
+    };
+
+    const expectedError = "Storage access token scope is not reverification";
+
+    const jws = await createJWS("sub", "reverification", "test-state", {
+      userinfo: {
+        "https://vocab.account.gov.uk/v1/storageAccessToken": {
+          values: [
+            await createSignedJwt(
+              validSigningAlg,
+              invalidStorageAccessTokenPayload,
+              authPrivateSigningKeyEVCS
+            ),
+          ],
+        },
+      },
+    });
+
+    expect(await validateNestedJwt(jws)).to.eq(expectedError);
   });
 });
 
-function base64Encode(json: object): string {
-  return Buffer.from(JSON.stringify(json), "utf-8").toString("base64");
+async function createSignedJwt(
+  header: string,
+  payload: unknown,
+  signingKey: string
+) {
+  const textEncoder = new TextEncoder();
+  const privateKey = await jose.importPKCS8(signingKey, header);
+  return new CompactSign(textEncoder.encode(JSON.stringify(payload)))
+    .setProtectedHeader({ alg: header })
+    .sign(privateKey);
 }
