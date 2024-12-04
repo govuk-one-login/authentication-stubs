@@ -25,8 +25,8 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
-      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJ1XeorB3yEOzJVW4stMI5dIBEXZ3Go9Kgq+hM0aFZ8WFtP+FiVa9D8+ZHdsCZElT7F/7ygxGpz4Ie15h/q3oZw==-----END PUBLIC KEY-----"
-      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmYLcUU/nI7010LxgpeirLepOZveQvBOui4IMuBmbAp97TX7lKW3W0ngUXYjbNidcIn/1RnI/uqP0aE2viMz9wg==-----END PUBLIC KEY-----"
+      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExAt6xsHUZdhfX2QcNs9es2dF3UTli3fjvMj4NgIgS1VCrxShBZIpuWEH3HLq7EB3a0N+ARh/xjWJoaYBYcDpDw==-----END PUBLIC KEY-----"
+      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVEIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==-----END PUBLIC KEY-----"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
