@@ -4,9 +4,9 @@ import {
   EncodedUserInfoClaim,
 } from "./types";
 import * as jose from "jose";
-import { logger } from "./logger";
 import { CodedError } from "./result-helper";
 import process from "node:process";
+import { processJoseError } from "./error-helper";
 
 export async function validateNestedJwt(
   nestedJws: string
@@ -17,7 +17,13 @@ export async function validateNestedJwt(
   }
 
   const publicJwk = await jose.importSPKI(authSignaturePublicKeyIpv, "ES256");
-  const { payload } = await jose.compactVerify(nestedJws, publicJwk);
+
+  let payload;
+  try {
+    ({ payload } = await jose.compactVerify(nestedJws, publicJwk));
+  } catch (error) {
+    processJoseError(error);
+  }
 
   const decodedPayload = new TextDecoder().decode(payload);
 
@@ -87,13 +93,7 @@ async function validateStorageAccessToken(
       const textDecoder = new TextDecoder();
       decodedPayloadAsJson = JSON.parse(textDecoder.decode(payload));
     } catch (error) {
-      if (error instanceof jose.errors.JOSEError) {
-        logger.error(error.message);
-        throw new CodedError(400, error.code);
-      } else {
-        logger.error(error);
-        throw new CodedError(400, "Unknown error.");
-      }
+      processJoseError(error);
     }
 
     try {
