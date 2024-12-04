@@ -29,3 +29,10 @@ export const authPublicSigningKeyIPV = `-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmYLcUU/nI7010LxgpeirLepOZveQ
 vBOui4IMuBmbAp97TX7lKW3W0ngUXYjbNidcIn/1RnI/uqP0aE2viMz9wg==
 -----END PUBLIC KEY-----`;
+
+export const ipvPublicKey = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE
+IKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==
+-----END PUBLIC KEY-----
+`.trim();

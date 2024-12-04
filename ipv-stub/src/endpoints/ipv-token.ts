@@ -19,13 +19,7 @@ import {
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-
-const public_key = `
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE
-IKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==
------END PUBLIC KEY-----
-`.trim();
+import {ipvPublicKey} from "../data/keys";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -52,13 +46,13 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
     "client_assertion",
     "client_assertion_type",
   ];
-  const missingParamaters: string[] = [];
+  const missingParameters: string[] = [];
 
   const validParameters: Partial<ValidatedParams> = {};
   for (const param of requiredParameters) {
     const value = params.get(param);
     if (!value || value === "undefined") {
-      missingParamaters.push(param);
+      missingParameters.push(param);
     } else {
       validParameters[param] = value;
     }
@@ -70,8 +64,8 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
     logger.info(`${key}::${loggedValue}`);
   }
 
-  if (missingParamaters.length > 0) {
-    const missingParametersErrorMessgae = `Missing or empty parameters: ${missingParamaters.join(", ")}`;
+  if (missingParameters.length > 0) {
+    const missingParametersErrorMessgae = `Missing or empty parameters: ${missingParameters.join(", ")}`;
     logger.info(missingParametersErrorMessgae);
     return error(missingParametersErrorMessgae);
   }
@@ -173,7 +167,7 @@ async function handle(
     return { statusCode: 400, body: "Missing reverification record." };
   }
 
-  var accessToken = base64url.encode(randomBytes(32));
+  const accessToken = base64url.encode(randomBytes(32));
 
   // Claims
   const parsedClaims: Result<JwtPayload> = await parsePayload(
@@ -208,7 +202,7 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, public_key, { algorithms: ["ES256"] });
+  const decoded = jwt.verify(token, ipvPublicKey, { algorithms: ["ES256"] });
 
   if (typeof decoded === "object" && decoded !== null) {
     return decoded as JwtPayload;
