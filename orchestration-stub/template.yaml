@@ -203,7 +203,7 @@ Mappings:
       lambdaMemorySize: "128"
 
     authdev2:
-      cookieDomain: .dev.account.gov.uk
+      cookieDomain: .sandpit.account.gov.uk
       stubDomain: orchstub-authdev2.signin.dev.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
