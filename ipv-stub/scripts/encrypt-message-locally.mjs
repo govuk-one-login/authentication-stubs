@@ -1,18 +1,10 @@
 import * as jose from "jose";
 import { CompactEncrypt, CompactSign, importSPKI } from "jose";
-
+import keys from '../src/data/keys.json' assert {type: 'json'}
 
 // This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
-const ipvPublicKeyPem = `-----BEGIN PUBLIC KEY-----
-      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApflLYqZm5IawLAHYtWoU
-  vKdO7cFBmDIOASlGgGCEG0PVBC4FJH2pM3FUw72n7YTS+H73Y8ZfTNIgu9K7zxEa
-  mCwimUAKU8Lsjq6Pqa0pZr2rE4l2MfO2j91uCcdlTzdM0kOkwcbzwqEdbDU+FJ4x
-  FT5aaOWyuN/BKFsc5kNz2t4+OaeRu/ev3h7WCqh2MMW5PWDbR2lBnKZR8HvuXZc5
-  ay0dUx098UjkLEBHIyT3FfzhXFMF2ZdOSysDMa64KwqeAWs6tjwM9+Bp3DYLkTsx
-  BML/eqgIwdZI5QBCTxD8YC2oxC1obMspiAoEz05wt8cYscmT4rZAdBGMspuxNqo4
-  6wIDAQAB
-  -----END PUBLIC KEY-----`;
+const ipvPublicKeyPem = keys.ipv_public_key;
 
 // This is the private key equivalent of the local public key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
