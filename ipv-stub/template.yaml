@@ -25,6 +25,8 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
+      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExAt6xsHUZdhfX2QcNs9es2dF3UTli3fjvMj4NgIgS1VCrxShBZIpuWEH3HLq7EB3a0N+ARh/xjWJoaYBYcDpDw==-----END PUBLIC KEY-----"
+      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVEIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==-----END PUBLIC KEY-----"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -155,6 +157,8 @@ Resources:
           ENVIRONMENT: !Sub ${Environment}
           IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
+          AUTH_PUBLIC_SIGNING_KEY_EVCS: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyEvcs ]
+          AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyIpv ]
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:

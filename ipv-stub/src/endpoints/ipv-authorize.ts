@@ -13,10 +13,11 @@ import {
   successfulJsonResult,
 } from "../helper/result-helper";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
-import { parseRequest } from "../helper/jwt-validator";
+import { validateNestedJwt } from "../helper/jwt-validator";
 import { ROOT_URI } from "../data/ipv-dummy-constants";
 import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
+import { processJoseError } from "../helper/error-helper";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -52,20 +53,23 @@ async function get(
   }
   const privateKey = await importPKCS8(ipvPrivateKeyPem, "RSA-OAEP-256");
 
-  const { plaintext } = await compactDecrypt(encryptedJwt, privateKey);
-  const encodedJwt = plaintext.toString();
-
-  const parts = encodedJwt.split(".");
-
-  if (parts.length !== 3) {
-    throw new CodedError(400, "Decrypted JWT is in invalid format");
+  let plaintext, protectedHeader;
+  try {
+    ({ plaintext, protectedHeader } = await compactDecrypt(
+      encryptedJwt,
+      privateKey
+    ));
+  } catch (error) {
+    processJoseError(error);
   }
 
-  const [decodedHeader, decodedPayload, _decodedSignature] = parts.map((part) =>
-    Buffer.from(part, "base64url").toString("utf8")
-  );
+  if (plaintext === undefined || protectedHeader === undefined) {
+    throw new CodedError(500, "compactDecrypt returned undefined values");
+  }
 
-  const parsedRequestOrError = parseRequest(decodedPayload);
+  const encodedJwt = plaintext.toString();
+
+  const parsedRequestOrError = await validateNestedJwt(encodedJwt);
 
   if (typeof parsedRequestOrError === "string") {
     throw new CodedError(400, parsedRequestOrError);
@@ -73,7 +77,7 @@ async function get(
 
   return successfulHtmlResult(
     200,
-    renderIPVAuthorize(decodedHeader, parsedRequestOrError)
+    renderIPVAuthorize(protectedHeader.alg, parsedRequestOrError)
   );
 }
 

@@ -1,8 +1,10 @@
-import { CompactEncrypt, importSPKI } from "jose";
+import * as jose from "jose";
+import { CompactEncrypt, CompactSign, importSPKI } from "jose";
 
-//This is the public key equivalent of the local private key in parameters.
+
+// This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
-const publicKeyPem = `-----BEGIN PUBLIC KEY-----
+const ipvPublicKeyPem = `-----BEGIN PUBLIC KEY-----
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApflLYqZm5IawLAHYtWoU
   vKdO7cFBmDIOASlGgGCEG0PVBC4FJH2pM3FUw72n7YTS+H73Y8ZfTNIgu9K7zxEa
   mCwimUAKU8Lsjq6Pqa0pZr2rE4l2MfO2j91uCcdlTzdM0kOkwcbzwqEdbDU+FJ4x
@@ -12,22 +14,33 @@ const publicKeyPem = `-----BEGIN PUBLIC KEY-----
   6wIDAQAB
   -----END PUBLIC KEY-----`;
 
-const base64Encode = (s) => {
-  return Buffer.from(s, "utf-8").toString("base64");
+// This is the private key equivalent of the local public key in parameters.
+// Both have been committed deliberately to allow for local running and testing.
+const authPrivateSigningKeyEVCS = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgksszURcCxE4v8xSA
+O9uwvvKDnntEb+2OBxQnsPs7vfKhRANCAAQnVd6isHfIQ7MlVbiy0wjl0gERdnca
+j0qCr6EzRoVnxYW0/4WJVr0Pz5kd2wJkSVPsX/vKDEanPgh7XmH+rehn
+-----END PRIVATE KEY-----
+`;
+
+// This is the private key equivalent of the local public key in parameters.
+// Both have been committed deliberately to allow for local running and testing.
+const authPrivateSigningKeyIPV = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgSaOnCpAfj31OwM9+
+IPuc+xPQZ6iCJHP+c3n4gOof+kihRANCAASZgtxRT+cjvTXQvGCl6Kst6k5m95C8
+E66Lggy4GZsCn3tNfuUpbdbSeBRdiNs2J1wif/VGcj+6o/RoTa+IzP3C
+-----END PRIVATE KEY-----
+`;
+
+const textEncoder = new TextEncoder();
+
+const createSignedJwt = async (header, payload, signingKey) => {
+  const privateKey = await jose.importPKCS8(signingKey, "ES256");
+  return await new CompactSign(await textEncoder.encode(JSON.stringify(payload))).setProtectedHeader(header).sign(privateKey)
 };
 
-const createJwt = (header, payload, signature) => {
-  return [header, payload, signature]
-    .map((e) => base64Encode(JSON.stringify(e)))
-    .join(".");
-};
-
-const createUserInfoClaims = () => {
-  const storageAccessTokenSignature = {
-    sig: "a-storage-access-token-signature",
-  };
-
-  const storageAccessTokenAlgorithm = { alg: "some-storage-access-alg" };
+const createUserInfoClaims = async () => {
+  const storageAccessTokenAlgorithm = { alg: "ES256" };
   const storageAccessTokenPayload = {
     scope: "reverification",
     aud: [
@@ -44,40 +57,33 @@ const createUserInfoClaims = () => {
     userinfo: {
       "https://vocab.account.gov.uk/v1/storageAccessToken": {
         values: [
-          createJwt(
+          await createSignedJwt(
             storageAccessTokenAlgorithm,
             storageAccessTokenPayload,
-            storageAccessTokenSignature
-          ),
+            authPrivateSigningKeyEVCS
+          )
         ],
       },
     },
   };
 };
 
-const createRequestJwt = () => {
-  const algorithm = { alg: "some-alg" };
+const createRequestJwt = async () => {
   const payload = {
     sub: `urn:fdc:gov.uk:2022:fake_common_subject_identifier_${Math.floor(Math.random() * 100000)}`,
     scope: "reverification",
-    claims: createUserInfoClaims(),
+    claims: await createUserInfoClaims(),
     state: "test-state",
   };
-  const signature = { sig: "a-signature" };
+  const publicKey = await importSPKI(ipvPublicKeyPem, "RSA-OAEP-256");
+  const nestedJWS = await createSignedJwt({ alg: "ES256" }, payload, authPrivateSigningKeyIPV)
 
-  return createJwt(algorithm, payload, signature);
+  return new CompactEncrypt(textEncoder.encode(nestedJWS))
+    .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+    .encrypt(publicKey);
 };
 
 (async () => {
-  const dataToEncrypt = Uint8Array.from(createRequestJwt(), (c) =>
-    c.charCodeAt(0)
-  );
-
-  const publicKey = await importSPKI(publicKeyPem, "RSA-OAEP-256");
-
-  const encryptedRequest = await new CompactEncrypt(dataToEncrypt)
-    .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
-    .encrypt(publicKey);
-
-  console.log(`Encrypted request:\n------\n${encryptedRequest}`);
+  const encryptedRequest = await createRequestJwt();
+  await console.log(`Encrypted request:\n------\n${encryptedRequest}`);
 })();
