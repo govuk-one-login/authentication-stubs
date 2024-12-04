@@ -223,7 +223,7 @@ Mappings:
       vpcId: "vpc-07436f099bccc77df"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
       authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
-      authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
+      authenticationFrontendUrl: "https://signin.authdev2.sandpit.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
