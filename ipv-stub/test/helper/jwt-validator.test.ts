@@ -3,6 +3,12 @@ import { describe } from "mocha";
 import { validateNestedJwt } from "../../src/helper/jwt-validator";
 import * as jose from "jose";
 import { CompactSign } from "jose";
+import {
+  authPrivateSigningKeyEVCS,
+  authPrivateSigningKeyIPV,
+  authPublicSigningKeyEVCS,
+  authPublicSigningKeyIPV,
+} from "../../src/data/keys";
 
 const expect = chai.expect;
 
@@ -20,20 +26,6 @@ const validStorageAccessTokenPayload = {
   iat: 1709047563,
   jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
 };
-
-const authPrivateSigningKeyEVCS = `-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgksszURcCxE4v8xSA
-O9uwvvKDnntEb+2OBxQnsPs7vfKhRANCAAQnVd6isHfIQ7MlVbiy0wjl0gERdnca
-j0qCr6EzRoVnxYW0/4WJVr0Pz5kd2wJkSVPsX/vKDEanPgh7XmH+rehn
------END PRIVATE KEY-----
-`;
-
-const authPrivateSigningKeyIPV = `-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgSaOnCpAfj31OwM9+
-IPuc+xPQZ6iCJHP+c3n4gOof+kihRANCAASZgtxRT+cjvTXQvGCl6Kst6k5m95C8
-E66Lggy4GZsCn3tNfuUpbdbSeBRdiNs2J1wif/VGcj+6o/RoTa+IzP3C
------END PRIVATE KEY-----
-`;
 
 async function createJWS(
   sub: string | undefined,
@@ -64,10 +56,8 @@ async function createJWS(
 
 describe("isValidJwt", async () => {
   beforeEach(() => {
-    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV =
-      "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmYLcUU/nI7010LxgpeirLepOZveQvBOui4IMuBmbAp97TX7lKW3W0ngUXYjbNidcIn/1RnI/uqP0aE2viMz9wg==-----END PUBLIC KEY-----";
-    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS =
-      "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJ1XeorB3yEOzJVW4stMI5dIBEXZ3Go9Kgq+hM0aFZ8WFtP+FiVa9D8+ZHdsCZElT7F/7ygxGpz4Ie15h/q3oZw==-----END PUBLIC KEY-----";
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = authPublicSigningKeyIPV;
+    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = authPublicSigningKeyEVCS;
   });
 
   it("returns true for a valid jwt", async () => {
