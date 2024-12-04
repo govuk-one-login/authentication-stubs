@@ -19,7 +19,7 @@ import {
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-import {ipvPublicKey} from "../data/keys";
+import keys from "../data/keys.json";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -65,9 +65,9 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
   }
 
   if (missingParameters.length > 0) {
-    const missingParametersErrorMessgae = `Missing or empty parameters: ${missingParameters.join(", ")}`;
-    logger.info(missingParametersErrorMessgae);
-    return error(missingParametersErrorMessgae);
+    const missingParametersErrorMessage = `Missing or empty parameters: ${missingParameters.join(", ")}`;
+    logger.info(missingParametersErrorMessage);
+    return error(missingParametersErrorMessage);
   }
 
   return ok(validParameters);
@@ -131,12 +131,11 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   logger.info("Reached the token endpoint.");
   return await handleErrors(async () => {
-    switch (event.httpMethod) {
-      case "POST":
-        logger.info("POST event");
-        return await handle(event);
-      default:
-        throw methodNotAllowedError(event.httpMethod);
+    if (event.httpMethod === "POST") {
+      logger.info("POST event");
+      return await handle(event);
+    } else {
+      throw methodNotAllowedError(event.httpMethod);
     }
   });
 };
@@ -202,10 +201,12 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, ipvPublicKey, { algorithms: ["ES256"] });
+  const decoded = jwt.verify(token, keys.ipv_public_key, {
+    algorithms: ["ES256"],
+  });
 
   if (typeof decoded === "object" && decoded !== null) {
-    return decoded as JwtPayload;
+    return decoded;
   } else {
     throw new Error("Invalid token payload");
   }

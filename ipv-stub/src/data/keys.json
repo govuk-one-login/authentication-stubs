@@ -1,0 +1,7 @@
+{
+  "ipv_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE\nIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==\n-----END PUBLIC KEY-----",
+  "authPrivateSigningKeyEVCS": "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgksszURcCxE4v8xSA\nO9uwvvKDnntEb+2OBxQnsPs7vfKhRANCAAQnVd6isHfIQ7MlVbiy0wjl0gERdnca\nj0qCr6EzRoVnxYW0/4WJVr0Pz5kd2wJkSVPsX/vKDEanPgh7XmH+rehn\n-----END PRIVATE KEY-----",
+  "authPrivateSigningKeyIPV": "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgSaOnCpAfj31OwM9+\nIPuc+xPQZ6iCJHP+c3n4gOof+kihRANCAASZgtxRT+cjvTXQvGCl6Kst6k5m95C8\nE66Lggy4GZsCn3tNfuUpbdbSeBRdiNs2J1wif/VGcj+6o/RoTa+IzP3C\n-----END PRIVATE KEY-----",
+  "authPublicSigningKeyEVCS": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJ1XeorB3yEOzJVW4stMI5dIBEXZ3\nGo9Kgq+hM0aFZ8WFtP+FiVa9D8+ZHdsCZElT7F/7ygxGpz4Ie15h/q3oZw==\n-----END PUBLIC KEY-----",
+  "authPublicSigningKeyIPV": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmYLcUU/nI7010LxgpeirLepOZveQ\nvBOui4IMuBmbAp97TX7lKW3W0ngUXYjbNidcIn/1RnI/uqP0aE2viMz9wg==\n-----END PUBLIC KEY-----"
+}
