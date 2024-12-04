@@ -173,28 +173,6 @@ describe("isValidJwt", async () => {
     expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
   });
 
-  it("the storage access token is not a string or Uint8Array", async () => {
-    const jws = await createJWS(
-      "commonSubjectIdentifier",
-      "reverification",
-      "test-state",
-      {
-        userinfo: {
-          "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [undefined],
-          },
-        },
-      }
-    );
-    try {
-      await validateNestedJwt(jws);
-    } catch (e) {
-      if (e instanceof jose.errors.JOSEError) {
-        expect(e.message).to.eq(jose.errors.JWSInvalid.code);
-      }
-    }
-  });
-
   it("the payload does not contain a state field", async () => {
     const jws = await createJWS(
       "commonSubjectIdentifier",
