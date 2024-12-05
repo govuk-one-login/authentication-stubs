@@ -120,6 +120,8 @@ async function post(
         }),
   };
 
+  logger.info(reverification);
+
   try {
     await putReverificationWithAuthCode(authCode, reverification);
   } catch (error) {
