@@ -4,6 +4,7 @@ import {
   Handler,
 } from "aws-lambda";
 import {
+  failedJsonResult,
   handleErrors,
   invalidAccessTokenResult,
   methodNotAllowedError,
@@ -38,9 +39,17 @@ async function get(
   logger.info(`Acess token: ${truncate(accessToken)}`);
 
   const reverification = await getReverificationWithAccessToken(accessToken);
+  logger.info(reverification)
+
   if (!reverification) {
     logger.info("No reverification result found for access token");
     return invalidAccessTokenResult();
+  }
+
+  if (!reverification.success) {
+    logger.info("inside failure")
+    logger.info(failedJsonResult(400, reverification))
+    return failedJsonResult(400, reverification);
   }
 
   return successfulJsonResult(200, reverification);
