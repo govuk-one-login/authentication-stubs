@@ -46,6 +46,18 @@ export function successfulJsonResult(
   };
 }
 
+export function failedJsonResult(
+  code: ErrorCode,
+  body: JsonEntity,
+  headers?: Headers | undefined
+): APIGatewayProxyResult {
+  return {
+    statusCode: code,
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
 export function invalidAccessTokenResult(): APIGatewayProxyResult {
   return {
     statusCode: 401,
