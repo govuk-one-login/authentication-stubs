@@ -1,6 +1,6 @@
 export interface Reverification {
   sub: string;
   success: boolean;
-  error_code?: string;
-  error_description?: boolean;
+  failure_code?: string;
+  failure_description?: string;
 }
