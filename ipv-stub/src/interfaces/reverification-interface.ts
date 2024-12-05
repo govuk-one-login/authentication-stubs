@@ -1,6 +1,13 @@
-export interface Reverification {
+export interface ReverificationSuccess {
   sub: string;
-  success: boolean;
-  error_code?: string;
-  error_description?: boolean;
+  success: true;
 }
+
+export interface ReverificationFailure {
+  sub: string;
+  success: false;
+  failure_code: string;
+  failure_description: boolean;
+}
+
+export type Reverification = ReverificationSuccess | ReverificationFailure;
