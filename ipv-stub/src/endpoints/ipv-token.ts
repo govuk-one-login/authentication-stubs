@@ -176,14 +176,11 @@ async function handle(
 
   const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
 
-  const reverification = {
-    sub: validatedClaims["sub"] as string,
-    success: true,
-  };
+  reverificationResult.sub = <string>validatedClaims["sub"];
 
   const result: PutCommandOutput = await putReverificationWithAccessToken(
     accessToken,
-    reverification
+    reverificationResult
   );
   if (!result || result.$metadata.httpStatusCode != 200) {
     return { statusCode: 500, body: "Failed to write access token record." };
