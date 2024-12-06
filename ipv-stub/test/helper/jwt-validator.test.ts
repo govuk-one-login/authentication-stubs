@@ -3,12 +3,7 @@ import { describe } from "mocha";
 import { validateNestedJwt } from "../../src/helper/jwt-validator";
 import * as jose from "jose";
 import { CompactSign } from "jose";
-import {
-  authPrivateSigningKeyEVCS,
-  authPrivateSigningKeyIPV,
-  authPublicSigningKeyEVCS,
-  authPublicSigningKeyIPV,
-} from "../../src/data/keys";
+import keys from "../../src/data/keys.json";
 
 const expect = chai.expect;
 
@@ -50,14 +45,14 @@ async function createJWS(
       claims: claims,
       state: state,
     },
-    authPrivateSigningKeyIPV
+    keys.authPrivateSigningKeyIPV
   );
 }
 
 describe("isValidJwt", async () => {
   beforeEach(() => {
-    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = authPublicSigningKeyIPV;
-    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = authPublicSigningKeyEVCS;
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
+    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = keys.authPublicSigningKeyEVCS;
   });
 
   it("returns true for a valid jwt", async () => {
@@ -75,7 +70,7 @@ describe("isValidJwt", async () => {
                 await createSignedJwt(
                   validSigningAlg,
                   validStorageAccessTokenPayload,
-                  authPrivateSigningKeyEVCS
+                  keys.authPrivateSigningKeyEVCS
                 ),
               ],
             },
@@ -83,7 +78,7 @@ describe("isValidJwt", async () => {
         },
         state: "test-state",
       },
-      authPrivateSigningKeyIPV
+      keys.authPrivateSigningKeyIPV
     );
 
     const expectedParsedJwt = {
@@ -129,7 +124,7 @@ describe("isValidJwt", async () => {
               await createSignedJwt(
                 validSigningAlg,
                 validStorageAccessTokenPayload,
-                authPrivateSigningKeyEVCS
+                keys.authPrivateSigningKeyEVCS
               ),
             ],
           },
@@ -175,7 +170,7 @@ describe("isValidJwt", async () => {
               await createSignedJwt(
                 validSigningAlg,
                 validStorageAccessTokenPayload,
-                authPrivateSigningKeyEVCS
+                keys.authPrivateSigningKeyEVCS
               ),
             ],
           },
@@ -194,7 +189,7 @@ describe("isValidJwt", async () => {
             await createSignedJwt(
               validSigningAlg,
               validStorageAccessTokenPayload,
-              authPrivateSigningKeyEVCS
+              keys.authPrivateSigningKeyEVCS
             ),
           ],
         },
@@ -227,7 +222,7 @@ describe("isValidJwt", async () => {
             await createSignedJwt(
               validSigningAlg,
               invalidStorageAccessTokenPayload,
-              authPrivateSigningKeyEVCS
+              keys.authPrivateSigningKeyEVCS
             ),
           ],
         },

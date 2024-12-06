@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { Reverification } from "../interfaces/reverification-interface";
 import { logger } from "../helper/logger";
-import { obfuscate } from "../helper/result-helper";
+import { truncate } from "../helper/result-helper";
 
 const client =
   process.env.ENVIRONMENT === "local"
@@ -35,7 +35,7 @@ export const putReverificationWithAuthCode = async (
 export const getReverificationWithAuthCode = async (
   authCode: string
 ): Promise<string | undefined> => {
-  logger.info(`Looking up ${obfuscate(authCode)}`);
+  logger.info(`Looking up ${truncate(authCode)}`);
   const result = await dynamo.get({
     TableName: tableName,
     Key: {
@@ -63,7 +63,7 @@ export const putReverificationWithAccessToken = async (
 export const getReverificationWithAccessToken = async (
   accessToken: string
 ): Promise<string | undefined> => {
-  logger.info(`Looking up ${obfuscate(accessToken)}`);
+  logger.info(`Looking up ${truncate(accessToken)}`);
   const result = await dynamo.get({
     TableName: tableName,
     Key: {

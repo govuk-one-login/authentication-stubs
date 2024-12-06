@@ -7,7 +7,7 @@ import {
   handleErrors,
   invalidAccessTokenResult,
   methodNotAllowedError,
-  obfuscate,
+  truncate,
   successfulJsonResult,
 } from "../helper/result-helper";
 import { getReverificationWithAccessToken } from "../services/dynamodb-form-response-service";
@@ -35,7 +35,7 @@ async function get(
     return invalidAccessTokenResult();
   }
 
-  logger.info(`Acess token: ${obfuscate(accessToken)}`);
+  logger.info(`Acess token: ${truncate(accessToken)}`);
 
   const reverification = await getReverificationWithAccessToken(accessToken);
   if (!reverification) {
