@@ -167,12 +167,6 @@ async function handle(
     return { statusCode: 400, body: "Missing reverification record." };
   }
 
-  if (!reverificationResult.success) {
-    logger.info("inside failure")
-    logger.info(failedJsonResult(400, reverificationResult))
-    return failedJsonResult(400, reverificationResult);
-  }
-
   const accessToken = base64url.encode(randomBytes(32));
 
   // Claims
@@ -183,14 +177,11 @@ async function handle(
 
   const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
 
-  const reverification = {
-    sub: validatedClaims["sub"] as string,
-    success: true,
-  };
+  reverificationResult.sub = <string>validatedClaims["sub"];
 
   const result: PutCommandOutput = await putReverificationWithAccessToken(
     accessToken,
-    reverification
+    reverificationResult
   );
   if (!result || result.$metadata.httpStatusCode != 200) {
     return { statusCode: 500, body: "Failed to write access token record." };
