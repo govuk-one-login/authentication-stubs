@@ -34,7 +34,7 @@ export const putReverificationWithAuthCode = async (
 
 export const getReverificationWithAuthCode = async (
   authCode: string
-): Promise<string | undefined> => {
+): Promise<Reverification | undefined> => {
   logger.info(`Looking up ${obfuscate(authCode)}`);
   const result = await dynamo.get({
     TableName: tableName,
