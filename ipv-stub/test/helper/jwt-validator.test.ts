@@ -3,7 +3,7 @@ import { describe } from "mocha";
 import { validateNestedJwt } from "../../src/helper/jwt-validator";
 import * as jose from "jose";
 import { CompactSign } from "jose";
-import keys from '../../src/data/keys.json'
+import keys from "../../src/data/keys.json";
 
 const expect = chai.expect;
 
