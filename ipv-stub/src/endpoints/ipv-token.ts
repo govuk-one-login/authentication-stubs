@@ -5,6 +5,7 @@ import {
 } from "aws-lambda";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import {
+  failedJsonResult,
   handleErrors,
   methodNotAllowedError,
   truncate,
@@ -164,6 +165,12 @@ async function handle(
   if (!reverificationResult) {
     logger.info("Did not find reverification result record");
     return { statusCode: 400, body: "Missing reverification record." };
+  }
+
+  if (!reverificationResult.success) {
+    logger.info("inside failure")
+    logger.info(failedJsonResult(400, reverificationResult))
+    return failedJsonResult(400, reverificationResult);
   }
 
   const accessToken = base64url.encode(randomBytes(32));
