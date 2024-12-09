@@ -7,7 +7,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import {
   handleErrors,
   methodNotAllowedError,
-  obfuscate,
+  truncate,
   shouldObfuscate,
   successfulJsonResult,
 } from "../helper/result-helper";
@@ -19,13 +19,7 @@ import {
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-
-const public_key = `
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVE
-IKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==
------END PUBLIC KEY-----
-`.trim();
+import keys from "../data/keys.json";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -52,13 +46,13 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
     "client_assertion",
     "client_assertion_type",
   ];
-  const missingParamaters: string[] = [];
+  const missingParameters: string[] = [];
 
   const validParameters: Partial<ValidatedParams> = {};
   for (const param of requiredParameters) {
     const value = params.get(param);
     if (!value || value === "undefined") {
-      missingParamaters.push(param);
+      missingParameters.push(param);
     } else {
       validParameters[param] = value;
     }
@@ -66,14 +60,14 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
 
   logger.info("Handling token request with parameters:");
   for (const [key, value] of Object.entries(validParameters)) {
-    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    const loggedValue = shouldObfuscate(key) ? truncate(value) : value;
     logger.info(`${key}::${loggedValue}`);
   }
 
-  if (missingParamaters.length > 0) {
-    const missingParametersErrorMessgae = `Missing or empty parameters: ${missingParamaters.join(", ")}`;
-    logger.info(missingParametersErrorMessgae);
-    return error(missingParametersErrorMessgae);
+  if (missingParameters.length > 0) {
+    const missingParametersErrorMessage = `Missing or empty parameters: ${missingParameters.join(", ")}`;
+    logger.info(missingParametersErrorMessage);
+    return error(missingParametersErrorMessage);
   }
 
   return ok(validParameters);
@@ -114,7 +108,7 @@ async function parsePayload(
 
   logger.info("Handling token request with claims:");
   for (const [key, value] of Object.entries(validClaims)) {
-    const loggedValue = shouldObfuscate(key) ? obfuscate(value) : value;
+    const loggedValue = shouldObfuscate(key) ? truncate(value) : value;
     logger.info(`${key}::${loggedValue}`);
   }
 
@@ -137,12 +131,11 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   logger.info("Reached the token endpoint.");
   return await handleErrors(async () => {
-    switch (event.httpMethod) {
-      case "POST":
-        logger.info("POST event");
-        return await handle(event);
-      default:
-        throw methodNotAllowedError(event.httpMethod);
+    if (event.httpMethod === "POST") {
+      logger.info("POST event");
+      return await handle(event);
+    } else {
+      throw methodNotAllowedError(event.httpMethod);
     }
   });
 };
@@ -173,7 +166,7 @@ async function handle(
     return { statusCode: 400, body: "Missing reverification record." };
   }
 
-  var accessToken = base64url.encode(randomBytes(32));
+  const accessToken = base64url.encode(randomBytes(32));
 
   // Claims
   const parsedClaims: Result<JwtPayload> = await parsePayload(
@@ -197,7 +190,7 @@ async function handle(
   }
 
   logger.info(
-    `Created access token ${obfuscate(accessToken)} for ${validatedClaims["sub"]}`
+    `Created access token ${truncate(accessToken)} for ${validatedClaims["sub"]}`
   );
 
   return successfulJsonResult(200, {
@@ -208,10 +201,12 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, public_key, { algorithms: ["ES256"] });
+  const decoded = jwt.verify(token, keys.ipv_public_key, {
+    algorithms: ["ES256"],
+  });
 
   if (typeof decoded === "object" && decoded !== null) {
-    return decoded as JwtPayload;
+    return decoded;
   } else {
     throw new Error("Invalid token payload");
   }
