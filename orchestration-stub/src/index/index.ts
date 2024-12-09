@@ -235,6 +235,12 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
   if (form.channel !== "none") {
     payload["channel"] = form.channel;
   }
+
+  if (form.authenticatedLevel) {
+    payload["current_credential_strength"] = credentialTrustToEnum(
+      form.authenticatedLevel,
+    );
+  }
   return payload;
 };
 
