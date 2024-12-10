@@ -27,6 +27,11 @@ Mappings:
       hostedZoneId: "Z10132222WVQ7U47816SI"
       authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExAt6xsHUZdhfX2QcNs9es2dF3UTli3fjvMj4NgIgS1VCrxShBZIpuWEH3HLq7EB3a0N+ARh/xjWJoaYBYcDpDw==-----END PUBLIC KEY-----"
       authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVEIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==-----END PUBLIC KEY-----"
+    build:
+      ipvStubDomainName: ipvstub.signin.build.account.gov.uk
+      hostedZoneId: "Z099220113UW2JSCXBNRI"
+      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZd7sKpglYci7vYylf1BnuzD2jLNDvd1k7Fe7SeBcflPsGTwmQ+ixmYOLw3g8DXKtyup1SaIeqPLj/y2TqINDZA==-----END PUBLIC KEY-----"
+      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGqXe8d+FIbe4ZvdYWwplSoOfNKjNEWQFkMXYD6MPmfc9QRx5a+LFSKU2vUaN79+MXkG9kjvfFcQCaucvQszXaw==-----END PUBLIC KEY-----"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
