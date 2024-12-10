@@ -18,6 +18,7 @@ import { ROOT_URI } from "../data/ipv-dummy-constants";
 import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 import { processJoseError } from "../helper/error-helper";
+import { Reverification } from "../interfaces/reverification-interface";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -106,9 +107,17 @@ async function post(
   url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
-  const reverification = {
+  const response = parsedBody["response"];
+
+  const reverification: Reverification = {
     sub,
-    success: true,
+    ...(response === "success"
+      ? { success: true }
+      : {
+          success: false,
+          failure_code: response,
+          failure_description: `${response} error has occurred`,
+        }),
   };
 
   try {
