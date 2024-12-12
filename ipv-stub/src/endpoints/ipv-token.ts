@@ -198,9 +198,13 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
+  logger.info("BECKA: Trying to verify jwt in the token handler")
+
   const decoded = jwt.verify(token, keys.ipv_public_key, {
     algorithms: ["ES256"],
   });
+  logger.info("BECKA: successfully verified jwt in the token handler")
+
 
   if (typeof decoded === "object" && decoded !== null) {
     return decoded;
