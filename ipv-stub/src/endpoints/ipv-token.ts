@@ -3,7 +3,7 @@ import {
   APIGatewayProxyResult,
   Handler,
 } from "aws-lambda";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 import {
   handleErrors,
   methodNotAllowedError,
@@ -19,7 +19,8 @@ import {
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-import keys from "../data/keys.json";
+import * as jose from "jose";
+import { processJoseError } from "../helper/error-helper";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -198,12 +199,27 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, keys.ipv_public_encryption_key, {
-    algorithms: ["ES256"],
-  });
+  const reverificationPublicSigningKey = process.env
+    .AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY as string;
 
-  if (typeof decoded === "object" && decoded !== null) {
-    return decoded;
+  const publicJwk = await jose.importSPKI(
+    reverificationPublicSigningKey,
+    "ES256"
+  );
+
+  let payload;
+  try {
+    ({ payload } = await jose.compactVerify(token, publicJwk));
+  } catch (error) {
+    processJoseError(error);
+  }
+
+  const decodedPayload = new TextDecoder().decode(payload);
+
+  const jwtAsJson = JSON.parse(decodedPayload);
+
+  if (typeof jwtAsJson === "object" && jwtAsJson !== null) {
+    return jwtAsJson;
   } else {
     throw new Error("Invalid token payload");
   }

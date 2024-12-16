@@ -51,8 +51,9 @@ async function createJWS(
 
 describe("isValidJwt", async () => {
   beforeEach(() => {
-    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
-    process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = keys.authPublicSigningKeyEVCS;
+    process.env.AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY =
+      keys.authPublicSigningKeyIPV;
+    process.env.AUTH_EVCS_PUBLIC_SIGNING_KEY = keys.authPublicSigningKeyEVCS;
   });
 
   it("returns true for a valid jwt", async () => {
@@ -63,6 +64,7 @@ describe("isValidJwt", async () => {
       {
         sub: sub,
         scope: "reverification",
+        state: "test-state",
         claims: {
           userinfo: {
             "https://vocab.account.gov.uk/v1/storageAccessToken": {
@@ -76,12 +78,14 @@ describe("isValidJwt", async () => {
             },
           },
         },
-        state: "test-state",
       },
       keys.authPrivateSigningKeyIPV
     );
 
     const expectedParsedJwt = {
+      scope: "reverification",
+      state: "test-state",
+      sub: sub,
       claims: {
         userinfo: {
           "https://vocab.account.gov.uk/v1/storageAccessToken": {
@@ -102,9 +106,6 @@ describe("isValidJwt", async () => {
           },
         },
       },
-      scope: "reverification",
-      state: "test-state",
-      sub: sub,
     };
 
     expect(await validateNestedJwt(validSampleJws)).to.be.deep.eq(
