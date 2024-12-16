@@ -198,7 +198,7 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, keys.ipv_public_key, {
+  const decoded = jwt.verify(token, keys.ipv_public_encryption_key, {
     algorithms: ["ES256"],
   });
 
