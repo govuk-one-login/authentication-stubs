@@ -11,7 +11,8 @@ import { processJoseError } from "./error-helper";
 export async function validateNestedJwt(
   nestedJws: string
 ): Promise<DecodedRequest | string> {
-  const authSignaturePublicKeyIpv = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
+  const authSignaturePublicKeyIpv =
+    process.env.AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY;
   if (!authSignaturePublicKeyIpv) {
     throw new CodedError(500, "Auth IPV signing public key not found");
   }
@@ -79,7 +80,7 @@ async function validateStorageAccessToken(
     const storageTokenJws =
       userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"].values[0];
 
-    const authSignaturePublicKey = process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS;
+    const authSignaturePublicKey = process.env.AUTH_EVCS_PUBLIC_SIGNING_KEY;
     if (!authSignaturePublicKey) {
       throw new CodedError(500, "Auth EVCS signing public key not found");
     }
