@@ -215,12 +215,12 @@ Mappings:
         G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
         zwIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-0ef903f65650689d8"
-      subnetBId: "subnet-0a664da1b8fbe815d"
-      subnetCId: "subnet-03533652fb2b7cd75"
-      endpointSgId: "sg-0d64cc026d540b919"
-      redisSgId: "sg-072d47bbcf7f12d00"
-      vpcId: "vpc-07436f099bccc77df"
+      subnetAId: "subnet-04234e8fb1ee28d2c"
+      subnetBId: "subnet-0c91be3c7426cf2e6"
+      subnetCId: "subnet-078749ec82aa5af94"
+      endpointSgId: "sg-0e554161114407ce2"
+      redisSgId: "sg-09a7840296f9f236e"
+      vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
       authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
@@ -243,12 +243,12 @@ Mappings:
         G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
         zwIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-0ef903f65650689d8"
-      subnetBId: "subnet-0a664da1b8fbe815d"
-      subnetCId: "subnet-03533652fb2b7cd75"
-      endpointSgId: "sg-0d64cc026d540b919"
-      redisSgId: "sg-072d47bbcf7f12d00"
-      vpcId: "vpc-07436f099bccc77df"
+      subnetAId: "subnet-04234e8fb1ee28d2c"
+      subnetBId: "subnet-0c91be3c7426cf2e6"
+      subnetCId: "subnet-078749ec82aa5af94"
+      endpointSgId: "sg-0e554161114407ce2"
+      redisSgId: "sg-09a7840296f9f236e"
+      vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
       authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.sandpit.account.gov.uk/"
