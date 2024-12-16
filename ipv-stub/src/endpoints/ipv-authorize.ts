@@ -48,11 +48,11 @@ async function get(
   if (!encryptedJwt) {
     throw new CodedError(400, "Request query string parameter not found");
   }
-  const ipvPrivateKeyPem = process.env.IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY;
-  if (!ipvPrivateKeyPem) {
-    throw new CodedError(500, "Private key not found");
+  const ipvPrivateEncryptionKey = process.env.IPV_PRIVATE_ENCRYPTION_KEY;
+  if (!ipvPrivateEncryptionKey) {
+    throw new CodedError(500, "IPV Private Encryption key not found");
   }
-  const privateKey = await importPKCS8(ipvPrivateKeyPem, "RSA-OAEP-256");
+  const privateKey = await importPKCS8(ipvPrivateEncryptionKey, "RSA-OAEP-256");
 
   let plaintext, protectedHeader;
   try {

@@ -155,8 +155,7 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
-          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
-          IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
+          IPV_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
           AUTH_PUBLIC_SIGNING_KEY_EVCS: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyEvcs ]
           AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyIpv ]
       Policies:
