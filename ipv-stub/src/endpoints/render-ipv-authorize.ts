@@ -1,5 +1,6 @@
 import { renderPage } from "../helper/template";
 import { DecodedRequest } from "../helper/types";
+import { ROOT_URI } from '../data/ipv-dummy-constants';
 
 export default function renderIPVAuthorize(
   decodedHeader: string,
@@ -73,6 +74,11 @@ export default function renderIPVAuthorize(
     <div class="govuk-summary-list__row">
       <button name="continue" value="continue" class="govuk-button">Continue</button>
     </div>
-  </form>\``
+  </form>
+  
+  <div class="govuk-inset-text">
+    To test the cross browser issue, open the following in a new private window: <a href="${ROOT_URI}/ipv/callback/authorize?state=${decodedPayload.state}&error=access_denied">${ROOT_URI}/ipv/callback/authorize?state=${decodedPayload.state}&error=access_denied</a>
+  </div>
+  `
   );
 }
