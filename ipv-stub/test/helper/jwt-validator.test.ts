@@ -1,9 +1,9 @@
 import chai from "chai";
-import { describe } from "mocha";
+import { before, describe } from "mocha";
 import { validateNestedJwt } from "../../src/helper/jwt-validator";
 import * as jose from "jose";
 import { CompactSign } from "jose";
-import keys from "../../src/data/keys.json";
+import { generateKeyPairSync } from "node:crypto";
 
 const expect = chai.expect;
 
@@ -22,38 +22,44 @@ const validStorageAccessTokenPayload = {
   jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
 };
 
-async function createJWS(
-  sub: string | undefined,
-  scope: string | undefined,
-  state: string | undefined,
-  claims:
-    | {
-        userinfo: {
-          "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [string | null];
-          };
-        };
-      }
-    | null
-    | unknown
-) {
-  return createSignedJwt(
-    validSigningAlg,
-    {
-      sub: sub,
-      scope: scope,
-      claims: claims,
-      state: state,
-    },
-    keys.authPrivateSigningKeyIPV
-  );
-}
+let authPrivateSigningKeyIPV: string;
 
 describe("isValidJwt", async () => {
-  beforeEach(() => {
-    process.env.AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY =
-      keys.authPublicSigningKeyIPV;
-    process.env.AUTH_EVCS_PUBLIC_SIGNING_KEY = keys.authPublicSigningKeyEVCS;
+  let authPrivateSigningKeyEVCS: string;
+  let authPublicSigningKeyEVCS: string;
+
+  before(() => {
+    const ipvKeys = generateKeyPairSync("ec", {
+      namedCurve: "P-256",
+      publicKeyEncoding: {
+        type: "spki",
+        format: "pem",
+      },
+      privateKeyEncoding: {
+        type: "pkcs8",
+        format: "pem",
+      },
+    });
+
+    authPrivateSigningKeyIPV = ipvKeys.privateKey;
+    process.env.AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY = ipvKeys.publicKey;
+
+    const evcsKeys = generateKeyPairSync("ec", {
+      namedCurve: "P-256",
+      publicKeyEncoding: {
+        type: "spki",
+        format: "pem",
+      },
+      privateKeyEncoding: {
+        type: "pkcs8",
+        format: "pem",
+      },
+    });
+
+    authPrivateSigningKeyEVCS = evcsKeys.privateKey;
+    authPublicSigningKeyEVCS = evcsKeys.publicKey;
+
+    process.env.AUTH_EVCS_PUBLIC_SIGNING_KEY = authPublicSigningKeyEVCS;
   });
 
   it("returns true for a valid jwt", async () => {
@@ -72,14 +78,14 @@ describe("isValidJwt", async () => {
                 await createSignedJwt(
                   validSigningAlg,
                   validStorageAccessTokenPayload,
-                  keys.authPrivateSigningKeyEVCS
+                  authPrivateSigningKeyEVCS
                 ),
               ],
             },
           },
         },
       },
-      keys.authPrivateSigningKeyIPV
+      authPrivateSigningKeyIPV
     );
 
     const expectedParsedJwt = {
@@ -125,7 +131,7 @@ describe("isValidJwt", async () => {
               await createSignedJwt(
                 validSigningAlg,
                 validStorageAccessTokenPayload,
-                keys.authPrivateSigningKeyEVCS
+                authPrivateSigningKeyEVCS
               ),
             ],
           },
@@ -171,7 +177,7 @@ describe("isValidJwt", async () => {
               await createSignedJwt(
                 validSigningAlg,
                 validStorageAccessTokenPayload,
-                keys.authPrivateSigningKeyEVCS
+                authPrivateSigningKeyEVCS
               ),
             ],
           },
@@ -190,7 +196,7 @@ describe("isValidJwt", async () => {
             await createSignedJwt(
               validSigningAlg,
               validStorageAccessTokenPayload,
-              keys.authPrivateSigningKeyEVCS
+              authPrivateSigningKeyEVCS
             ),
           ],
         },
@@ -223,7 +229,7 @@ describe("isValidJwt", async () => {
             await createSignedJwt(
               validSigningAlg,
               invalidStorageAccessTokenPayload,
-              keys.authPrivateSigningKeyEVCS
+              authPrivateSigningKeyEVCS
             ),
           ],
         },
@@ -233,6 +239,33 @@ describe("isValidJwt", async () => {
     expect(await validateNestedJwt(jws)).to.eq(expectedError);
   });
 });
+
+async function createJWS(
+  sub: string | undefined,
+  scope: string | undefined,
+  state: string | undefined,
+  claims:
+    | {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [string | null];
+          };
+        };
+      }
+    | null
+    | unknown
+) {
+  return createSignedJwt(
+    validSigningAlg,
+    {
+      sub: sub,
+      scope: scope,
+      claims: claims,
+      state: state,
+    },
+    authPrivateSigningKeyIPV
+  );
+}
 
 async function createSignedJwt(
   header: string,
