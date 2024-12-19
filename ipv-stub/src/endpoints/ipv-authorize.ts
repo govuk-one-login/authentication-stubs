@@ -18,7 +18,6 @@ import { ROOT_URI } from "../data/ipv-dummy-constants";
 import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 import { processJoseError } from "../helper/error-helper";
-import { Reverification } from "../interfaces/reverification-interface";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
@@ -48,11 +47,11 @@ async function get(
   if (!encryptedJwt) {
     throw new CodedError(400, "Request query string parameter not found");
   }
-  const ipvPrivateKeyPem = process.env.IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY;
-  if (!ipvPrivateKeyPem) {
-    throw new CodedError(500, "Private key not found");
+  const ipvPrivateEncryptionKey = process.env.IPV_PRIVATE_ENCRYPTION_KEY;
+  if (!ipvPrivateEncryptionKey) {
+    throw new CodedError(500, "IPV Private Encryption key not found");
   }
-  const privateKey = await importPKCS8(ipvPrivateKeyPem, "RSA-OAEP-256");
+  const privateKey = await importPKCS8(ipvPrivateEncryptionKey, "RSA-OAEP-256");
 
   let plaintext, protectedHeader;
   try {
@@ -109,7 +108,7 @@ async function post(
 
   const response = parsedBody["response"];
 
-  const reverification: Reverification = {
+  const reverification: { sub: string; success: boolean } = {
     sub,
     ...(response === "success"
       ? { success: true }

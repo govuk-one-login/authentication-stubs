@@ -25,8 +25,6 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
-      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExAt6xsHUZdhfX2QcNs9es2dF3UTli3fjvMj4NgIgS1VCrxShBZIpuWEH3HLq7EB3a0N+ARh/xjWJoaYBYcDpDw==-----END PUBLIC KEY-----"
-      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVEIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==-----END PUBLIC KEY-----"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -155,10 +153,9 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
-          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
-          IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
-          AUTH_PUBLIC_SIGNING_KEY_EVCS: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyEvcs ]
-          AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyIpv ]
+          IPV_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
+          AUTH_EVCS_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key:SecretString}}"
+          AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key:SecretString}}"
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -205,6 +202,8 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
+          AUTH_EVCS_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key:SecretString}}"
+          AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key:SecretString}}"
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -301,9 +300,9 @@ Resources:
       ValidationMethod: DNS
 
 # todo ,
-# currently records set and ACM vadiladation is done Manaully in old dev account 
-# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 
-  
+# currently records set and ACM vadiladation is done Manaully in old dev account
+# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
+
   #Domain:
     #Type: AWS::Route53::RecordSet
     #Properties:
@@ -313,4 +312,3 @@ Resources:
       #AliasTarget:
         #DNSName: !GetAtt GatewayDomain.RegionalDomainName
         #HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
-

@@ -20,7 +20,7 @@ const accessTokenPrefix = "accesstoken";
 
 export const putReverificationWithAuthCode = async (
   authCode: string,
-  reverification: Reverification
+  reverification: { sub: string; success: boolean }
 ) => {
   return await dynamo.put({
     TableName: tableName,
