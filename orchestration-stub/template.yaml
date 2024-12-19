@@ -207,22 +207,22 @@ Mappings:
       stubDomain: orchstub-authdev2.signin.dev.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlWwvS/QGYHfu8nufIzgo
-        05G4GEjMHvOXGywV61Inev6+46VF36rAs1+ZtxAhR6D4FFDbyLFhej0Rp/H9PMnk
-        rwaIoRkZq89BHAX/yklx3EYPkdRhsXjfWocL7ZJP/JgFcNZV/eE2ZOf9O3UmcVGy
-        DCQMhKDhYX3XFR5mtd2lCHmu9TtONvodQ2zf0REFPJey1X4M3JYWhtW0lm8lxuFM
-        +wq2LiUkwO6qgTiUcweMzKVNMX55pLajsL9o/wVApm9FiGLB1Ndt4aRT6JIbgG3U
-        G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
-        zwIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuO+7VuYnfrI1q3FR9IbD
+        HHFkmCCl58ZwBHq2RNx8ZMg/wjCWVe8vGsC4xe25QfxpqZYZ+r6HgRSDL+e6WWgG
+        VO0zZFP1b4sEjm2TN6cJOtCmGK9YCdczIV+rUZ8RQdfGd/VBrTwbihVVwcsU/AK/
+        Zn35yyxIOBQBfebpODqXvTNqyZCCnRsEft6NoiB7d0MtQj3pVBpP6zMrAqV7I4nl
+        uUy+EBm5Gjxr1tu4g513kauhbvpsejePvjN4LOyrNVVrbr2Sui874H+BJp7OQOLq
+        R8JLAPX4gEUilflULbVG/JZTulPOyGrDyR656sbh7yuE/rTQBnNSrBibJaAGjlQb
+        DQIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-0ef903f65650689d8"
-      subnetBId: "subnet-0a664da1b8fbe815d"
-      subnetCId: "subnet-03533652fb2b7cd75"
-      endpointSgId: "sg-0d64cc026d540b919"
-      redisSgId: "sg-072d47bbcf7f12d00"
-      vpcId: "vpc-07436f099bccc77df"
+      subnetAId: "subnet-04234e8fb1ee28d2c"
+      subnetBId: "subnet-0c91be3c7426cf2e6"
+      subnetCId: "subnet-078749ec82aa5af94"
+      endpointSgId: "sg-0e554161114407ce2"
+      redisSgId: "sg-09a7840296f9f236e"
+      vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
-      authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
+      authenticationBackendUrl: "https://8yikw2kek6-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
@@ -235,22 +235,22 @@ Mappings:
       stubDomain: orchstub.authdev2.sandpit.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlWwvS/QGYHfu8nufIzgo
-        05G4GEjMHvOXGywV61Inev6+46VF36rAs1+ZtxAhR6D4FFDbyLFhej0Rp/H9PMnk
-        rwaIoRkZq89BHAX/yklx3EYPkdRhsXjfWocL7ZJP/JgFcNZV/eE2ZOf9O3UmcVGy
-        DCQMhKDhYX3XFR5mtd2lCHmu9TtONvodQ2zf0REFPJey1X4M3JYWhtW0lm8lxuFM
-        +wq2LiUkwO6qgTiUcweMzKVNMX55pLajsL9o/wVApm9FiGLB1Ndt4aRT6JIbgG3U
-        G+6lf+OkwDRht0L31b0vGGzy263wprcxjd/v3bznttaTP8W2ouwh9UdTBWMq+BIB
-        zwIDAQAB
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuO+7VuYnfrI1q3FR9IbD
+        HHFkmCCl58ZwBHq2RNx8ZMg/wjCWVe8vGsC4xe25QfxpqZYZ+r6HgRSDL+e6WWgG
+        VO0zZFP1b4sEjm2TN6cJOtCmGK9YCdczIV+rUZ8RQdfGd/VBrTwbihVVwcsU/AK/
+        Zn35yyxIOBQBfebpODqXvTNqyZCCnRsEft6NoiB7d0MtQj3pVBpP6zMrAqV7I4nl
+        uUy+EBm5Gjxr1tu4g513kauhbvpsejePvjN4LOyrNVVrbr2Sui874H+BJp7OQOLq
+        R8JLAPX4gEUilflULbVG/JZTulPOyGrDyR656sbh7yuE/rTQBnNSrBibJaAGjlQb
+        DQIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-0ef903f65650689d8"
-      subnetBId: "subnet-0a664da1b8fbe815d"
-      subnetCId: "subnet-03533652fb2b7cd75"
-      endpointSgId: "sg-0d64cc026d540b919"
-      redisSgId: "sg-072d47bbcf7f12d00"
-      vpcId: "vpc-07436f099bccc77df"
+      subnetAId: "subnet-04234e8fb1ee28d2c"
+      subnetBId: "subnet-0c91be3c7426cf2e6"
+      subnetCId: "subnet-078749ec82aa5af94"
+      endpointSgId: "sg-0e554161114407ce2"
+      redisSgId: "sg-09a7840296f9f236e"
+      vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
-      authenticationBackendUrl: "https://gsk0hjohsf-vpce-0a13e281125335a7e.execute-api.eu-west-2.amazonaws.com/authdev2/"
+      authenticationBackendUrl: "https://8yikw2kek6-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.sandpit.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z062001013DJY2F0YXEJR"
