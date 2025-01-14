@@ -25,12 +25,26 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
-      authPublicSigningKeyEvcs: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExAt6xsHUZdhfX2QcNs9es2dF3UTli3fjvMj4NgIgS1VCrxShBZIpuWEH3HLq7EB3a0N+ARh/xjWJoaYBYcDpDw==-----END PUBLIC KEY-----"
-      authPublicSigningKeyIpv: "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDn0sV329oTHdahzIuUSWS2xw5GVEIKUQ9FPvvEDsNKofkw3n7hy1orQQ0XucyhLAcJy0mofJ3fwbjIZEgKBfUw==-----END PUBLIC KEY-----"
+
+    authdev1:
+      ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
+      hostedZoneId: "Z01488663SVMGDFYGEX88"
+
+    authdev2:
+      ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
+      hostedZoneId: "Z0283478G72QVGV7VVBG"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
   UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
+  CreateIPVDNSrecord:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref Environment
+          - "authdev1"
+      - Fn::Equals:
+          - !Ref Environment
+          - "authdev2"
 
 Globals:
   Function:
@@ -135,12 +149,13 @@ Resources:
   ApiGatewayInvokePermissionForLambda:
     Type: AWS::Lambda::Permission
     Properties:
-        FunctionName: !GetAtt IPVStubAuthorizeLambda.Arn
-        Action: lambda:InvokeFunction
-        Principal: apigateway.amazonaws.com
+      FunctionName: !GetAtt IPVStubAuthorizeLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
 
   ApiGatewayMapping:
-    Type: 'AWS::ApiGateway::BasePathMapping'
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: Certificate
     Properties:
       Stage: Live
       DomainName: !Ref GatewayDomain
@@ -155,16 +170,16 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
-          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key:SecretString}}"
+          IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/ipv-stub-private-key:SecretString}}"
           IPV_AUTHORIZE_PUBLIC_SIGNING_KEY: ""
-          AUTH_PUBLIC_SIGNING_KEY_EVCS: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyEvcs ]
-          AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap [ EnvironmentConfiguration, !Ref Environment, authPublicSigningKeyIpv ]
+          AUTH_PUBLIC_SIGNING_KEY_EVCS: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-evcs-public-signing-key:SecretString}}"
+          AUTH_PUBLIC_SIGNING_KEY_IPV: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-reverification-public-signing-key:SecretString}}"
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref ReverificationTable
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: arn:aws:secretsmanager:eu-west-2:975050272416:secret:/dev/stubs/ipv-stub-private-key-KQsLL3
+            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/${Environment}/ipv-stub-private-key-*"
       Events:
         Get:
           Type: Api
@@ -287,7 +302,12 @@ Resources:
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      DomainName:
+        !FindInMap [
+          EnvironmentConfiguration,
+          !Ref Environment,
+          ipvStubDomainName,
+        ]
       SecurityPolicy: TLS_1_2
       RegionalCertificateArn: !Ref Certificate
       EndpointConfiguration:
@@ -297,20 +317,30 @@ Resources:
   Certificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
+      DomainName:
+        !FindInMap [
+          EnvironmentConfiguration,
+          !Ref Environment,
+          ipvStubDomainName,
+        ]
       ValidationMethod: DNS
 
-# todo ,
-# currently records set and ACM vadiladation is done Manaully in old dev account 
-# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code 
-  
-  #Domain:
-    #Type: AWS::Route53::RecordSet
-    #Properties:
-      #HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
-      #Type: A
-      #Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, ipvStubDomainName ]
-      #AliasTarget:
-        #DNSName: !GetAtt GatewayDomain.RegionalDomainName
-        #HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+  # todo currently route 53 dns records and ACM vadiladation is done Manaully in old dev account for DEV Env.
+  # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
 
+  IPVdnsrecordsubdomain:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateIPVDNSrecord
+    Properties:
+      HostedZoneId:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, hostedZoneId]
+      Type: A
+      Name:
+        !FindInMap [
+          EnvironmentConfiguration,
+          !Ref Environment,
+          ipvStubDomainName,
+        ]
+      AliasTarget:
+        DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId

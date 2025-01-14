@@ -2,7 +2,7 @@
 
 import * as jose from "jose";
 import { CompactEncrypt, CompactSign, importSPKI } from "jose";
-import keys from '../src/data/keys.json' assert {type: 'json'}
+import keys from "../src/data/keys.json" assert { type: "json" };
 
 // This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
@@ -20,7 +20,11 @@ const textEncoder = new TextEncoder();
 
 const createSignedJwt = async (header, payload, signingKey) => {
   const privateKey = await jose.importPKCS8(signingKey, "ES256");
-  return await new CompactSign(await textEncoder.encode(JSON.stringify(payload))).setProtectedHeader(header).sign(privateKey)
+  return await new CompactSign(
+    await textEncoder.encode(JSON.stringify(payload))
+  )
+    .setProtectedHeader(header)
+    .sign(privateKey);
 };
 
 const createUserInfoClaims = async () => {
@@ -45,7 +49,7 @@ const createUserInfoClaims = async () => {
             storageAccessTokenAlgorithm,
             storageAccessTokenPayload,
             authPrivateSigningKeyEVCS
-          )
+          ),
         ],
       },
     },
@@ -60,7 +64,11 @@ const createRequestJwt = async () => {
     state: "test-state",
   };
   const publicKey = await importSPKI(ipvPublicKeyPem, "RSA-OAEP-256");
-  const nestedJWS = await createSignedJwt({ alg: "ES256" }, payload, authPrivateSigningKeyIPV)
+  const nestedJWS = await createSignedJwt(
+    { alg: "ES256" },
+    payload,
+    authPrivateSigningKeyIPV
+  );
 
   return new CompactEncrypt(textEncoder.encode(nestedJWS))
     .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
