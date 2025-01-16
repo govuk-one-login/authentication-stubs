@@ -325,7 +325,8 @@ Resources:
         ]
       ValidationMethod: DNS
 
-  # todo currently route 53 dns records and ACM vadiladation is done Manaully in old dev account for DEV Env.
+  # todo 
+  # currently route 53 dns records and ACM vadiladation is done Manaully in old dev account for DEV Env.
   # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
 
   IPVdnsrecordsubdomain:
