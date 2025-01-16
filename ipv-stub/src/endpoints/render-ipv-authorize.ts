@@ -1,6 +1,6 @@
 import { renderPage } from "../helper/template";
 import { DecodedRequest } from "../helper/types";
-import { ROOT_URI } from '../data/ipv-dummy-constants';
+import { ROOT_URI } from "../data/ipv-dummy-constants";
 
 export default function renderIPVAuthorize(
   decodedHeader: string,

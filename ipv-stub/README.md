@@ -5,6 +5,7 @@
 ```bash
 (cd localstack && docker compose up)
 ```
+
 ```bash
 npm run build && npm run start:local
 ```
@@ -24,15 +25,14 @@ Then use the output to construct a request e.g. http://localhost:3000/authorize?
 
 Private and public keys are be needed for decryption and signature validation.
 
-The local private key (in _parameters.json_) as well as its public key (in the encrypt helper script) have been commited deliberately. 
+The local private key (in _parameters.json_) as well as its public key (in the encrypt helper script) have been commited deliberately.
 The key pair was generated fresh and should only be used for testing, both locally and as part of the pre-merge GitHub workflow.
 
 In deployed environments, the private key will be retrieved from AWS Secrets Manager, and the public key from AWS Parameter Store. This key pair is different from the one which has been commited here.
 
-
 ## Connect to DynamoDB with IntelliJ Database Explorer
 
-1) Create a `localstack` AWS profile
+1. Create a `localstack` AWS profile
 
 ```
 > aws configure --profile localstack
@@ -41,11 +41,26 @@ AWS Secret Access Key [None]: na
 Default region name [None]: eu-west-2
 ```
 
-2) Navigate File > New > Datasource > DynamoDB
-3) Submit with:
-    - Host: `localhost`
-    - Port: `4566`
-    - Region: `eu-west-2`
-    - Authentication: `AWS Profile`
-    - Profile: `localstack`
-4) Navigate View > Tool Windows > Database
+2. Navigate File > New > Datasource > DynamoDB
+3. Submit with:
+   - Host: `localhost`
+   - Port: `4566`
+   - Region: `eu-west-2`
+   - Authentication: `AWS Profile`
+   - Profile: `localstack`
+4. Navigate View > Tool Windows > Database
+
+## Deploying
+
+authdev1 and authdev2 [samconfig.toml](samconfig.toml) configuration with mapping in [template.yaml](template.yaml)
+To build and deploy in Authdev's Env , run the following command:
+
+```bash
+cd ipv-stub
+```
+
+```bash
+sam build && sam deploy --config-env <env>
+```
+
+To deploy stubs that integrate with secure pipelines use GitHub workflow [Build and deploy IPV stub to Dev](https://github.com/govuk-one-login/authentication-stubs/actions/workflows/dev-deploy-ipv-stub.yaml) Instead.
