@@ -6,7 +6,7 @@ import keys from "../src/data/keys.json" assert { type: "json" };
 
 // This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
-const ipvPublicEncryptionKeyPem = keys.ipv_public_encryption_key;
+const ipvPublicKeyPem = keys.ipv_public_key;
 
 // This is the private key equivalent of the local public key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
@@ -63,7 +63,7 @@ const createRequestJwt = async () => {
     claims: await createUserInfoClaims(),
     state: "test-state",
   };
-  const publicKey = await importSPKI(ipvPublicEncryptionKeyPem, "RSA-OAEP-256");
+  const publicKey = await importSPKI(ipvPublicKeyPem, "RSA-OAEP-256");
   const nestedJWS = await createSignedJwt(
     { alg: "ES256" },
     payload,

@@ -219,8 +219,7 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Sub ${Environment}
-          AUTH_EVCS_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key:SecretString}}"
-          AUTH_REVERIFICATION_PUBLIC_SIGNING_KEY: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key:SecretString}}"
+          AUTH_PUBLIC_SIGNING_KEY_IPV: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-reverification-public-signing-key:SecretString}}"
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
