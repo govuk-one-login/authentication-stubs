@@ -48,7 +48,7 @@ async function get(
   if (!encryptedJwt) {
     throw new CodedError(400, "Request query string parameter not found");
   }
-  const ipvPrivateKeyPem = process.env.IPV_AUTHORIZE_PRIVATE_ENCRYPTION_KEY;
+  const ipvPrivateKeyPem = process.env.IPV_PRIVATE_ENCRYPTION_KEY;
   if (!ipvPrivateKeyPem) {
     throw new CodedError(500, "Private key not found");
   }

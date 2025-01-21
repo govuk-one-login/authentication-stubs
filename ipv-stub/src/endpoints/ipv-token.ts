@@ -19,7 +19,6 @@ import {
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-import keys from "../data/keys.json";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -198,7 +197,8 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const decoded = jwt.verify(token, keys.ipv_public_key, {
+  const signingKey: string = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV as string;
+  const decoded = jwt.verify(token, signingKey, {
     algorithms: ["ES256"],
   });
 
