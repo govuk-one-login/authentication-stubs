@@ -54,13 +54,7 @@ export async function validateNestedJwt(
       sub: jwtAsJson.sub,
       scope: "reverification",
       state: jwtAsJson.state,
-      claims: {
-        userinfo: {
-          "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [parsedUserInfoClaimOrErrorString],
-          },
-        },
-      },
+      claims: jwtAsJson.claims,
     };
   }
 }
