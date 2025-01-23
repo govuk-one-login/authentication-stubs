@@ -12,12 +12,10 @@ Parameters:
   Environment:
     Type: String
     AllowedValues:
-      - local
-      - sandpit # not a recognizable environment to secure pipelines
-      - old-build # not a recognizable environment to secure pipelines
       - dev
       - build
       - staging
+      - build
 
   SubEnvironment:
     Type: String
