@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform: AWS::Serverless-2016-10-31
+Transform:
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
 Description: IPV stub
 
 #      Tags:
@@ -9,12 +11,30 @@ Description: IPV stub
 Parameters:
   Environment:
     Type: String
-    Description: The name of the environment to deploy to
+    AllowedValues:
+      - local
+      - sandpit # not a recognizable environment to secure pipelines
+      - old-build # not a recognizable environment to secure pipelines
+      - dev
+      - build
+      - staging
+
+  SubEnvironment:
+    Type: String
+    Description: >
+      When deploying to dev, optionally configure which sub-environment to deploy to
+      i.e. authdev1, authdev2. This feature is not available for route-to-live environments
     Default: none
+    AllowedValues:
+      - none
+      - authdev1
+      - authdev2
+
   CodeSigningConfigArn:
     Type: String
     Description: The ARN of the Code Signing Config to use, provided by the deployment pipeline
     Default: none
+
   PermissionsBoundary:
     Type: String
     Description: The ARN of the permissions boundary to apply when creating IAM roles
@@ -25,26 +45,36 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::1661d241-ef9e-4b64-8584-3941f64e88c0}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::7dfe59aa-655f-4117-b60e-b6189127057f}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::3b1e0933-dbeb-4e04-9576-3810e47169a6}}"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
       hostedZoneId: "Z01488663SVMGDFYGEX88"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev1/stubs/ipv-stub-private-key::::ea3de3c0-a3bb-41f6-9df6-dbf73ee9f75f}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::9245577a-2180-47c9-a944-213d864d75e8}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::b1ba8354-7f9e-4770-98e8-1016bdff58a4}}"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
       hostedZoneId: "Z0283478G72QVGV7VVBG"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev2/stubs/ipv-stub-private-key::::78c42d33-23d3-4bc3-865a-1df55660a5bb}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
   UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
-  CreateIPVDNSrecord:
-    Fn::Or:
+  UseSubEnvironment:
+    Fn::And:
       - Fn::Equals:
           - !Ref Environment
-          - "authdev1"
-      - Fn::Equals:
-          - !Ref Environment
-          - "authdev2"
+          - dev
+      - Fn::Not:
+          - Fn::Equals:
+              - !Ref SubEnvironment
+              - none
 
 Globals:
   Function:
@@ -169,16 +199,40 @@ Resources:
         LogGroup: !Ref IPVStubAuthorizeLambdaLogGroup
       Environment:
         Variables:
-          ENVIRONMENT: !Sub ${Environment}
-          IPV_PRIVATE_ENCRYPTION_KEY: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/ipv-stub-private-key:SecretString}}"
-          AUTH_PUBLIC_SIGNING_KEY_EVCS: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-evcs-public-signing-key:SecretString}}"
-          AUTH_PUBLIC_SIGNING_KEY_IPV: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-reverification-public-signing-key:SecretString}}"
+          ENVIRONMENT: !If
+            - UseSubEnvironment
+            - !Ref SubEnvironment
+            - !Ref Environment
+          IPV_PRIVATE_ENCRYPTION_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - ipvprivateencryptionkey
+          AUTH_PUBLIC_SIGNING_KEY_EVCS: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authpublicsigningkeyevcs
+          AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authpublicsigningkeyipv
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref ReverificationTable
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/${Environment}/ipv-stub-private-key-*"
+            SecretArn: !Sub
+              - "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/${env}/stubs/ipv-stub-private-key-*"
+              - env:
+                  !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       Events:
         Get:
           Type: Api
@@ -207,7 +261,9 @@ Resources:
   IPVStubAuthorizeLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-authorize"
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-authorize"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
   IPVStubTokenLambda:
@@ -218,8 +274,17 @@ Resources:
         LogGroup: !Ref IPVStubTokenLambdaLogGroup
       Environment:
         Variables:
-          ENVIRONMENT: !Sub ${Environment}
-          AUTH_PUBLIC_SIGNING_KEY_IPV: !Sub "{{resolve:secretsmanager:/${Environment}/stubs/auth-reverification-public-signing-key:SecretString}}"
+          ENVIRONMENT: !If
+            - UseSubEnvironment
+            - !Ref SubEnvironment
+            - !Ref Environment
+          AUTH_PUBLIC_SIGNING_KEY_IPV: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authpublicsigningkeyipv
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -243,7 +308,9 @@ Resources:
   IPVStubTokenLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-token"
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-token"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
   IPVStubReverificationLambda:
@@ -254,7 +321,10 @@ Resources:
         LogGroup: !Ref IPVStubReverificationLambdaLogGroup
       Environment:
         Variables:
-          ENVIRONMENT: !Sub ${Environment}
+          ENVIRONMENT: !If
+            - UseSubEnvironment
+            - !Ref SubEnvironment
+            - !Ref Environment
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBReadPolicy:
@@ -278,13 +348,17 @@ Resources:
   IPVStubReverificationLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-ipv-stub-reverification"
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-reverification"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
   ReverificationTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${Environment}-AuthIpvStub-Reverification
+      TableName: !Sub
+        - "${env}-AuthIpvStub-Reverification"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       KeySchema:
         - AttributeName: ReverificationId
           KeyType: HASH
@@ -302,12 +376,13 @@ Resources:
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      DomainName:
-        !FindInMap [
-          EnvironmentConfiguration,
-          !Ref Environment,
-          ipvStubDomainName,
-        ]
+      DomainName: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - ipvStubDomainName
       SecurityPolicy: TLS_1_2
       RegionalCertificateArn: !Ref Certificate
       EndpointConfiguration:
@@ -317,33 +392,32 @@ Resources:
   Certificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName:
-        !FindInMap [
-          EnvironmentConfiguration,
-          !Ref Environment,
-          ipvStubDomainName,
-        ]
+      DomainName: !FindInMap
+        - EnvironmentConfiguration
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
+        - ipvStubDomainName
       ValidationMethod: DNS
 
   # todo
   # currently route 53 dns records  and ACM vadiladation is done Manaully in old dev accountfor DEV Env.
-# Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
-
-
+  # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
 
   IPVdnsrecordsubdomain:
     Type: AWS::Route53::RecordSet
-    Condition: CreateIPVDNSrecord
+    Condition: UseSubEnvironment
     Properties:
-      HostedZoneId:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, hostedZoneId]
+      HostedZoneId: !FindInMap
+        - EnvironmentConfiguration
+        - !Ref SubEnvironment
+        - hostedZoneId
       Type: A
-      Name:
-        !FindInMap [
-          EnvironmentConfiguration,
-          !Ref Environment,
-          ipvStubDomainName,
-        ]
+      Name: !FindInMap
+        - EnvironmentConfiguration
+        - !Ref SubEnvironment
+        - ipvStubDomainName
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
         HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
