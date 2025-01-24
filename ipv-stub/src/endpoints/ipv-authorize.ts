@@ -95,6 +95,11 @@ async function post(
     ? Object.fromEntries(new URLSearchParams(event.body))
     : {};
 
+  const redirectUri = parsedBody["redirect_uri"];
+  if (!redirectUri) {
+    throw new CodedError(500, "redirect_uri not found");
+  }
+
   const state = parsedBody["state"];
   if (!state) {
     throw new CodedError(500, "state not found");
