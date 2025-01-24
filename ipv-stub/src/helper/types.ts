@@ -3,6 +3,7 @@ export type DecodedRequest = {
   scope: string;
   state: string;
   claims: DecodedUserInfoClaim;
+  redirect_uri: string;
 };
 
 export type DecodedUserInfoClaim = {

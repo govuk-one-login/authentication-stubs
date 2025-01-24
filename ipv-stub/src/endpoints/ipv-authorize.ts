@@ -13,8 +13,7 @@ import {
   successfulJsonResult,
 } from "../helper/result-helper";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
-import { validateNestedJwt } from "../helper/jwt-validator";
-import { ROOT_URI } from "../data/ipv-dummy-constants";
+import { validateAuthorisationJwt } from "../helper/jwt-validator";
 import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
 import { randomBytes } from "crypto";
 import { processJoseError } from "../helper/error-helper";
@@ -70,7 +69,7 @@ async function get(
 
   const encodedJwt = plaintext.toString();
 
-  const parsedRequestOrError = await validateNestedJwt(encodedJwt);
+  const parsedRequestOrError = await validateAuthorisationJwt(encodedJwt);
 
   if (typeof parsedRequestOrError === "string") {
     throw new CodedError(400, parsedRequestOrError);
@@ -85,8 +84,6 @@ async function get(
 async function post(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-  const redirectUri = `${ROOT_URI}/ipv/callback/authorize`;
-
   if (event.body == null) {
     throw new CodedError(400, "Missing request body");
   }

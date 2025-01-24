@@ -1,6 +1,6 @@
 import chai from "chai";
 import { describe } from "mocha";
-import { validateNestedJwt } from "../../src/helper/jwt-validator";
+import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
 import * as jose from "jose";
 import { CompactSign } from "jose";
 import keys from "../../src/data/keys.json";
@@ -107,7 +107,7 @@ describe("isValidJwt", async () => {
       sub: sub,
     };
 
-    expect(await validateNestedJwt(validSampleJws)).to.be.deep.eq(
+    expect(await validateAuthorisationJwt(validSampleJws)).to.be.deep.eq(
       expectedParsedJwt
     );
   });
@@ -132,8 +132,8 @@ describe("isValidJwt", async () => {
       }
     );
     const expectedErrorMessage =
-      "Scope in request payload must be verification";
-    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+      "Scope in request payload must be reverification";
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedErrorMessage);
   });
 
   it("the jwt does not contain a claims field", async () => {
@@ -144,7 +144,7 @@ describe("isValidJwt", async () => {
       undefined
     );
     const expectedErrorMessage = "Request payload is missing user info claim";
-    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedErrorMessage);
   });
 
   it("the jwt does not contain a userinfo claim", async () => {
@@ -155,7 +155,7 @@ describe("isValidJwt", async () => {
       {}
     );
     const expectedErrorMessage = "Request payload is missing user info claim";
-    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedErrorMessage);
   });
 
   it("the payload does not contain a state field", async () => {
@@ -178,7 +178,7 @@ describe("isValidJwt", async () => {
       }
     );
     const expectedErrorMessage = "Payload must contain state";
-    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedErrorMessage);
   });
 
   it("the payload does not contain a sub field", async () => {
@@ -196,7 +196,7 @@ describe("isValidJwt", async () => {
       },
     });
     const expectedErrorMessage = "Payload must contain sub";
-    expect(await validateNestedJwt(jws)).to.eq(expectedErrorMessage);
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedErrorMessage);
   });
 
   it("should return false if access token payload scope is not reverification", async () => {
@@ -229,7 +229,7 @@ describe("isValidJwt", async () => {
       },
     });
 
-    expect(await validateNestedJwt(jws)).to.eq(expectedError);
+    expect(await validateAuthorisationJwt(jws)).to.eq(expectedError);
   });
 });
 
