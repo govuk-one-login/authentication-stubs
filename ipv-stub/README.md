@@ -52,15 +52,4 @@ Default region name [None]: eu-west-2
 
 ## Deploying
 
-authdev1 and authdev2 [samconfig.toml](samconfig.toml) configuration with mapping in [template.yaml](template.yaml)
-To build and deploy in Authdev's Env , run the following command:
-
-```bash
-cd ipv-stub
-```
-
-```bash
-sam build && sam deploy --config-env <env>
-```
-
-To deploy stubs that integrate with secure pipelines use GitHub workflow [Build and deploy IPV stub to Dev](https://github.com/govuk-one-login/authentication-stubs/actions/workflows/dev-deploy-ipv-stub.yaml) Instead.
+To deploy stubs use GitHub workflow using secure pipelines [Build and deploy IPV stub to Dev](https://github.com/govuk-one-login/authentication-stubs/actions/workflows/dev-deploy-ipv-stub.yaml) Instead.
