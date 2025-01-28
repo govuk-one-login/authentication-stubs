@@ -8,7 +8,7 @@ import { CodedError } from "./result-helper";
 import process from "node:process";
 import { processJoseError } from "./error-helper";
 
-export async function validateNestedJwt(
+export async function validateAuthorisationJwt(
   nestedJws: string
 ): Promise<DecodedRequest | string> {
   const authSignaturePublicKeyIpv = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
@@ -27,45 +27,43 @@ export async function validateNestedJwt(
 
   const decodedPayload = new TextDecoder().decode(payload);
 
-  const jwtAsJson = JSON.parse(decodedPayload);
+  const authoriseRequestAsJson = JSON.parse(decodedPayload);
 
-  if (jwtAsJson.scope !== "reverification") {
-    return "Scope in request payload must be verification";
+  if (authoriseRequestAsJson.scope !== "reverification") {
+    return "Scope in request payload must be reverification";
   }
-  if (jwtAsJson.state === undefined) {
+  if (authoriseRequestAsJson.state === undefined) {
     return "Payload must contain state";
   }
-  if (jwtAsJson.sub === undefined) {
+  if (authoriseRequestAsJson.sub === undefined) {
     return "Payload must contain sub";
   }
-  const hasUserInfoClaim = jwtAsJson.claims?.userinfo != undefined;
+  const hasUserInfoClaim = authoriseRequestAsJson.claims?.userinfo != undefined;
 
   if (!hasUserInfoClaim) {
     return "Request payload is missing user info claim";
   }
 
-  const parsedUserInfoClaimOrErrorString = await validateStorageAccessToken(
-    jwtAsJson.claims.userinfo
-  );
-  if (typeof parsedUserInfoClaimOrErrorString === "string") {
-    return parsedUserInfoClaimOrErrorString;
+  const storageAccessTokenJWTOrErrorString =
+    await validateStorageAccessTokenJWT(authoriseRequestAsJson.claims.userinfo);
+
+  if (typeof storageAccessTokenJWTOrErrorString === "string") {
+    return storageAccessTokenJWTOrErrorString;
   } else {
-    return {
-      sub: jwtAsJson.sub,
-      scope: "reverification",
-      state: jwtAsJson.state,
-      claims: {
-        userinfo: {
-          "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [parsedUserInfoClaimOrErrorString],
-          },
-        },
-      },
+    const storageAccessTokenClaimName =
+      "https://vocab.account.gov.uk/v1/storageAccessToken";
+
+    authoriseRequestAsJson.claims.userinfo[storageAccessTokenClaimName] = {
+      values: [],
     };
+    authoriseRequestAsJson.claims.userinfo[
+      storageAccessTokenClaimName
+    ].values.push(storageAccessTokenJWTOrErrorString);
+    return authoriseRequestAsJson;
   }
 }
 
-async function validateStorageAccessToken(
+async function validateStorageAccessTokenJWT(
   userInfo: EncodedUserInfoClaim
 ): Promise<DecodedStorageAccessToken | string> {
   const hasAccessTokenValues =
