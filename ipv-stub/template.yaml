@@ -61,6 +61,13 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
 
+    build:
+      ipvStubDomainName: ipvstub.signin.build.account.gov.uk
+      hostedZoneId: "Z09720813AWZDQSXZBWKJ"
+      ipvprivateencryptionkey: ""
+      authpublicsigningkeyevcs: ""
+      authpublicsigningkeyipv: ""
+
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
   UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]

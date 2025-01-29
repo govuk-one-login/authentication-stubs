@@ -1,0 +1,48 @@
+name: Build and deploy IPV stub
+
+on:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./ipv-stub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up SAM cli
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true  # this caches installation but is only available on Linux x86-64 runners
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IPV_STUB_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: SAM validate
+        run: sam validate
+
+      - name: SAM build and test
+        run: sam build
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@v3.9.2
+        with:
+            artifact-bucket-name: ${{ secrets.IPV_STUB_ARTIFACT_BUCKET_NAME }}
+            signing-profile-name: ${{ secrets.IPV_STUB_SIGNING_PROFILE_NAME }}
+            working-directory: ./ipv-stub/.aws-sam/build
