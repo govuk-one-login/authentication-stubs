@@ -1,9 +1,7 @@
 name: Build and deploy IPV stub
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 defaults:
   run:
