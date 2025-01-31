@@ -64,9 +64,9 @@ Mappings:
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      ipvprivateencryptionkey: ""
-      authpublicsigningkeyevcs: ""
-      authpublicsigningkeyipv: ""
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key:SecretString}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key:SecretString}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key:SecretString}}"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -407,7 +407,7 @@ Resources:
       ValidationMethod: DNS
 
   # todo
-  # currently route 53 dns records  and ACM vadiladation is done Manaully in old dev accountfor DEV Env.
+  # currently route 53 dns records  and ACM validation is done Manaully in old auth account for DEV and BUILD Env.
   # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
 
   IPVdnsrecordsubdomain:
