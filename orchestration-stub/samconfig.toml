@@ -36,5 +36,5 @@ s3_prefix = "build-orch-stub"
 region = "eu-west-2"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"old-build\""
+parameter_overrides = "Environment=\"new-build\""
 image_repositories = []
