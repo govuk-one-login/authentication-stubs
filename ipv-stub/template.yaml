@@ -38,35 +38,16 @@ Parameters:
     Description: The ARN of the permissions boundary to apply when creating IAM roles
     Default: none
 
+#TODO: need to set up localstack environment variables for secrets and other things with environment specific values
+
 Mappings:
   EnvironmentConfiguration:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::1661d241-ef9e-4b64-8584-3941f64e88c0}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::7dfe59aa-655f-4117-b60e-b6189127057f}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::3b1e0933-dbeb-4e04-9576-3810e47169a6}}"
-
-    authdev1:
-      ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
-      hostedZoneId: "Z01488663SVMGDFYGEX88"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev1/stubs/ipv-stub-private-key::::ea3de3c0-a3bb-41f6-9df6-dbf73ee9f75f}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::9245577a-2180-47c9-a944-213d864d75e8}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::b1ba8354-7f9e-4770-98e8-1016bdff58a4}}"
-
-    authdev2:
-      ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
-      hostedZoneId: "Z0283478G72QVGV7VVBG"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev2/stubs/ipv-stub-private-key::::78c42d33-23d3-4bc3-865a-1df55660a5bb}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
-
-    build:
-      ipvStubDomainName: ipvstub.signin.build.account.gov.uk
-      hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      ipvprivateencryptionkey: ""
-      authpublicsigningkeyevcs: ""
-      authpublicsigningkeyipv: ""
+      ipvprivateencryptionkey: "key1"
+      authpublicsigningkeyevcs: "key2"
+      authpublicsigningkeyipv: "key3"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -245,12 +226,15 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: get
+          DependsOn: IPVStubAuthorizeLambda
+
         Post:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: post
+          DependsOn: IPVStubAuthorizeLambda
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -377,6 +361,7 @@ Resources:
       Tags:
         - Key: Name
           Value: Reverification
+      DependsOn: IPVStubAuthorizeLambda
 
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName

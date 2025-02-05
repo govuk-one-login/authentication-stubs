@@ -1,0 +1,10 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "MfaReset"
+resolve_s3 = true
+s3_prefix = "MfaReset"
+region = "eu-west-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"dev\" SubEnvironment=\"none\" CodeSigningConfigArn=\"none\" PermissionsBoundary=\"none\""
+image_repositories = []
+disable_rollback = true
