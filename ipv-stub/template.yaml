@@ -64,9 +64,9 @@ Mappings:
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::4f4c8ec8-4c2e-4c60-82cd-20709fc3cd89}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3cd382cb-8129-4535-8d43-696dc29623a8}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::ff6b0916-613c-4ad7-b264-357f2f218424}}"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::a45ab7d1-0832-4d81-bce1-5e87ca7b82a6}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -396,6 +396,7 @@ Resources:
 
   Certificate:
     Type: AWS::CertificateManager::Certificate
+    DependsOn: ApiGatewayLiveStage
     Properties:
       DomainName: !FindInMap
         - EnvironmentConfiguration
