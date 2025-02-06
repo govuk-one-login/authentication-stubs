@@ -43,7 +43,7 @@ Mappings:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z10132222WVQ7U47816SI"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::1661d241-ef9e-4b64-8584-3941f64e88c0}}"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::237c23b9-d524-443f-913f-8766f6f263df}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::7dfe59aa-655f-4117-b60e-b6189127057f}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::3b1e0933-dbeb-4e04-9576-3810e47169a6}}"
 
@@ -64,9 +64,9 @@ Mappings:
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      ipvprivateencryptionkey: ""
-      authpublicsigningkeyevcs: ""
-      authpublicsigningkeyipv: ""
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::a45ab7d1-0832-4d81-bce1-5e87ca7b82a6}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -396,6 +396,7 @@ Resources:
 
   Certificate:
     Type: AWS::CertificateManager::Certificate
+    DependsOn: ApiGatewayLiveStage
     Properties:
       DomainName: !FindInMap
         - EnvironmentConfiguration

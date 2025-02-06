@@ -25,10 +25,14 @@ Then use the output to construct a request e.g. http://localhost:3000/authorize?
 
 Private and public keys are be needed for decryption and signature validation.
 
-The local private key (in _parameters.json_) as well as its public key (in the encrypt helper script) have been commited deliberately.
-The key pair was generated fresh and should only be used for testing, both locally and as part of the pre-merge GitHub workflow.
+We have a set of keys in `src/data/keys.json` that are used for unit testing and can be used to generate an encrypted message locally using the `encrypt-message-locally.mjs` script.
 
-In deployed environments, the private key will be retrieved from AWS Secrets Manager, and the public key from AWS Parameter Store. This key pair is different from the one which has been commited here.
+When deployed the stub obtains the three keys that it needs from secrets manager at deployment time, see the `EnvironmentConfiguration` section of the SAM template.
+
+### Changing keys
+
+When adding a new key value to a secret the SAM template must also be updated so that the `resolve:secretsmanager` command references the new version of the secret.  We have chosen to use this mechanism of updating the secret to force a re-deploy of the lambdas which read the secrets.  Without making a change in the SAM template just changing the value of the secret will not be recognised by the lambdas.
+
 
 ## Connect to DynamoDB with IntelliJ Database Explorer
 
