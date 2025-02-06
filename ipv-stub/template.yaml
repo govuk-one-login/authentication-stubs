@@ -64,7 +64,7 @@ Mappings:
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::a45ab7d1-0832-4d81-bce1-5e87ca7b82a6}}"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::b0570d70-75ea-447a-929d-d678c39ede1c}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
 
