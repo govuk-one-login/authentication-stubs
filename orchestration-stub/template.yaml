@@ -287,35 +287,6 @@ Mappings:
       defaultProvisionedConcurrency: 0
       lambdaMemorySize: "128"
 
-    old-build:
-      cookieDomain: .build.account.gov.uk
-      stubDomain: orchstub-old.signin.build.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApLJWOHz7uHLinSJr8XM0
-        fhyq0aLm8HP06lCT7csGUoRav2xybsCsypufvJHbuD5SLkg25/VGFt21KH2g60u8
-        6mV7ULLG/m4hvAiXbwSGdcRTToPS+UULX3YDnDXZHvd+3ypane82+XLjVZ9B2V0i
-        1MGCJ7kiRurXCuE+9Kx/MQYBCqhz/OwHlCe3FJZXKvgnqqpO5ZtyjrxDJSZJpxbi
-        KsVnLksPKV10Z0/XvpJ6oHtOjseetk8TRdekRWBvqCX5MqLjdi1TfiaDu2Tjg2N0
-        dqhoDR3/THktb4KThc+U5EOWCWpH4OIAetYtjFChnkR8kU05Ol9zfdR08uO0RxMk
-        1wIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-06431beae9b136e15"
-      subnetBId: "subnet-016db45a259212743"
-      subnetCId: "subnet-0f595928b921f038a"
-      endpointSgId: "sg-0ac202c3d996f3ad8"
-      redisSgId: "sg-05ff2238b12306a34"
-      vpcId: "vpc-03db44fa71b8d00b2"
-      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}"
-      authenticationBackendUrl: "https://fag06zqnve-vpce-02837b184c6538fce.execute-api.eu-west-2.amazonaws.com/build/"
-      authenticationFrontendUrl: "https://signin.build.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
-      hostedZoneId: "Z099220113UW2JSCXBNRI"
-      rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
-      rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 0
-      lambdaMemorySize: "128"
-
     build:
       cookieDomain: .build.account.gov.uk
       stubDomain: orchstub.signin.build.account.gov.uk
@@ -329,21 +300,21 @@ Mappings:
         dqhoDR3/THktb4KThc+U5EOWCWpH4OIAetYtjFChnkR8kU05Ol9zfdR08uO0RxMk
         1wIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-06431beae9b136e15"
-      subnetBId: "subnet-016db45a259212743"
-      subnetCId: "subnet-0f595928b921f038a"
-      endpointSgId: "sg-0ac202c3d996f3ad8"
+      subnetAId: "subnet-03d50d98f5a4829cc"
+      subnetBId: "subnet-055927eafb2d73cd3"
+      subnetCId: "subnet-0778a9775ee5845a3"
+      endpointSgId: "sg-022ad00847f2dc9be"
       redisSgId: "sg-05ff2238b12306a34"
-      vpcId: "vpc-03db44fa71b8d00b2"
-      privateKey: "{{resolve:secretsmanager:buildsp-orchestration-stub-private-key::::fd77a65b-d350-49f8-96d3-95c854e71adf}}"
-      authenticationBackendUrl: "https://fag06zqnve-vpce-02837b184c6538fce.execute-api.eu-west-2.amazonaws.com/build/"
+      vpcId: "vpc-095e2f57f31498e5d"
+      privateKey: "{{resolve:secretsmanager:build-orchestration-stub-private-key::::00dc89e1-b4de-4be8-9ad2-d8f8dcc46434}}"
+      authenticationBackendUrl: "https://fag06zqnve-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/"
       authenticationFrontendUrl: "https://signin-sp.build.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::c8c021d9-f981-4ddf-9e1d-eab8234e4807}}"
-      hostedZoneId: "Z099220113UW2JSCXBNRI"
+      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::1760a81f-0aff-4df0-8dee-7341be6543d2}}"
+      hostedZoneId: "Z09720813AWZDQSXZBWKJ"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
       rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 0
-      lambdaMemorySize: "512"
+      lambdaMemorySize: "128"
 
     staging:
       cookieDomain: .staging.account.gov.uk
@@ -358,17 +329,17 @@ Mappings:
         pi0FWWzbnn9UcbdcS/Sl5UeuTyCQ+MrunV/XGjIrPMWaFUIQomX1+pCMHkthbQ0J
         AQIDAQAB
         -----END PUBLIC KEY-----
-      subnetAId: "subnet-05a8324e95078935b"
-      subnetBId: "subnet-0ab32f8faa3150e2f"
-      subnetCId: "subnet-04526c509b7d3363f"
-      endpointSgId: "sg-0c5c165f4c8cb47af"
+      subnetAId: "subnet-096c40365bf722fe9"
+      subnetBId: "subnet-0998c876e86131a63"
+      subnetCId: "subnet-0ff5a12cce4d4228f"
+      endpointSgId: "sg-01743a16df7d6136b"
       redisSgId: "sg-0b580ccddb50eb178"
-      vpcId: "vpc-0ca40c7d13490419d"
-      privateKey: "{{resolve:secretsmanager:stagingsp-orchestration-stub-private-key::::a31a76f2-4209-41e5-8f99-7d318f536985}}"
-      authenticationBackendUrl: "https://rr86yg3r28-vpce-0339d04aeb67de9da.execute-api.eu-west-2.amazonaws.com/staging/"
+      vpcId: "vpc-07cf1e76e27f28e86"
+      privateKey: "{{resolve:secretsmanager:staging-orchestration-stub-private-key::::c1f83296-2f8d-458c-8542-f3c919e9be8c}}"
+      authenticationBackendUrl: "https://rr86yg3r28-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
       authenticationFrontendUrl: "https://signin.staging.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::bc07829a-baee-4063-a971-430a0a7f4650}}"
-      hostedZoneId: "Z02212762LL4X7ZM4JYAT"
+      redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::9af2bcd3-bc3d-4044-90db-7a505917fa58}}"
+      hostedZoneId: "Z06032813E21PC11LZZAB"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 3
@@ -404,7 +375,7 @@ Resources:
         - lambdaMemorySize
       VpcConfig:
         SecurityGroupIds:
-          - !Ref SecurityGroup
+          - !Ref LambdaSecurityGroup
         SubnetIds:
           - !FindInMap
             - EnvironmentConfiguration
@@ -528,7 +499,7 @@ Resources:
         - lambdaMemorySize
       VpcConfig:
         SecurityGroupIds:
-          - !Ref SecurityGroup
+          - !Ref LambdaSecurityGroup
         SubnetIds:
           - !FindInMap
             - EnvironmentConfiguration
@@ -597,7 +568,7 @@ Resources:
         Sourcemap: true
         Target: "es2020"
 
-  SecurityGroup:
+  LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: "Orchestration Stub"
