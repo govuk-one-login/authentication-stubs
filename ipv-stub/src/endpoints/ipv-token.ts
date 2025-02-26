@@ -77,6 +77,7 @@ type ValidatedClaims = Record<"iss" | "sub" | "aud" | "jti" | "exp", string>;
 async function parsePayload(
   clientAssertion: string
 ): Promise<Result<JwtPayload>> {
+  logger.info("AIDAN - client assertion passed to parse payload: " + clientAssertion);
   const claims: JwtPayload = await verifyJWT(clientAssertion);
   const obfuscatedClientAssertion = {
     ...claims,
@@ -171,11 +172,16 @@ async function handle(
   const parsedClaims: Result<JwtPayload> = await parsePayload(
     validatedParameters["client_assertion"] as string
   );
+
+  logger.info("AIDAN - parsedClaims: " + parsedClaims)
+
   if (!parsedClaims.ok) return parsedClaims.error;
 
   const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
 
   reverificationResult.sub = <string>validatedClaims["sub"];
+
+  logger.info("AIDAN - sub post parsing: " + reverificationResult.sub)
 
   const result: PutCommandOutput = await putReverificationWithAccessToken(
     accessToken,
