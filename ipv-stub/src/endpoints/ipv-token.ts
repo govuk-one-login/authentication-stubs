@@ -179,9 +179,9 @@ async function handle(
 
   const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
 
-  reverificationResult.sub = <string>validatedClaims["sub"];
-
-  logger.info("AIDAN - sub post parsing: " + reverificationResult.sub)
+  // reverificationResult.sub = <string>validatedClaims["sub"];
+  //
+  // logger.info("AIDAN - sub post parsing: " + reverificationResult.sub)
 
   const result: PutCommandOutput = await putReverificationWithAccessToken(
     accessToken,
