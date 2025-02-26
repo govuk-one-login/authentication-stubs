@@ -105,11 +105,15 @@ async function post(
   const authCode = base64url.encode(randomBytes(32));
   const sub = parsedBody["sub"];
 
+  logger.info("The sub is: " + sub)
+
   const url = new URL(redirectUri);
   url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
   const response = parsedBody["response"];
+
+  logger.info("The response: " + response)
 
   const reverification: Reverification = {
     sub,
