@@ -175,8 +175,6 @@ async function handle(
 
   const validatedClaims: Partial<JwtPayload> = parsedClaims.value;
 
-  reverificationResult.sub = <string>validatedClaims["sub"];
-
   const result: PutCommandOutput = await putReverificationWithAccessToken(
     accessToken,
     reverificationResult
