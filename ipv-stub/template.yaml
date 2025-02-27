@@ -409,7 +409,6 @@ Resources:
 
   IPVdnsrecordsubdomain:
     Type: AWS::Route53::RecordSet
-    Condition: UseSubEnvironment
     Properties:
       HostedZoneId: !FindInMap
         - EnvironmentConfiguration
