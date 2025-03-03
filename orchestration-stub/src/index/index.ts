@@ -172,10 +172,15 @@ const post = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const form = parseRequestParameters(event.body);
+  const previousSessionId = getCookie(event.headers["cookie"], "gs")?.split(
+    ".",
+  )[0];
   const gsCookie = await setUpSession(event.headers, form);
+
+  //Isn't the journeyId the at index [1]?
   const journeyId = gsCookie.split(".")[0];
   const signingPrivKey = await getPrivateKey();
-  const payload = jarPayload(form, journeyId);
+  const payload = jarPayload(form, journeyId, previousSessionId);
   const jws = await signRequestObject(payload, signingPrivKey);
   const jwe = await encryptRequestObject(jws, await sandpitFrontendPublicKey());
 
@@ -199,7 +204,11 @@ const post = async (
   };
 };
 
-const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
+const jarPayload = (
+  form: RequestParameters,
+  journeyId: string,
+  previousSessionId: string | undefined,
+): JWTPayload => {
   const claim = {
     userinfo: {
       salt: "",
@@ -240,6 +249,10 @@ const jarPayload = (form: RequestParameters, journeyId: string): JWTPayload => {
     payload["current_credential_strength"] = credentialTrustToEnum(
       form.authenticatedLevel,
     );
+  }
+
+  if (previousSessionId) {
+    payload["previous_session_id"] = previousSessionId;
   }
   return payload;
 };
