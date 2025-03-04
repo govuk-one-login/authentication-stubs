@@ -308,7 +308,7 @@ Mappings:
       vpcId: "vpc-095e2f57f31498e5d"
       privateKey: "{{resolve:secretsmanager:build-orchestration-stub-private-key::::00dc89e1-b4de-4be8-9ad2-d8f8dcc46434}}"
       authenticationBackendUrl: "https://fag06zqnve-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/"
-      authenticationFrontendUrl: "https://signin-sp.build.account.gov.uk/"
+      authenticationFrontendUrl: "https://signin.build.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::1760a81f-0aff-4df0-8dee-7341be6543d2}}"
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
