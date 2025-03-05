@@ -42,7 +42,7 @@ Mappings:
   EnvironmentConfiguration:
     dev:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
-      hostedZoneId: "Z10132222WVQ7U47816SI"
+      hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::237c23b9-d524-443f-913f-8766f6f263df}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::7dfe59aa-655f-4117-b60e-b6189127057f}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::3b1e0933-dbeb-4e04-9576-3810e47169a6}}"
@@ -407,22 +407,23 @@ Resources:
         - ipvStubDomainName
       ValidationMethod: DNS
 
-  # todo
-  # currently route 53 dns records  and ACM vadiladation is done Manaully in old dev accountfor DEV Env.
-  # Once the signin.dev.account.gov.uk zone is migrated to new dev account we need to bring this is Code
-
   IPVdnsrecordsubdomain:
     Type: AWS::Route53::RecordSet
-    Condition: UseSubEnvironment
     Properties:
       HostedZoneId: !FindInMap
         - EnvironmentConfiguration
-        - !Ref SubEnvironment
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
         - hostedZoneId
       Type: A
       Name: !FindInMap
         - EnvironmentConfiguration
-        - !Ref SubEnvironment
+        - !If
+          - UseSubEnvironment
+          - !Ref SubEnvironment
+          - !Ref Environment
         - ipvStubDomainName
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
