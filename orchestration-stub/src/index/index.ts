@@ -156,6 +156,41 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </div>
     </fieldset>
     </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h4 class="govuk-fieldset__heading">
+                Cookie Consent
+            </h4>
+        </legend>
+        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="cookie-consent-none" name="cookie-consent" type="radio" value="none" checked>
+                <label class="govuk-label govuk-radios__label" for="cookie-consent-none">
+                    none
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="cookie-consent-accept" name="cookie-consent" type="radio" value="accept">
+                <label class="govuk-label govuk-radios__label" for="cookie-consent-accept">
+                    accept
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="cookie-consent-reject" name="cookie-consent" type="radio" value="reject">
+                <label class="govuk-label govuk-radios__label" for="cookie-consent-reject">
+                    reject
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="cookie-consent-not-engaged" name="cookie-consent" type="radio" value="not-engaged">
+                <label class="govuk-label govuk-radios__label" for="cookie-consent-not-engaged">
+                    not engaged
+                </label>
+            </div>
+        </div>
+    </fieldset>
+    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
@@ -237,6 +272,8 @@ const jarPayload = (
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
+    vtr_list: `[${form.confidence}]`,
+    scope: "openid email phone",
   };
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
@@ -253,6 +290,9 @@ const jarPayload = (
 
   if (previousSessionId) {
     payload["previous_session_id"] = previousSessionId;
+  }
+  if (form.cookieConsent !== "none") {
+    payload["cookie_consent"] = form.cookieConsent;
   }
   return payload;
 };
