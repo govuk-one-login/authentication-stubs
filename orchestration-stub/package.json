@@ -6,7 +6,7 @@
   },
   "description": "Orchestration stub for Authentication",
   "devDependencies": {
-    "@babel/core": "7.26.9",
+    "@babel/core": "7.26.10",
     "@babel/preset-env": "7.26.9",
     "@babel/preset-typescript": "7.26.0",
     "@eslint/eslintrc": "^3.2.0",
