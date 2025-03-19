@@ -260,7 +260,7 @@ Mappings:
 
     dev:
       cookieDomain: .dev.account.gov.uk
-      stubDomain: orchstub-new.signin.dev.account.gov.uk
+      stubDomain: orchstub.signin.dev.account.gov.uk
       authPubKey: |
         -----BEGIN PUBLIC KEY-----
         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0PcOHuVXOuexYZmpOlCo
