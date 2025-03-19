@@ -44,8 +44,8 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::237c23b9-d524-443f-913f-8766f6f263df}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::7dfe59aa-655f-4117-b60e-b6189127057f}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::3b1e0933-dbeb-4e04-9576-3810e47169a6}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::b1378a0e-fc3e-44cb-8228-2bd73b23bca1}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::e1f50b13-1ea9-4a1d-b735-2b4fed54b551}}"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
