@@ -272,7 +272,7 @@ const jarPayload = (
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
-    vtr_list: `[${form.confidence}]`,
+    vtr: `["${form.confidence}"]`,
     scope: "openid email phone",
   };
   if (form["reauthenticate"] !== "") {
