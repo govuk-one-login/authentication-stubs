@@ -20,9 +20,10 @@ import {
 } from "../services/request-parameters";
 import { credentialTrustToEnum } from "../types/credential-trust";
 import { AccountStateEnum } from "../types/account-state";
-
+const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
+const RP_REDIRECT_URI = "https://a.example.com/redirect";
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   downcaseHeaders(event);
   const method = event.httpMethod.toUpperCase();
@@ -204,11 +205,11 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
 };
 
 const post = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const form = parseRequestParameters(event.body);
   const previousSessionId = getCookie(event.headers["cookie"], "gs")?.split(
-    "."
+    ".",
   )[0];
   const gsCookie = await setUpSession(event.headers, form);
 
@@ -242,7 +243,7 @@ const post = async (
 const jarPayload = (
   form: RequestParameters,
   journeyId: string,
-  previousSessionId: string | undefined
+  previousSessionId: string | undefined,
 ): JWTPayload => {
   const claim = {
     userinfo: {
@@ -260,7 +261,7 @@ const jarPayload = (
     rp_client_id: process.env.RP_CLIENT_ID,
     rp_sector_host: process.env.RP_SECTOR_HOST,
     rp_redirect_uri: "https://a.example.com/redirect",
-    rp_state: "state",
+    rp_state: RP_STATE,
     client_name: "client",
     cookie_consent_shared: true,
     is_one_login_service: false,
@@ -284,7 +285,7 @@ const jarPayload = (
 
   if (form.authenticatedLevel) {
     payload["current_credential_strength"] = credentialTrustToEnum(
-      form.authenticatedLevel
+      form.authenticatedLevel,
     );
   }
 
@@ -302,7 +303,7 @@ const sandpitFrontendPublicKey = async () =>
 
 const signRequestObject = async (
   payload: JWTPayload,
-  signingPrivKey: jose.KeyLike
+  signingPrivKey: jose.KeyLike,
 ) => {
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: "ES256" })
@@ -322,7 +323,7 @@ const encryptRequestObject = async (jws: string, encPubKey: jose.KeyLike) =>
 
 const setUpSession = async (
   headers: APIGatewayProxyEventHeaders,
-  config: RequestParameters
+  config: RequestParameters,
 ) => {
   const newSessionId = crypto.randomBytes(20).toString("base64url");
   const newClientSessionId = crypto.randomBytes(20).toString("base64url");
@@ -347,24 +348,26 @@ const setUpSession = async (
 
 const createNewClientSession = async (
   id: string,
-  config: RequestParameters
+  config: RequestParameters,
 ) => {
   const client = await getRedisClient();
+  var auth_request_params: { [key: string]: string[] } = {
+    vtr: [`[${config.confidence}]`],
+    scope: ["openid email phone"],
+    response_type: ["code"],
+    redirect_uri: [RP_REDIRECT_URI],
+    state: [RP_STATE],
+    prompt: ["none"],
+    nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
+    client_id: [process.env.RP_CLIENT_ID!],
+  };
+  if (config.cookieConsent) {
+    auth_request_params["cookie_consent"] = [config.cookieConsent];
+  }
   const clientSession: ClientSession = {
     creation_time: new Date(),
     client_name: "Example RP",
-    auth_request_params: {
-      vtr: [`[${config.confidence}]`],
-      scope: ["openid email phone"],
-      response_type: ["code"],
-      redirect_uri: [
-        "https://rp-dev.build.stubs.account.gov.uk/oidc/authorization-code/callback",
-      ],
-      state: ["dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY"],
-      prompt: ["none"],
-      nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
-      client_id: [process.env.RP_CLIENT_ID!],
-    },
+    auth_request_params,
     effective_vector_of_trust: {
       credential_trust_level: credentialTrustToEnum(config.confidence),
     },
@@ -372,7 +375,7 @@ const createNewClientSession = async (
   await client.setEx(
     `client-session-${id}`,
     3600,
-    JSON.stringify(clientSession)
+    JSON.stringify(clientSession),
   );
 };
 
@@ -382,7 +385,7 @@ const createNewSession = async (id: string, config: RequestParameters) => {
     code_request_count_map: {},
     authenticated: config.authenticated,
     current_credential_strength: credentialTrustToEnum(
-      config.authenticatedLevel
+      config.authenticatedLevel,
     ),
     is_new_account: AccountStateEnum.UNKNOWN,
   };
@@ -393,7 +396,7 @@ const createNewSession = async (id: string, config: RequestParameters) => {
 const renameExistingSession = async (
   existingSessionId: string,
   newSessionId: string,
-  config: RequestParameters
+  config: RequestParameters,
 ) => {
   const client = await getRedisClient();
   const existingSession = await getSession(existingSessionId);
@@ -401,14 +404,14 @@ const renameExistingSession = async (
   existingSession.session_id = newSessionId;
   existingSession.authenticated = config.authenticated;
   existingSession.current_credential_strength = credentialTrustToEnum(
-    config.authenticatedLevel
+    config.authenticatedLevel,
   );
   await client.setEx(newSessionId, 3600, JSON.stringify(existingSession));
 };
 
 const attachClientSessionToSession = async (
   clientSessionId: string,
-  sessionId: string
+  sessionId: string,
 ) => {
   const client = await getRedisClient();
   const session = await getSession(sessionId);
