@@ -22,7 +22,7 @@ import { credentialTrustToEnum } from "../types/credential-trust";
 import { AccountStateEnum } from "../types/account-state";
 
 export const handler = async (
-  event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   downcaseHeaders(event);
   const method = event.httpMethod.toUpperCase();
@@ -204,11 +204,11 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
 };
 
 const post = async (
-  event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const form = parseRequestParameters(event.body);
   const previousSessionId = getCookie(event.headers["cookie"], "gs")?.split(
-    ".",
+    "."
   )[0];
   const gsCookie = await setUpSession(event.headers, form);
 
@@ -242,7 +242,7 @@ const post = async (
 const jarPayload = (
   form: RequestParameters,
   journeyId: string,
-  previousSessionId: string | undefined,
+  previousSessionId: string | undefined
 ): JWTPayload => {
   const claim = {
     userinfo: {
@@ -272,7 +272,7 @@ const jarPayload = (
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
-    vtr: `["${form.confidence}"]`,
+    vtr: [`${form.confidence}`],
     scope: "openid email phone",
   };
   if (form["reauthenticate"] !== "") {
@@ -284,7 +284,7 @@ const jarPayload = (
 
   if (form.authenticatedLevel) {
     payload["current_credential_strength"] = credentialTrustToEnum(
-      form.authenticatedLevel,
+      form.authenticatedLevel
     );
   }
 
@@ -302,7 +302,7 @@ const sandpitFrontendPublicKey = async () =>
 
 const signRequestObject = async (
   payload: JWTPayload,
-  signingPrivKey: jose.KeyLike,
+  signingPrivKey: jose.KeyLike
 ) => {
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: "ES256" })
@@ -322,7 +322,7 @@ const encryptRequestObject = async (jws: string, encPubKey: jose.KeyLike) =>
 
 const setUpSession = async (
   headers: APIGatewayProxyEventHeaders,
-  config: RequestParameters,
+  config: RequestParameters
 ) => {
   const newSessionId = crypto.randomBytes(20).toString("base64url");
   const newClientSessionId = crypto.randomBytes(20).toString("base64url");
@@ -347,7 +347,7 @@ const setUpSession = async (
 
 const createNewClientSession = async (
   id: string,
-  config: RequestParameters,
+  config: RequestParameters
 ) => {
   const client = await getRedisClient();
   const clientSession: ClientSession = {
@@ -372,7 +372,7 @@ const createNewClientSession = async (
   await client.setEx(
     `client-session-${id}`,
     3600,
-    JSON.stringify(clientSession),
+    JSON.stringify(clientSession)
   );
 };
 
@@ -382,7 +382,7 @@ const createNewSession = async (id: string, config: RequestParameters) => {
     code_request_count_map: {},
     authenticated: config.authenticated,
     current_credential_strength: credentialTrustToEnum(
-      config.authenticatedLevel,
+      config.authenticatedLevel
     ),
     is_new_account: AccountStateEnum.UNKNOWN,
   };
@@ -393,7 +393,7 @@ const createNewSession = async (id: string, config: RequestParameters) => {
 const renameExistingSession = async (
   existingSessionId: string,
   newSessionId: string,
-  config: RequestParameters,
+  config: RequestParameters
 ) => {
   const client = await getRedisClient();
   const existingSession = await getSession(existingSessionId);
@@ -401,14 +401,14 @@ const renameExistingSession = async (
   existingSession.session_id = newSessionId;
   existingSession.authenticated = config.authenticated;
   existingSession.current_credential_strength = credentialTrustToEnum(
-    config.authenticatedLevel,
+    config.authenticatedLevel
   );
   await client.setEx(newSessionId, 3600, JSON.stringify(existingSession));
 };
 
 const attachClientSessionToSession = async (
   clientSessionId: string,
-  sessionId: string,
+  sessionId: string
 ) => {
   const client = await getRedisClient();
   const session = await getSession(sessionId);
