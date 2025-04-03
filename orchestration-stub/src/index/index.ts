@@ -20,7 +20,8 @@ import {
 } from "../services/request-parameters";
 import { credentialTrustToEnum } from "../types/credential-trust";
 import { AccountStateEnum } from "../types/account-state";
-
+const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
+const RP_REDIRECT_URI = "https://a.example.com/redirect";
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -260,7 +261,7 @@ const jarPayload = (
     rp_client_id: process.env.RP_CLIENT_ID,
     rp_sector_host: process.env.RP_SECTOR_HOST,
     rp_redirect_uri: "https://a.example.com/redirect",
-    rp_state: "state",
+    rp_state: RP_STATE,
     client_name: "client",
     cookie_consent_shared: true,
     is_one_login_service: false,
@@ -272,7 +273,7 @@ const jarPayload = (
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
     claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
-    vtr: `["${form.confidence}"]`,
+    vtr: [`${form.confidence}`],
     scope: "openid email phone",
   };
   if (form["reauthenticate"] !== "") {
@@ -350,21 +351,23 @@ const createNewClientSession = async (
   config: RequestParameters,
 ) => {
   const client = await getRedisClient();
+  var auth_request_params: { [key: string]: string[] } = {
+    vtr: [`[${config.confidence}]`],
+    scope: ["openid email phone"],
+    response_type: ["code"],
+    redirect_uri: [RP_REDIRECT_URI],
+    state: [RP_STATE],
+    prompt: ["none"],
+    nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
+    client_id: [process.env.RP_CLIENT_ID!],
+  };
+  if (config.cookieConsent) {
+    auth_request_params["cookie_consent"] = [config.cookieConsent];
+  }
   const clientSession: ClientSession = {
     creation_time: new Date(),
     client_name: "Example RP",
-    auth_request_params: {
-      vtr: [`[${config.confidence}]`],
-      scope: ["openid email phone"],
-      response_type: ["code"],
-      redirect_uri: [
-        "https://rp-dev.build.stubs.account.gov.uk/oidc/authorization-code/callback",
-      ],
-      state: ["dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY"],
-      prompt: ["none"],
-      nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
-      client_id: [process.env.RP_CLIENT_ID!],
-    },
+    auth_request_params,
     effective_vector_of_trust: {
       credential_trust_level: credentialTrustToEnum(config.confidence),
     },
