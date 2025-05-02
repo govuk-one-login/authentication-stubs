@@ -28,3 +28,14 @@ confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "Environment=\"dev\" SubEnvironment=\"old-authdev2\""
 image_repositories = []
+
+[dev-apitest.deploy.parameters]
+stack_name = "dev-apitest-orch-stub"
+resolve_s3 = true
+s3_prefix = "dev-apitest-orch-stub"
+region = "eu-west-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "CodeSigningConfigArn=\"arn:aws:lambda:eu-west-2:975050272416:code-signing-config:csc-091a54675c513659e\" Environment=\"dev-apitest\" SubEnvironment=\"none\" PermissionsBoundary=\"arn:aws:iam::975050272416:policy/dev-orch-stub-pipeline-AppPermissionsBoundary-02bcbfb0ffff\""
+image_repositories = []
+signing_profiles = "CallbackFunction=\"SigningProfile_bdzyxbYzrSD8\" IndexFunction=\"SigningProfile_bdzyxbYzrSD8\""

@@ -16,6 +16,7 @@ Parameters:
       - sandpit # not a recognizable environment to secure pipelines
       - old-build # not a recognizable environment to secure pipelines
       - dev
+      - dev-apitest
       - build
       - staging
 
@@ -279,6 +280,35 @@ Mappings:
       vpcId: "vpc-0ad3a83e46742a372"
       privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::02a7ed01-c5d6-4562-aef1-cfc25df8ec14}}"
       authenticationBackendUrl: "https://txat8ipxf8-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/"
+      authenticationFrontendUrl: "https://signin.dev.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::93448bbd-38b1-4841-8f91-cccd46b4c486}}"
+      hostedZoneId: "Z07405851J4NJYGEP1PS7"
+      rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
+      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
+      defaultProvisionedConcurrency: 0
+      lambdaMemorySize: "128"
+
+    dev-apitest:
+      cookieDomain: .dev.account.gov.uk
+      stubDomain: orchstub-apitest.signin.dev.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0PcOHuVXOuexYZmpOlCo
+        vFcGfezObHnnVTTfnCrS5TBmAEC9JNwH/YFmE/zx84I1dy5fEjll+2GIe8Hcue+W
+        ubQMToFaAAeaqowqjgJYIPjgTubJ+baAP7+6GFPBWkk+LntBRQaoF7YkICT6im9h
+        JTrFb5KxyDNT/j4SCCXlkMTzqmeMVM59NM66MSS7OXsUny9GinG6xhDovUswvU99
+        N7GtGZBYIDmG6IrT/rS9ZosBLeLqCvRAfaYjq0/2EKHcudyeYjPDkkGpBNt7vXJJ
+        A+Ud3Nx8MmuKS3kb8NoDhQJxKxg7lgjAj+Lhb9xr+Y074hdTs5ju2Jx2tmP1y9vl
+        RwIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-0c6f6e7abc765bd57"
+      subnetBId: "subnet-04a0851b2083a2782"
+      subnetCId: "subnet-0c0c7f285b1ef1378"
+      endpointSgId: "sg-0903a817986dc39ef"
+      redisSgId: "sg-0d16b5ae8a12d3785"
+      vpcId: "vpc-0ad3a83e46742a372"
+      privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::02a7ed01-c5d6-4562-aef1-cfc25df8ec14}}"
+      authenticationBackendUrl: "https://k3d8ykiz8e-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/"
       authenticationFrontendUrl: "https://signin.dev.account.gov.uk/"
       redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::93448bbd-38b1-4841-8f91-cccd46b4c486}}"
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
