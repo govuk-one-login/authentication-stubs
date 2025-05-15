@@ -10,21 +10,23 @@ parameter_overrides = "Environment=\"sandpit\""
 image_repositories = []
 
 [authdev1.deploy.parameters]
-stack_name = "authdev1-orch-stub"
-resolve_s3 = true
-s3_prefix = "authdev1-orch-stub"
+stack_name = "authdev1-sp-orch-stub"
+resolve_s3 = false
+s3_bucket = "authdev1-sp-orch-stub-pip-githubartifactsourcebuck-7x2zgverkhya"
 region = "eu-west-2"
-confirm_changeset = false
+confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"dev\" SubEnvironment=\"old-authdev1\""
+parameter_overrides = "CodeSigningConfigArn=\"arn:aws:lambda:eu-west-2:653994557586:code-signing-config:csc-0b1375978ffa2443e\" Environment=\"dev\" SubEnvironment=\"old-authdev1\" PermissionsBoundary=\"arn:aws:iam::653994557586:policy/authdev1-sp-orch-stub-pipeline-AppPermissionsBoundary-02499872cb5f\""
 image_repositories = []
+signing_profiles = "IndexFunction=\"SigningProfile_CA9d6RmKsM4d\" CallbackFunction=\"SigningProfile_CA9d6RmKsM4d\""
 
 [authdev2.deploy.parameters]
-stack_name = "authdev2-orch-stub"
-resolve_s3 = true
-s3_prefix = "authdev2-orch-stub"
+stack_name = "authdev2-sp-orch-stub"
+resolve_s3 = false
+s3_bucket = "authdev2-sp-orch-stub-pip-githubartifactsourcebuck-ebuj1e05ka3c"
 region = "eu-west-2"
-confirm_changeset = false
+confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"dev\" SubEnvironment=\"old-authdev2\""
+parameter_overrides = "CodeSigningConfigArn=\"arn:aws:lambda:eu-west-2:653994557586:code-signing-config:csc-0bde508d034b8a4e7\" Environment=\"dev\" SubEnvironment=\"old-authdev2\" PermissionsBoundary=\"arn:aws:iam::653994557586:policy/authdev2-sp-orch-stub-pipeline-AppPermissionsBoundary-0a0f6a95fa6b\""
 image_repositories = []
+signing_profiles = "CallbackFunction=\"SigningProfile_CA9d6RmKsM4d\" IndexFunction=\"SigningProfile_CA9d6RmKsM4d\""
