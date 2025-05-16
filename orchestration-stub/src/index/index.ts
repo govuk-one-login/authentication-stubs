@@ -267,7 +267,6 @@ const jarPayload = (
     is_one_login_service: false,
     service_type: "essential",
     govuk_signin_journey_id: journeyId,
-    confidence: form.confidence,
     state: "3",
     client_id: "orchestrationAuth",
     redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
