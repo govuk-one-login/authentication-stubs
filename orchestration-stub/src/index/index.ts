@@ -154,6 +154,12 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
                     Strategic App
                 </label>
             </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="channel-mobile" name="channel" type="radio" value="mobile">
+                <label class="govuk-label govuk-radios__label" for="channel-mobile">
+                    Mobile
+                </label>
+            </div>
         </div>
     </fieldset>
     </div>
