@@ -198,6 +198,17 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </div>
     </fieldset>
     </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Login hint
+            </h2>
+        </legend>
+        <label for="login-hint" class="govuk-label">Login hint</label>
+        <input name="login-hint" id="login-hint" class="govuk-input">
+    </fieldset>
+    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
@@ -301,6 +312,10 @@ const jarPayload = (
     payload["cookie_consent"] = form.cookieConsent;
   }
   return payload;
+
+  if (form["login-hint"] !== "") {
+    payload["login_hint"] = form["login-hint"];
+  }
 };
 
 const sandpitFrontendPublicKey = async () =>

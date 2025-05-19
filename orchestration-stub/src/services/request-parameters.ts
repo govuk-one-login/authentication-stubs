@@ -9,6 +9,7 @@ export type RequestParameters = {
   authenticatedLevel?: CredentialTrustLevel;
   channel: ChannelEnum;
   cookieConsent: string;
+  loginHint: string;
 };
 
 export const parseRequestParameters = (
@@ -28,6 +29,7 @@ export const parseRequestParameters = (
     authenticatedLevel: existingAuthentication.authenticatedLevel,
     channel: getChannel(parsedForm.channel),
     cookieConsent: parsedForm["cookie-consent"],
+    loginHint: parsedForm["login-hint"]
   };
 };
 
