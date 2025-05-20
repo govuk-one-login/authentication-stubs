@@ -20,6 +20,7 @@ import {
 } from "../services/request-parameters";
 import { credentialTrustToEnum } from "../types/credential-trust";
 import { AccountStateEnum } from "../types/account-state";
+
 const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
 const RP_REDIRECT_URI = "https://a.example.com/redirect";
 export const handler = async (
@@ -297,24 +298,21 @@ const jarPayload = (
   if (form.channel !== "none") {
     payload["channel"] = form.channel;
   }
-
   if (form.authenticatedLevel) {
     payload["current_credential_strength"] = credentialTrustToEnum(
       form.authenticatedLevel,
     );
   }
-
   if (previousSessionId) {
     payload["previous_session_id"] = previousSessionId;
   }
   if (form.cookieConsent !== "none") {
     payload["cookie_consent"] = form.cookieConsent;
   }
-  return payload;
-
-  if (form["login-hint"] !== "") {
-    payload["login_hint"] = form["login-hint"];
+  if (form.loginHint !== "") {
+    payload["login_hint"] = form.loginHint;
   }
+  return payload;
 };
 
 const sandpitFrontendPublicKey = async () =>
