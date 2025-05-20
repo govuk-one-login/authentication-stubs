@@ -29,7 +29,7 @@ export const parseRequestParameters = (
     authenticatedLevel: existingAuthentication.authenticatedLevel,
     channel: getChannel(parsedForm.channel),
     cookieConsent: parsedForm["cookie-consent"],
-    loginHint: parsedForm["login-hint"]
+    loginHint: parsedForm["login-hint"],
   };
 };
 

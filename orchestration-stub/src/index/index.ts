@@ -200,13 +200,12 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
     </div>
     <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <legend id="login-hint-legend" class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h2 class="govuk-fieldset__heading">
                 Login hint
             </h2>
         </legend>
-        <label for="login-hint" class="govuk-label">Login hint</label>
-        <input name="login-hint" id="login-hint" class="govuk-input">
+        <input name="login-hint" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="login-hint-legend">
     </fieldset>
     </div>
     <button class="govuk-button">Submit</button>
