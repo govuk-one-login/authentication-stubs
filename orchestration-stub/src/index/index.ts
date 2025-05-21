@@ -20,6 +20,7 @@ import {
 } from "../services/request-parameters";
 import { credentialTrustToEnum } from "../types/credential-trust";
 import { AccountStateEnum } from "../types/account-state";
+
 const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
 const RP_REDIRECT_URI = "https://a.example.com/redirect";
 export const handler = async (
@@ -198,6 +199,16 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </div>
     </fieldset>
     </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend id="login-hint-legend" class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Login hint
+            </h2>
+        </legend>
+        <input name="login-hint" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="login-hint-legend">
+    </fieldset>
+    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
@@ -287,18 +298,19 @@ const jarPayload = (
   if (form.channel !== "none") {
     payload["channel"] = form.channel;
   }
-
   if (form.authenticatedLevel) {
     payload["current_credential_strength"] = credentialTrustToEnum(
       form.authenticatedLevel,
     );
   }
-
   if (previousSessionId) {
     payload["previous_session_id"] = previousSessionId;
   }
   if (form.cookieConsent !== "none") {
     payload["cookie_consent"] = form.cookieConsent;
+  }
+  if (form.loginHint !== "") {
+    payload["login_hint"] = form.loginHint;
   }
   return payload;
 };
