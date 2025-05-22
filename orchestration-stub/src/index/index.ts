@@ -107,26 +107,6 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
                         common subject identifier are set on the session
                     </div>
                 </div>
-                <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                     id="conditional-authenticated-2">
-                    <div class="govuk-form-group govuk-radios" data-module="govuk-radios">
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input govuk-!-width-one-third" id="authenticated-level"
-                                   name="authenticatedLevel" type="radio" value="Cl">
-                            <label class="govuk-label govuk-radios__label" for="authenticated-level">
-                                Low level
-                            </label>
-                        </div>
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input govuk-!-width-one-third" id="authenticated-level-2"
-                                   name="authenticatedLevel" type="radio" value="Cl.Cm" checked>
-                            <label class="govuk-label govuk-radios__label" for="authenticated-level-2">
-                                Medium level
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </fieldset>
     </div>
     <div class="govuk-form-group">
@@ -298,11 +278,7 @@ const jarPayload = (
   if (form.channel !== "none") {
     payload["channel"] = form.channel;
   }
-  if (form.authenticatedLevel) {
-    payload["current_credential_strength"] = credentialTrustToEnum(
-      form.authenticatedLevel,
-    );
-  }
+
   if (previousSessionId) {
     payload["previous_session_id"] = previousSessionId;
   }
@@ -401,9 +377,6 @@ const createNewSession = async (id: string, config: RequestParameters) => {
     session_id: id,
     code_request_count_map: {},
     authenticated: config.authenticated,
-    current_credential_strength: credentialTrustToEnum(
-      config.authenticatedLevel,
-    ),
     is_new_account: AccountStateEnum.UNKNOWN,
   };
   const client = await getRedisClient();
@@ -420,9 +393,6 @@ const renameExistingSession = async (
   await client.del(existingSessionId);
   existingSession.session_id = newSessionId;
   existingSession.authenticated = config.authenticated;
-  existingSession.current_credential_strength = credentialTrustToEnum(
-    config.authenticatedLevel,
-  );
   await client.setEx(newSessionId, 3600, JSON.stringify(existingSession));
 };
 

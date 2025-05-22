@@ -6,7 +6,6 @@ export type RequestParameters = {
   confidence: CredentialTrustLevel;
   reauthenticate?: string;
   authenticated: boolean;
-  authenticatedLevel?: CredentialTrustLevel;
   channel: ChannelEnum;
   cookieConsent: string;
   loginHint?: string;
@@ -21,15 +20,13 @@ export const parseRequestParameters = (
 
   const parsedForm = querystring.parse(body);
 
-  const existingAuthentication = getExistingAuthentication(parsedForm);
   return {
     confidence: validateCredentialTrustLevel(parsedForm.level),
     reauthenticate: getReauthenticate(parsedForm),
-    authenticated: existingAuthentication.authenticated,
-    authenticatedLevel: existingAuthentication.authenticatedLevel,
+    authenticated: parsedForm.authenticated === "yes",
     channel: getChannel(parsedForm.channel),
-    cookieConsent: parsedForm["cookie-consent"],
-    loginHint: parsedForm["login-hint"],
+    cookieConsent: parsedForm["cookie-consent"] as string,
+    loginHint: parsedForm["login-hint"] as string | undefined,
   };
 };
 
@@ -40,14 +37,6 @@ const validateCredentialTrustLevel = (
     return level;
   }
   throw new Error("Unknown level " + level);
-};
-
-const getExistingAuthentication = (form: ParsedUrlQuery) => {
-  const authenticated = form.authenticated === "yes";
-  const authenticatedLevel = authenticated
-    ? validateCredentialTrustLevel(form.authenticatedLevel)
-    : undefined;
-  return { authenticated, authenticatedLevel };
 };
 
 const getReauthenticate = (form: ParsedUrlQuery): string | undefined => {
