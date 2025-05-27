@@ -51,7 +51,7 @@ const getChannel = (channel: string | string[] | undefined): ChannelEnum => {
     (channel === ChannelEnum.NONE ||
       channel === ChannelEnum.WEB ||
       channel === ChannelEnum.STRATEGIC_APP ||
-      channel === ChannelEnum.MOBILE)
+      channel === ChannelEnum.GENERIC_APP)
   ) {
     return channel;
   }
