@@ -272,6 +272,7 @@ const jarPayload = (
     scope: "openid email phone",
     requested_credential_strength: form.confidence,
     is_smoke_test: false,
+    subject_type: "pairwise",
   };
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
