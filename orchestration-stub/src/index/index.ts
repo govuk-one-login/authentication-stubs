@@ -51,6 +51,9 @@ const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
   const cookieConsent =
     event.queryStringParameters?.["cookie-consent"] ?? "none";
   const loginHint = event.queryStringParameters?.["login-hint"] ?? "";
+  const redirectUrl =
+    event.queryStringParameters?.["redirect-url"] ??
+    `${process.env.AUTHENTICATION_FRONTEND_URL}authorize`;
 
   const form = `
 <h1 class="govuk-heading-xl">Orchestration stub</h1>
@@ -210,6 +213,17 @@ const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         value="${loginHint}">
     </fieldset>
     </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend id="redirect-url-legend" class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Frontend Redirect URL
+            </h2>
+        </legend>
+        <input name="redirect-url" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="redirect-url-legend"
+        value="${redirectUrl}">
+    </fieldset>
+    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
@@ -247,7 +261,7 @@ const post = async (
     statusCode: 302,
     multiValueHeaders: {
       Location: [
-        `${process.env.AUTHENTICATION_FRONTEND_URL}authorize?request=${jwe}&response_type=code&client_id=orchestrationAuth`,
+        `${form.redirectUrl}?request=${jwe}&response_type=code&client_id=orchestrationAuth`,
       ],
       "Set-Cookie": [
         `gs=${gsCookie}; max-age=3600${cookieDomain}`,
