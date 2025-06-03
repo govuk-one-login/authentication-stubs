@@ -54,10 +54,12 @@ const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
   const redirectUrl =
     event.queryStringParameters?.["redirect-url"] ??
     `${process.env.AUTHENTICATION_FRONTEND_URL}authorize`;
+  const autoSubmit = event.queryStringParameters?.["auto-submit"] ?? `no`;
 
   const form = `
 <h1 class="govuk-heading-xl">Orchestration stub</h1>
-<form method='post'>
+${autoSubmit === "yes" ? '<p class="govuk-hint">Please wait to be redirected</p>' : ""}
+<form method='post' ${autoSubmit === "yes" ? "hidden" : ""}>
     <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
@@ -226,6 +228,16 @@ const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
     </div>
     <button class="govuk-button">Submit</button>
 </form>
+${
+  autoSubmit === "yes"
+    ? `
+<script>
+  const form = document.forms[0];
+  if (form) form.submit();
+</script>
+`
+    : ""
+}
 `;
   return {
     statusCode: 200,
