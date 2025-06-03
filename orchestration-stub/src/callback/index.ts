@@ -6,7 +6,6 @@ import { getPrivateKey } from "../utils/key";
 import { renderGovukPage } from "../utils/page";
 import { getCookie } from "../utils/cookie";
 import { getSession } from "../services/redis";
-import { SESSION_ID_HEADER } from "../utils/constants";
 
 const TOKEN_URL = `${process.env.AUTHENTICATION_BACKEND_URL}token`;
 const USER_INFO_URL = `${process.env.AUTHENTICATION_BACKEND_URL}userinfo`;
@@ -34,13 +33,13 @@ const get = async (
 ): Promise<APIGatewayProxyResult> => {
   const authCode = getAuthCode(event);
   const gsCookie = getCookie(event.headers["cookie"], "gs");
-  const sessionId = gsCookie!.split(".")[0];
+  const sessionId = gsCookie?.split(".")[0];
 
   const clientAssertion = await buildClientAssertion();
   const tokenResponse = await getToken(authCode, clientAssertion);
-  const userInfo = await getUserInfo(tokenResponse, sessionId);
+  const userInfo = await getUserInfo(tokenResponse);
 
-  const session = await getSession(sessionId);
+  const session = sessionId ? await getSession(sessionId) : undefined;
 
   const content = `<script defer src="https://unpkg.com/pretty-json-custom-element/index.js"></script>
 <dl class="govuk-summary-list">
@@ -138,12 +137,11 @@ const getToken = async (authCode: string, clientAssertion: string) => {
   return tokenResponse.access_token;
 };
 
-const getUserInfo = async (accessToken: string, sessionId: string) => {
+const getUserInfo = async (accessToken: string) => {
   const userInfoUrl = new URL(USER_INFO_URL);
   const response = await fetch(userInfoUrl, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      [SESSION_ID_HEADER]: sessionId,
     },
   });
   if (!response.ok) {
