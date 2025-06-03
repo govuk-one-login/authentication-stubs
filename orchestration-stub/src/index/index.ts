@@ -43,8 +43,17 @@ export const handler = async (
   }
 };
 
-const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
-  const form = `<h1 class="govuk-heading-xl">Orchestration stub</h1>
+const get = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
+  const level = event.queryStringParameters?.level ?? "Cl.Cm";
+  const reauthenticate = event.queryStringParameters?.reauthenticate ?? "";
+  const authenticated = event.queryStringParameters?.authenticated ?? "no";
+  const channel = event.queryStringParameters?.channel ?? "none";
+  const cookieConsent =
+    event.queryStringParameters?.["cookie-consent"] ?? "none";
+  const loginHint = event.queryStringParameters?.["login-hint"] ?? "";
+
+  const form = `
+<h1 class="govuk-heading-xl">Orchestration stub</h1>
 <form method='post'>
     <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
@@ -54,7 +63,7 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
             </h2>
         </legend>
         <label for="reauthenticate" class="govuk-label">RP pairwise ID</label>
-        <input name="reauthenticate" id="reauthenticate" class="govuk-input">
+        <input name="reauthenticate" id="reauthenticate" class="govuk-input" value="${reauthenticate}">
     </fieldset>
     </div>
     <div class="govuk-form-group">
@@ -67,13 +76,15 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         <label for="level" class="govuk-label">Credential Trust Level</label>
         <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="level" name="level" type="radio" value="Cl.Cm" checked>
+                <input class="govuk-radios__input" id="level" name="level" type="radio"
+                value="Cl.Cm" ${level === "Cl.Cm" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="level">
                     Cl.Cm (2FA)
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="level-2" name="level" type="radio" value="Cl">
+                <input class="govuk-radios__input" id="level-2" name="level" type="radio"
+                value="Cl" ${level === "Cl" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="level-2">
                     Cl (No 2FA)
                 </label>
@@ -91,14 +102,15 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
             <div class="govuk-radios" data-module="govuk-radios">
                 <div class="govuk-radios__item">
                     <input class="govuk-radios__input" id="authenticated" name="authenticated" type="radio" value="no"
-                           checked>
+                           ${authenticated === "no" ? "checked" : ""}>
                     <label class="govuk-label govuk-radios__label" for="authenticated">
                         Not authenticated
                     </label>
                 </div>
                 <div class="govuk-radios__item">
                     <input class="govuk-radios__input" id="authenticated-2" name="authenticated" type="radio"
-                           value="yes" data-aria-controls="conditional-authenticated-2">
+                    value="yes" ${authenticated === "yes" ? "checked" : ""}
+                    data-aria-controls="conditional-authenticated-2">
                     <label class="govuk-label govuk-radios__label" for="authenticated-2">
                         Authenticated
                     </label>
@@ -118,25 +130,29 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </legend>
         <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="channel-none" name="channel" type="radio" value="none" checked>
+                <input class="govuk-radios__input" id="channel-none" name="channel" type="radio"
+                value="none" ${channel === "none" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="channel-none">
                     None
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="channel-web" name="channel" type="radio" value="web">
+                <input class="govuk-radios__input" id="channel-web" name="channel" type="radio"
+                value="web" ${channel === "web" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="channel-web">
                     Web
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="channel-strategic-app" name="channel" type="radio" value="strategic_app">
+                <input class="govuk-radios__input" id="channel-strategic-app" name="channel" type="radio"
+                value="strategic_app" ${channel === "strategic_app" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="channel-strategic-app">
                     Strategic App
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="channel-generic-app" name="channel" type="radio" value="generic_app">
+                <input class="govuk-radios__input" id="channel-generic-app" name="channel" type="radio"
+                value="generic_app" ${channel === "generic_app" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="channel-generic-app">
                     Generic App
                 </label>
@@ -153,25 +169,29 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </legend>
         <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="cookie-consent-none" name="cookie-consent" type="radio" value="none" checked>
+                <input class="govuk-radios__input" id="cookie-consent-none" name="cookie-consent" type="radio"
+                value="none" ${cookieConsent === "none" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="cookie-consent-none">
                     none
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="cookie-consent-accept" name="cookie-consent" type="radio" value="accept">
+                <input class="govuk-radios__input" id="cookie-consent-accept" name="cookie-consent" type="radio"
+                value="accept" ${cookieConsent === "accept" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="cookie-consent-accept">
                     accept
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="cookie-consent-reject" name="cookie-consent" type="radio" value="reject">
+                <input class="govuk-radios__input" id="cookie-consent-reject" name="cookie-consent" type="radio"
+                value="reject" ${cookieConsent === "reject" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="cookie-consent-reject">
                     reject
                 </label>
             </div>
             <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="cookie-consent-not-engaged" name="cookie-consent" type="radio" value="not-engaged">
+                <input class="govuk-radios__input" id="cookie-consent-not-engaged" name="cookie-consent" type="radio"
+                value="not-engaged" ${cookieConsent === "not-engaged" ? "checked" : ""}>
                 <label class="govuk-label govuk-radios__label" for="cookie-consent-not-engaged">
                     not engaged
                 </label>
@@ -186,7 +206,8 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
                 Login hint
             </h2>
         </legend>
-        <input name="login-hint" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="login-hint-legend">
+        <input name="login-hint" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="login-hint-legend"
+        value="${loginHint}">
     </fieldset>
     </div>
     <button class="govuk-button">Submit</button>
