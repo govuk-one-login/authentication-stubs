@@ -273,6 +273,7 @@ const jarPayload = (
     requested_credential_strength: form.confidence,
     is_smoke_test: false,
     subject_type: "pairwise",
+    is_identity_verification_required: false,
   };
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
