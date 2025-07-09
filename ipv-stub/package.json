@@ -59,9 +59,7 @@
     ],
     "timeout": 20000,
     "recursive": true,
-    "require": [
-      "ts-node/register"
-    ],
+    "loader": "ts-node/esm",
     "exit": true
   }
 }
