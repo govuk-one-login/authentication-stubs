@@ -41,6 +41,29 @@ Parameters:
     Default: "none"
 
 Conditions:
+  AccessViaVPNOnly:
+    Fn::Or:
+      - Fn::And:
+          - !Condition UseSubEnvironment
+          - Fn::Equals:
+              - !FindInMap [
+                EnvironmentConfiguration,
+                !Ref SubEnvironment,
+                accessViaVPNOnly,
+                DefaultValue: "No",
+              ]
+              - "Yes"
+      - Fn::And:
+          - !Condition NotSubEnvironment
+          - Fn::Equals:
+              - !FindInMap [
+                EnvironmentConfiguration,
+                !Ref Environment,
+                accessViaVPNOnly,
+                DefaultValue: "No",
+              ]
+              - "Yes"
+
   EnableProvisionedConcurrency:
     Fn::Equals:
       - !Ref Environment
@@ -57,6 +80,11 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+
+  NotSubEnvironment:
+    Fn::Equals:
+      - !Ref SubEnvironment
+      - none
 
   UseSubEnvironment:
     Fn::And:
@@ -291,6 +319,7 @@ Mappings:
       lambdaMemorySize: "128"
 
     dev-apitest:
+      accessViaVPNOnly: "Yes"
       cookieDomain: .dev.account.gov.uk
       stubDomain: orchstub-apitest.signin.dev.account.gov.uk
       authPubKey: |
@@ -349,6 +378,7 @@ Mappings:
       lambdaMemorySize: "128"
 
     build-apitest:
+      accessViaVPNOnly: "Yes"
       cookieDomain: .build.account.gov.uk
       stubDomain: orchstub-apitest.signin.build.account.gov.uk
       authPubKey: |
@@ -407,6 +437,7 @@ Mappings:
       lambdaMemorySize: "1536"
 
     staging-apitest:
+      accessViaVPNOnly: "Yes"
       cookieDomain: .staging.account.gov.uk
       stubDomain: orchstub-apitest.signin.staging.account.gov.uk
       authPubKey: |
@@ -443,6 +474,70 @@ Resources:
       AlwaysDeploy: true
       EndpointConfiguration:
         Type: REGIONAL
+      OpenApiVersion: 3.0.1
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title:
+            Fn::Sub: "${Environment}-orch-stub"
+          version: "1.0"
+        paths:
+          /orchestration-redirect:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CallbackFunction.Arn}:latest/invocations
+                passthroughBehavior: "when_no_match"
+                type: "aws_proxy"
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IndexFunction.Arn}:latest/invocations
+                passthroughBehavior: "when_no_match"
+                type: "aws_proxy"
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IndexFunction.Arn}:latest/invocations
+                passthroughBehavior: "when_no_match"
+                type: "aws_proxy"
+        x-amazon-apigateway-gateway-responses:
+          ACCESS_DENIED:
+            statusCode: 403
+            responseTemplates:
+              application/json: '{"message": "Access denied. Login to VPN"}'
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Action: "execute-api:Invoke"
+              Principal: "*"
+              Resource:
+                - "execute-api:/*"
+            - !If
+              - AccessViaVPNOnly
+              - Effect: Deny
+                Action: "execute-api:Invoke"
+                Principal: "*"
+                Resource:
+                  - "execute-api:/*"
+                Condition:
+                  NotIpAddress:
+                    aws:SourceIp:
+                      # Source: https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
+                      - '217.196.229.77/32'
+                      - '217.196.229.79/32'
+                      - '217.196.229.80/32'
+                      - '217.196.229.81/32'
+                      - '51.149.8.0/25'
+                      - '51.149.8.128/29'
+                      - '18.169.230.200/29' # codebuild public ip
+                      - '35.176.92.32/29'   # codebuild public ip
+              - !Ref AWS::NoValue
 
   IndexFunction:
     Type: AWS::Serverless::Function
@@ -546,19 +641,6 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - rpSectorHost
-      Events:
-        Get:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiGateway
-            Path: /
-            Method: get
-        Post:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiGateway
-            Path: /
-            Method: post
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -567,6 +649,20 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: "es2020"
+
+  IndexFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt IndexFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  IndexFunctionAliasPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref IndexFunction.Alias
+      Principal: apigateway.amazonaws.com
 
   CallbackFunction:
     Type: AWS::Serverless::Function
@@ -642,13 +738,6 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authenticationBackendUrl
-      Events:
-        Get:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiGateway
-            Path: /orchestration-redirect
-            Method: get
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -657,6 +746,20 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: "es2020"
+
+  CallbackFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CallbackFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  CallbackFunctionAliasPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CallbackFunction.Alias
+      Principal: apigateway.amazonaws.com
 
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
