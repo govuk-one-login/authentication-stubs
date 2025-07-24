@@ -2,7 +2,7 @@
   "dependencies": {
     "esbuild": "0.25.2",
     "jose": "5.10.0",
-    "redis": "^4.7.0"
+    "redis": "^5.6.1"
   },
   "description": "Orchestration stub for Authentication",
   "devDependencies": {
