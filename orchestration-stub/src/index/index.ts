@@ -266,7 +266,7 @@ const jarPayload = (
     govuk_signin_journey_id: journeyId,
     state: "3",
     client_id: "orchestrationAuth",
-    redirect_uri: `https://${process.env.STUB_DOMAIN}/orchestration-redirect`,
+    redirect_uri: `${process.env.STUB_URL}orchestration-redirect`,
     claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
     scope: "openid email phone",
@@ -347,7 +347,7 @@ const createNewClientSession = async (
   config: RequestParameters,
 ) => {
   const client = await getRedisClient();
-  var auth_request_params: { [key: string]: string[] } = {
+  const auth_request_params: { [key: string]: string[] } = {
     vtr: [`[${config.confidence}]`],
     scope: ["openid email phone"],
     response_type: ["code"],

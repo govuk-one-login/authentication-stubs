@@ -632,13 +632,15 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - cookieDomain
-          STUB_DOMAIN: !FindInMap
-            - EnvironmentConfiguration
-            - !If
-              - UseSubEnvironment
-              - !Ref SubEnvironment
-              - !Ref Environment
-            - stubDomain
+          STUB_URL: !Sub
+            - "https://${Domain}/"
+            - Domain: !FindInMap
+              - EnvironmentConfiguration
+              - !If
+                - UseSubEnvironment
+                - !Ref SubEnvironment
+                - !Ref Environment
+              - stubDomain
           AUTH_PUB_KEY: !FindInMap
             - EnvironmentConfiguration
             - !If
