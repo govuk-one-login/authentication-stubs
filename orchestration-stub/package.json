@@ -39,6 +39,7 @@
   "main": "index.js",
   "name": "orch-stub",
   "scripts": {
+    "build": "esbuild src/server.ts --bundle --minify --sourcemap --platform=node --outdir=build",
     "compile": "tsc",
     "lint": "eslint . --fix",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
