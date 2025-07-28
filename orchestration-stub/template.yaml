@@ -18,6 +18,7 @@ Parameters:
       - dev
       - build
       - staging
+      - integration
       - dev-apitest     # not a recognizable environment to secure pipelines
       - build-apitest   # not a recognizable environment to secure pipelines
       - staging-apitest # not a recognizable environment to secure pipelines
