@@ -319,7 +319,6 @@ Mappings:
       lambdaMemorySize: "128"
 
     dev-apitest:
-      accessViaVPNOnly: "Yes"
       cookieDomain: .dev.account.gov.uk
       stubDomain: orchstub-apitest.signin.dev.account.gov.uk
       authPubKey: |
@@ -378,7 +377,6 @@ Mappings:
       lambdaMemorySize: "128"
 
     build-apitest:
-      accessViaVPNOnly: "Yes"
       cookieDomain: .build.account.gov.uk
       stubDomain: orchstub-apitest.signin.build.account.gov.uk
       authPubKey: |
@@ -437,7 +435,6 @@ Mappings:
       lambdaMemorySize: "1536"
 
     staging-apitest:
-      accessViaVPNOnly: "Yes"
       cookieDomain: .staging.account.gov.uk
       stubDomain: orchstub-apitest.signin.staging.account.gov.uk
       authPubKey: |
@@ -463,6 +460,36 @@ Mappings:
       hostedZoneId: "Z06032813E21PC11LZZAB"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
+      defaultProvisionedConcurrency: 3
+      lambdaMemorySize: "1536"
+
+    integration:
+      accessViaVPNOnly: "Yes"
+      cookieDomain: .integration.account.gov.uk
+      stubDomain: orchstub.signin.integration.account.gov.uk
+      authPubKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAojSigrHTBqF/2xuSptZo
+        rifAahfOOD6BKOfRMZauLYLITU7+AASC+oIUU8vfJ6yMstuLbrpFHQ5lPgnbNQ4h
+        Hp91wzXl2w/4TPgx9sH6AIVEe0nzM7w808jzGK1xkqeDN24TSdTCS9uU340K+1lg
+        vHJ6RPURwpGKmwi/yQs4aEdBswK1qjdwtyz3KQF6a5sI3d4uCwtsLYfwD+yxIVnX
+        L5tIdMLWFTMX7PCN24cwWFMz8JJr5D/3Gujy3oEJgaBLVSkBEQcGcR9zTcF46e0x
+        qZM9NOP2fgb26CFV/vGQj21Jo+z4NK9+3doXwVESaw+8iTvlavUg1l91cJ1iHzde
+        UQIDAQAB
+        -----END PUBLIC KEY-----
+      subnetAId: "subnet-09e770fb9805bf8f3"
+      subnetBId: "subnet-0a36dbbd771a6b262"
+      subnetCId: "subnet-08c27975e04e98a72"
+      endpointSgId: "sg-0a2b2f093fc81a2ec"
+      redisSgId: "sg-018bd4640f5842d31"
+      vpcId: "vpc-04796e8a5bf41b046"
+      privateKey: "{{resolve:secretsmanager:integration-orchestration-stub-private-key::::f04a5553-cc9d-46d5-84bc-61191729bb05}}"
+      authenticationBackendUrl: "https://5wcpjlfg3i-vpce-0df10df14d851e1c9.execute-api.eu-west-2.amazonaws.com/integration/"
+      authenticationFrontendUrl: "https://apitest.signin.integration.account.gov.uk/"
+      redisUrl: "{{resolve:secretsmanager:integration-orchestration-stub-redis-url::::595fef6e-d156-454b-88b5-56245f916e80}}"
+      hostedZoneId: "Z0653856BRBXRB77AUXG"
+      rpClientId: "gjWNvoLYietMjeaOE6Zoww533u18ZUfr"
+      rpSectorHost: "rp-integration.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 3
       lambdaMemorySize: "1536"
 
@@ -535,8 +562,6 @@ Resources:
                       - '217.196.229.81/32'
                       - '51.149.8.0/25'
                       - '51.149.8.128/29'
-                      - '18.169.230.200/29' # codebuild public ip
-                      - '35.176.92.32/29'   # codebuild public ip
               - !Ref AWS::NoValue
 
   IndexFunction:
