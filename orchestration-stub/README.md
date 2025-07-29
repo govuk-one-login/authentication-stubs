@@ -2,6 +2,12 @@
 
 ## Running Locally
 
+There are two ways of running the stub locally, depending on the purpose of the testing.
+When testing AWS integrations with deployed auth environments, you can use SAM local.
+For running a complete stack locally, an express server is run in a docker container.
+
+### SAM Local
+
 ```bash
 sam build && docker compose up --detach && sam local start-api --docker-network lambda-local --parameter-overrides 'Environment=local'
 ```
@@ -24,6 +30,22 @@ openssl ec -in private.pem -pubout -out public.pem
 
 Then the private key is in private.pem (this goes into secrets manager) and the public is in public.pem
 (configure the auth frontend and auth external API with this). Do not commit these files.
+
+### Docker local
+
+The `Dockerfile` runs a small express server which simulates the API Gateway interface.
+
+N.B. You need to provide the environment variable configuration yourself:
+
+- `AUTHENTICATION_BACKEND_URL` - base URL for the auth /token and /userinfo endpoints
+- `AUTHENTICATION_FRONTEND_URL` - base URL for the auth frontend
+- `AUTH_PUB_KEY` - public key used for encrypting JAR payloads to auth
+- `COOKIE_DOMAIN` - cookie domain, or `none` to use the default
+- `PRIVATE_KEY` - private key used for signing JAR payloads and private-key-jwt auth
+- `REDIS_URL` - URL of a redis instance to use for tracking sessions
+- `RP_CLIENT_ID` - RP client ID to pass to auth (not the orchestration client id)
+- `RP_SECTOR_HOST` - RP sector host to pass to auth
+- `STUB_URL` - URL of the stub itself, used to generate the callback, typically `http://localhost:4400`
 
 ## Deploying
 
