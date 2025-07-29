@@ -5,11 +5,14 @@ import { JWTPayload } from "jose";
 import { getPrivateKey } from "../utils/key";
 import { renderGovukPage } from "../utils/page";
 import { getCookie } from "../utils/cookie";
-import { getSession } from "../services/redis";
 import { SESSION_ID_HEADER } from "../utils/constants";
 
 const TOKEN_URL = `${process.env.AUTHENTICATION_BACKEND_URL}token`;
 const USER_INFO_URL = `${process.env.AUTHENTICATION_BACKEND_URL}userinfo`;
+
+const invalidStateError = `<p class="govuk-error-message">
+  <span class="govuk-visually-hidden">Error:</span> Invalid state parameter
+</p>`;
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -34,19 +37,36 @@ const get = async (
 ): Promise<APIGatewayProxyResult> => {
   const authCode = getAuthCode(event);
   const gsCookie = getCookie(event.headers["cookie"], "gs");
-  const sessionId = gsCookie!.split(".")[0];
+  const [sessionId, journeyId] = gsCookie!.split(".");
+
+  const invalidState = event.queryStringParameters?.state !== sessionId;
 
   const clientAssertion = await buildClientAssertion();
   const tokenResponse = await getToken(authCode, clientAssertion);
   const userInfo = await getUserInfo(tokenResponse, sessionId);
 
-  const session = await getSession(sessionId);
-
   const content = `<script defer src="https://unpkg.com/pretty-json-custom-element/index.js"></script>
+${invalidState ? invalidStateError : ""}
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Token
+            Session ID
+        </dt>
+        <dd class="govuk-summary-list__value">
+            ${sessionId}
+        </dd>
+    </div>
+        <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Journey ID
+        </dt>
+        <dd class="govuk-summary-list__value">
+            ${journeyId}
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Access Token
         </dt>
         <dd class="govuk-summary-list__value">
             ${tokenResponse}
@@ -59,16 +79,6 @@ const get = async (
         <dd class="govuk-summary-list__value">
             <pretty-json>
                 ${JSON.stringify(userInfo)}
-            </pretty-json>
-        </dd>
-    </div>
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">
-            Session
-        </dt>
-        <dd class="govuk-summary-list__value">
-            <pretty-json>
-                ${JSON.stringify(session)}
             </pretty-json>
         </dd>
     </div>

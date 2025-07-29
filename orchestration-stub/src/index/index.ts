@@ -1,16 +1,9 @@
-import {
-  APIGatewayProxyEvent,
-  APIGatewayProxyEventHeaders,
-  APIGatewayProxyResult,
-} from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as jose from "jose";
 import { JWTPayload } from "jose";
 import { getCookie, getOrCreatePersistentSessionId } from "../utils/cookie";
 import crypto from "node:crypto";
 import { downcaseHeaders } from "../utils/headers";
-import { Session } from "../types/session";
-import { getRedisClient, getSession } from "../services/redis";
-import { ClientSession } from "../types/client-session";
 import * as process from "node:process";
 import { getPrivateKey } from "../utils/key";
 import { renderGovukPage } from "../utils/page";
@@ -18,11 +11,9 @@ import {
   parseRequestParameters,
   RequestParameters,
 } from "../services/request-parameters";
-import { credentialTrustToEnum } from "../types/credential-trust";
-import { AccountStateEnum } from "../types/account-state";
 
 const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
-const RP_REDIRECT_URI = "https://a.example.com/redirect";
+
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -208,12 +199,11 @@ const post = async (
   const previousSessionId = getCookie(event.headers["cookie"], "gs")?.split(
     ".",
   )[0];
-  const gsCookie = await setUpSession(event.headers, form);
+  const sessionId = generateNewSessionId();
+  const journeyId = generateNewSessionId();
 
-  //Isn't the journeyId the at index [1]?
-  const journeyId = gsCookie.split(".")[0];
   const signingPrivKey = await getPrivateKey();
-  const payload = jarPayload(form, journeyId, previousSessionId);
+  const payload = jarPayload(form, journeyId, sessionId, previousSessionId);
   const jws = await signRequestObject(payload, signingPrivKey);
   const jwe = await encryptRequestObject(jws, await sandpitFrontendPublicKey());
 
@@ -229,7 +219,7 @@ const post = async (
         `${process.env.AUTHENTICATION_FRONTEND_URL}authorize?request=${jwe}&response_type=code&client_id=orchestrationAuth`,
       ],
       "Set-Cookie": [
-        `gs=${gsCookie}; max-age=3600${cookieDomain}`,
+        `gs=${sessionId}.${journeyId}; max-age=3600${cookieDomain}`,
         `di-persistent-session-id=${persistentSessionId}; max-age=34190000${cookieDomain}`,
       ],
     },
@@ -240,6 +230,7 @@ const post = async (
 const jarPayload = (
   form: RequestParameters,
   journeyId: string,
+  sessionId: string,
   previousSessionId: string | undefined,
 ): JWTPayload => {
   const claim = {
@@ -264,7 +255,7 @@ const jarPayload = (
     is_one_login_service: false,
     service_type: "essential",
     govuk_signin_journey_id: journeyId,
-    state: "3",
+    state: sessionId,
     client_id: "orchestrationAuth",
     redirect_uri: `${process.env.STUB_URL}orchestration-redirect`,
     claim: JSON.stringify(claim),
@@ -317,97 +308,6 @@ const encryptRequestObject = async (jws: string, encPubKey: jose.KeyLike) =>
     .setProtectedHeader({ cty: "JWT", alg: "RSA-OAEP-256", enc: "A256GCM" })
     .encrypt(encPubKey);
 
-const setUpSession = async (
-  headers: APIGatewayProxyEventHeaders,
-  config: RequestParameters,
-) => {
-  const newSessionId = crypto.randomBytes(20).toString("base64url");
-  const newClientSessionId = crypto.randomBytes(20).toString("base64url");
-  await createNewClientSession(newClientSessionId, config);
-
-  const existingGsCookie = getCookie(headers["cookie"], "gs");
-  if (existingGsCookie) {
-    const idParts = existingGsCookie.split(".");
-    const sessionId = idParts[0];
-    try {
-      await renameExistingSession(sessionId, newSessionId, config);
-    } catch (_e) {
-      await createNewSession(newSessionId, config);
-    }
-  } else {
-    await createNewSession(newSessionId, config);
-  }
-  await attachClientSessionToSession(newClientSessionId, newSessionId);
-
-  return `${newSessionId}.${newClientSessionId}`;
-};
-
-const createNewClientSession = async (
-  id: string,
-  config: RequestParameters,
-) => {
-  const client = await getRedisClient();
-  const auth_request_params: { [key: string]: string[] } = {
-    vtr: [`[${config.confidence}]`],
-    scope: ["openid email phone"],
-    response_type: ["code"],
-    redirect_uri: [RP_REDIRECT_URI],
-    state: [RP_STATE],
-    prompt: ["none"],
-    nonce: ["AJYiGSXv6euaffiuG5jMNgCwQW0ne7yuqDR9PrjsuvQ"],
-    client_id: [process.env.RP_CLIENT_ID!],
-  };
-  if (config.cookieConsent) {
-    auth_request_params["cookie_consent"] = [config.cookieConsent];
-  }
-  const clientSession: ClientSession = {
-    creation_time: new Date(),
-    client_name: "Example RP",
-    auth_request_params,
-    effective_vector_of_trust: {
-      credential_trust_level: credentialTrustToEnum(config.confidence),
-    },
-  };
-  await client.setEx(
-    `client-session-${id}`,
-    3600,
-    JSON.stringify(clientSession),
-  );
-};
-
-const createNewSession = async (id: string, config: RequestParameters) => {
-  const session: Session = {
-    session_id: id,
-    code_request_count_map: {},
-    authenticated: config.authenticated,
-    is_new_account: AccountStateEnum.UNKNOWN,
-  };
-  const client = await getRedisClient();
-  await client.setEx(id, 3600, JSON.stringify(session));
-};
-
-const renameExistingSession = async (
-  existingSessionId: string,
-  newSessionId: string,
-  config: RequestParameters,
-) => {
-  const client = await getRedisClient();
-  const existingSession = await getSession(existingSessionId);
-  await client.del(existingSessionId);
-  existingSession.session_id = newSessionId;
-  existingSession.authenticated = config.authenticated;
-  await client.setEx(newSessionId, 3600, JSON.stringify(existingSession));
-};
-
-const attachClientSessionToSession = async (
-  clientSessionId: string,
-  sessionId: string,
-) => {
-  const client = await getRedisClient();
-  const session = await getSession(sessionId);
-
-  session.client_sessions ||= [];
-  session.client_sessions.push(clientSessionId);
-
-  await client.setEx(sessionId, 3600, JSON.stringify(session));
+const generateNewSessionId = () => {
+  return crypto.randomBytes(20).toString("base64url");
 };
