@@ -132,7 +132,6 @@ Mappings:
       subnetBId: placeholder
       subnetCId: placeholder
       endpointSgId: placeholder
-      redisSgId: placeholder
       vpcId: placeholder
       privateKey: |
         -----BEGIN PRIVATE KEY-----
@@ -142,7 +141,6 @@ Mappings:
         -----END PRIVATE KEY-----
       authenticationBackendUrl: "https://www.example.com/"
       authenticationFrontendUrl: "https://www.example.com/"
-      redisUrl: "redis://redis-local:6379"
       hostedZoneId: placeholder
       rpClientId: "rpclient"
       rpSectorHost: "a.example.com"
@@ -166,12 +164,10 @@ Mappings:
       subnetBId: "subnet-0b648700a8ac43736"
       subnetCId: "subnet-01b7b1c835828eb3d"
       endpointSgId: "sg-036acdb59028a0c78"
-      redisSgId: "sg-0e4baa990eaebfb74"
       vpcId: "vpc-0b6f4a5d72f84ed0c"
       privateKey: "{{resolve:secretsmanager:sandpit-orchestration-stub-private-key::::4f623556-c691-4352-90f8-33d79b833a79}}"
       authenticationBackendUrl: "https://48oqh70cm7-vpce-040f33c3489ff777b.execute-api.eu-west-2.amazonaws.com/sandpit/"
       authenticationFrontendUrl: "https://signin.sandpit.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:sandpit-orchestration-stub-redis-url::::1e143e9d-8b87-4638-a460-66aaf5f60b2d}}"
       hostedZoneId: placeholder
       rpClientId: "1Dlz5rYheTqzZASRMmSBtgFIYgZlysnQ"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -195,12 +191,10 @@ Mappings:
       subnetBId: "subnet-0c91be3c7426cf2e6"
       subnetCId: "subnet-078749ec82aa5af94"
       endpointSgId: "sg-0e554161114407ce2"
-      redisSgId: "sg-0eae375db6b4bebb1"
       vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev1-orchestration-stub-private-key::::ca3923ea-99ba-4e9f-8088-f050e45d5aef}}"
       authenticationBackendUrl: "https://l31ra96lnc-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev1/"
       authenticationFrontendUrl: "https://signin.authdev1.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::805bf5c2-85fe-4042-bedc-2d0d93b4b91d}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -223,12 +217,10 @@ Mappings:
       subnetBId: "subnet-04a0851b2083a2782"
       subnetCId: "subnet-0c0c7f285b1ef1378"
       endpointSgId: "sg-0903a817986dc39ef"
-      redisSgId: "sg-0eae375db6b4bebb1"
       vpcId: "vpc-0ad3a83e46742a372"
       privateKey: "{{resolve:secretsmanager:authdev1-orchestration-stub-private-key::::6f903965-2ce9-4a6e-bfe6-9fe27d12db56}}"
       authenticationBackendUrl: "https://71gp8u9pgg-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev1/"
       authenticationFrontendUrl: "https://signin.authdev1.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:authdev1-orchestration-stub-redis-url::::5908ca87-432a-43d6-bb8c-f9b88e2af208}}"
       hostedZoneId: "Z01488663SVMGDFYGEX88"
       rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -251,12 +243,10 @@ Mappings:
       subnetBId: "subnet-0c91be3c7426cf2e6"
       subnetCId: "subnet-078749ec82aa5af94"
       endpointSgId: "sg-0e554161114407ce2"
-      redisSgId: "sg-09a7840296f9f236e"
       vpcId: "vpc-04918b35a66969280"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
       authenticationBackendUrl: "https://8yikw2kek6-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::17471c88-d25a-4e85-b075-5c703ee6db92}}"
       hostedZoneId: "Z10132222WVQ7U47816SI"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -279,12 +269,10 @@ Mappings:
       subnetBId: "subnet-04a0851b2083a2782"
       subnetCId: "subnet-0c0c7f285b1ef1378"
       endpointSgId: "sg-0903a817986dc39ef"
-      redisSgId: "sg-09a7840296f9f236e"
       vpcId: "vpc-0ad3a83e46742a372"
       privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::dbc5daa9-f92c-4450-b801-29ed5e91e126}}"
       authenticationBackendUrl: "https://rqdauafdhd-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev2/"
       authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:authdev2-orchestration-stub-redis-url::::75b26f7c-5e9c-4f17-bac4-0660e5c2a284}}"
       hostedZoneId: "Z0283478G72QVGV7VVBG"
       rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -307,12 +295,10 @@ Mappings:
       subnetBId: "subnet-04a0851b2083a2782"
       subnetCId: "subnet-0c0c7f285b1ef1378"
       endpointSgId: "sg-0903a817986dc39ef"
-      redisSgId: "sg-0d16b5ae8a12d3785"
       vpcId: "vpc-0ad3a83e46742a372"
       privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::02a7ed01-c5d6-4562-aef1-cfc25df8ec14}}"
       authenticationBackendUrl: "https://txat8ipxf8-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/"
       authenticationFrontendUrl: "https://signin.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::93448bbd-38b1-4841-8f91-cccd46b4c486}}"
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -336,12 +322,10 @@ Mappings:
       subnetBId: "subnet-04a0851b2083a2782"
       subnetCId: "subnet-0c0c7f285b1ef1378"
       endpointSgId: "sg-0903a817986dc39ef"
-      redisSgId: "sg-0d16b5ae8a12d3785"
       vpcId: "vpc-0ad3a83e46742a372"
       privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::02a7ed01-c5d6-4562-aef1-cfc25df8ec14}}"
       authenticationBackendUrl: "https://k3d8ykiz8e-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/"
       authenticationFrontendUrl: "https://apitest.signin.dev.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:dev-orchestration-stub-redis-url::::93448bbd-38b1-4841-8f91-cccd46b4c486}}"
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
@@ -365,12 +349,10 @@ Mappings:
       subnetBId: "subnet-055927eafb2d73cd3"
       subnetCId: "subnet-0778a9775ee5845a3"
       endpointSgId: "sg-022ad00847f2dc9be"
-      redisSgId: "sg-05ff2238b12306a34"
       vpcId: "vpc-095e2f57f31498e5d"
       privateKey: "{{resolve:secretsmanager:build-orchestration-stub-private-key::::00dc89e1-b4de-4be8-9ad2-d8f8dcc46434}}"
       authenticationBackendUrl: "https://fag06zqnve-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/"
       authenticationFrontendUrl: "https://signin.build.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::1760a81f-0aff-4df0-8dee-7341be6543d2}}"
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
       rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
@@ -394,12 +376,10 @@ Mappings:
       subnetBId: "subnet-055927eafb2d73cd3"
       subnetCId: "subnet-0778a9775ee5845a3"
       endpointSgId: "sg-022ad00847f2dc9be"
-      redisSgId: "sg-05ff2238b12306a34"
       vpcId: "vpc-095e2f57f31498e5d"
       privateKey: "{{resolve:secretsmanager:build-orchestration-stub-private-key::::00dc89e1-b4de-4be8-9ad2-d8f8dcc46434}}"
       authenticationBackendUrl: "https://w3nit2qina-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/"
       authenticationFrontendUrl: "https://apitest.signin.build.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:build-orchestration-stub-redis-url::::1760a81f-0aff-4df0-8dee-7341be6543d2}}"
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
       rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
       rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
@@ -423,12 +403,10 @@ Mappings:
       subnetBId: "subnet-0998c876e86131a63"
       subnetCId: "subnet-0ff5a12cce4d4228f"
       endpointSgId: "sg-01743a16df7d6136b"
-      redisSgId: "sg-0b580ccddb50eb178"
       vpcId: "vpc-07cf1e76e27f28e86"
       privateKey: "{{resolve:secretsmanager:staging-orchestration-stub-private-key::::c1f83296-2f8d-458c-8542-f3c919e9be8c}}"
       authenticationBackendUrl: "https://rr86yg3r28-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
       authenticationFrontendUrl: "https://signin.staging.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::9af2bcd3-bc3d-4044-90db-7a505917fa58}}"
       hostedZoneId: "Z06032813E21PC11LZZAB"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
@@ -452,12 +430,10 @@ Mappings:
       subnetBId: "subnet-0998c876e86131a63"
       subnetCId: "subnet-0ff5a12cce4d4228f"
       endpointSgId: "sg-01743a16df7d6136b"
-      redisSgId: "sg-0b580ccddb50eb178"
       vpcId: "vpc-07cf1e76e27f28e86"
       privateKey: "{{resolve:secretsmanager:staging-orchestration-stub-private-key::::c1f83296-2f8d-458c-8542-f3c919e9be8c}}"
       authenticationBackendUrl: "https://8ttd794ay4-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
       authenticationFrontendUrl: "https://apitest.signin.staging.account.gov.uk/"
-      redisUrl: "{{resolve:secretsmanager:staging-orchestration-stub-redis-url::::9af2bcd3-bc3d-4044-90db-7a505917fa58}}"
       hostedZoneId: "Z06032813E21PC11LZZAB"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
@@ -611,13 +587,6 @@ Resources:
             - subnetCId
       Environment:
         Variables:
-          REDIS_URL: !FindInMap
-            - EnvironmentConfiguration
-            - !If
-              - UseSubEnvironment
-              - !Ref SubEnvironment
-              - !Ref Environment
-            - redisUrl
           PRIVATE_KEY: !FindInMap
             - EnvironmentConfiguration
             - !If
@@ -738,13 +707,6 @@ Resources:
             - subnetCId
       Environment:
         Variables:
-          REDIS_URL: !FindInMap
-            - EnvironmentConfiguration
-            - !If
-              - UseSubEnvironment
-              - !Ref SubEnvironment
-              - !Ref Environment
-            - redisUrl
           PRIVATE_KEY: !FindInMap
             - EnvironmentConfiguration
             - !If
@@ -812,17 +774,6 @@ Resources:
           IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-        - DestinationSecurityGroupId: !FindInMap
-            - EnvironmentConfiguration
-            - !If
-              - UseSubEnvironment
-              - !Ref SubEnvironment
-              - !Ref Environment
-            - redisSgId
-          Description: Allow traffic to Redis
-          IpProtocol: tcp
-          FromPort: 6379
-          ToPort: 6379
 
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
