@@ -204,6 +204,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/ipv-authorize.handler
+      Timeout: 30
       LoggingConfig:
         LogGroup: !Ref IPVStubAuthorizeLambdaLogGroup
       Environment:
