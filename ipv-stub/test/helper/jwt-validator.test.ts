@@ -1,8 +1,13 @@
 import chai from "chai";
 import { describe } from "mocha";
 import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
-import * as jose from "jose";
-import { CompactSign } from "jose";
+import {
+  importSPKI,
+  calculateJwkThumbprint,
+  importPKCS8,
+  exportJWK,
+  CompactSign,
+} from "jose";
 import keys from "../../src/data/keys.json";
 
 const expect = chai.expect;
@@ -231,6 +236,67 @@ describe("isValidJwt", async () => {
 
     expect(await validateAuthorisationJwt(jws)).to.eq(expectedError);
   });
+
+  it("should use key from JWKS when kid is present in JWT header", async () => {
+    const originalFetch = global.fetch;
+
+    try {
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
+
+      const privateKey = await importPKCS8(
+        keys.authPrivateSigningKeyIPV,
+        "ES256"
+      );
+      const publicKey = await exportJWK(
+        await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+      );
+      const kid = await calculateJwkThumbprint(publicKey, "sha256");
+      const mockJwks = {
+        keys: [{ ...publicKey, kid }],
+      };
+
+      global.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockJwks,
+        }) as Response;
+
+      const sub = "test-sub";
+      const payload = {
+        sub,
+        scope: "reverification",
+        state: "test-state",
+        claims: {
+          userinfo: {
+            "https://vocab.account.gov.uk/v1/storageAccessToken": {
+              values: [
+                await createSignedJwt(
+                  validSigningAlg,
+                  validStorageAccessTokenPayload,
+                  keys.authPrivateSigningKeyEVCS
+                ),
+              ],
+            },
+          },
+        },
+      };
+
+      const textEncoder = new TextEncoder();
+      const jwt = await new CompactSign(
+        textEncoder.encode(JSON.stringify(payload))
+      )
+        .setProtectedHeader({ alg: "ES256", kid })
+        .sign(privateKey);
+
+      const result = await validateAuthorisationJwt(jwt);
+      expect(result).to.not.be.a("string");
+      expect(result.sub).to.eq(sub);
+    } finally {
+      global.fetch = originalFetch;
+      delete process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
+    }
+  });
 });
 
 async function createSignedJwt(
@@ -239,7 +305,7 @@ async function createSignedJwt(
   signingKey: string
 ) {
   const textEncoder = new TextEncoder();
-  const privateKey = await jose.importPKCS8(signingKey, header);
+  const privateKey = await importPKCS8(signingKey, header);
   return new CompactSign(textEncoder.encode(JSON.stringify(payload)))
     .setProtectedHeader({ alg: header })
     .sign(privateKey);
