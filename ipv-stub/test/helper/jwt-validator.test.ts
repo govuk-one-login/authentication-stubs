@@ -1,8 +1,13 @@
 import chai from "chai";
 import { describe } from "mocha";
 import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
-import * as jose from "jose";
-import { CompactSign } from "jose";
+import {
+  importSPKI,
+  calculateJwkThumbprint,
+  importPKCS8,
+  exportJWK,
+  CompactSign,
+} from "jose";
 import keys from "../../src/data/keys.json";
 
 const expect = chai.expect;
@@ -239,15 +244,14 @@ describe("isValidJwt", async () => {
       process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
         "https://example.com/.well-known/jwks.json";
 
-      const privateKey = await jose.importPKCS8(
+      const privateKey = await importPKCS8(
         keys.authPrivateSigningKeyIPV,
         "ES256"
       );
-      const publicKey = await jose.exportJWK(
-        await jose.importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+      const publicKey = await exportJWK(
+        await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
       );
-      const kid = await jose.calculateJwkThumbprint(publicKey, "sha256");
-
+      const kid = await calculateJwkThumbprint(publicKey, "sha256");
       const mockJwks = {
         keys: [{ ...publicKey, kid }],
       };
@@ -301,7 +305,7 @@ async function createSignedJwt(
   signingKey: string
 ) {
   const textEncoder = new TextEncoder();
-  const privateKey = await jose.importPKCS8(signingKey, header);
+  const privateKey = await importPKCS8(signingKey, header);
   return new CompactSign(textEncoder.encode(JSON.stringify(payload)))
     .setProtectedHeader({ alg: header })
     .sign(privateKey);
