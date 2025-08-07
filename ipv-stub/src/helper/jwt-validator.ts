@@ -3,7 +3,13 @@ import {
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
 } from "./types";
-import * as jose from "jose";
+import {
+  KeyLike,
+  compactVerify,
+  importJWK,
+  importSPKI,
+  decodeProtectedHeader,
+} from "jose";
 import { CodedError } from "./result-helper";
 import process from "node:process";
 import { processJoseError } from "./error-helper";
@@ -21,8 +27,8 @@ export async function validateAuthorisationJwt(
   return await processStorageAccessToken(authoriseRequestAsJson);
 }
 
-async function getPublicSigningKey(nestedJws: string): Promise<jose.KeyLike> {
-  const header = jose.decodeProtectedHeader(nestedJws);
+async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
+  const header = decodeProtectedHeader(nestedJws);
   const kid = header.kid;
 
   if (kid) {
@@ -34,10 +40,10 @@ async function getPublicSigningKey(nestedJws: string): Promise<jose.KeyLike> {
   if (!authSignaturePublicKeyIpv) {
     throw new CodedError(500, "Auth IPV signing public key not found");
   }
-  return await jose.importSPKI(authSignaturePublicKeyIpv, "ES256");
+  return await importSPKI(authSignaturePublicKeyIpv, "ES256");
 }
 
-async function getPublicKeyFromJwks(kid: string): Promise<jose.KeyLike> {
+async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
   const jwksUri = process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
   if (!jwksUri) {
     throw new CodedError(500, "JWKS URI not found");
@@ -47,7 +53,7 @@ async function getPublicKeyFromJwks(kid: string): Promise<jose.KeyLike> {
   for (const k of jwks.keys) {
     if (k.kid === kid) {
       logger.info(`using kid: ${kid}`);
-      return (await jose.importJWK(k)) as jose.KeyLike;
+      return (await importJWK(k)) as KeyLike;
     }
   }
 
@@ -56,11 +62,11 @@ async function getPublicKeyFromJwks(kid: string): Promise<jose.KeyLike> {
 
 async function verifyAndDecodeJwt(
   nestedJws: string,
-  publicJwk: jose.KeyLike
+  publicJwk: KeyLike
 ): Promise<DecodedRequest> {
   let payload;
   try {
-    ({ payload } = await jose.compactVerify(nestedJws, publicJwk));
+    ({ payload } = await compactVerify(nestedJws, publicJwk));
   } catch (error) {
     processJoseError(error);
   }
@@ -137,9 +143,9 @@ async function validateStorageAccessTokenJWT(
       throw new CodedError(500, "Auth EVCS signing public key not found");
     }
 
-    const publicJwk = await jose.importSPKI(authSignaturePublicKey, "ES256");
+    const publicJwk = await importSPKI(authSignaturePublicKey, "ES256");
     try {
-      ({ payload } = await jose.compactVerify(storageTokenJws, publicJwk));
+      ({ payload } = await compactVerify(storageTokenJws, publicJwk));
       const textDecoder = new TextDecoder();
       decodedPayloadAsJson = JSON.parse(textDecoder.decode(payload));
     } catch (error) {
