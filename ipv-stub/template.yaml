@@ -46,6 +46,7 @@ Mappings:
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::13d29a8d-453e-4786-a485-91eb59967ba8}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::7621276c-9e71-42dd-9308-d2a651d4f0d2}}"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
@@ -53,6 +54,7 @@ Mappings:
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev1/stubs/ipv-stub-private-key::::ea3de3c0-a3bb-41f6-9df6-dbf73ee9f75f}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::b138706a-0371-4a8c-ae5e-2f6a0b0cf198}}"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
@@ -60,6 +62,7 @@ Mappings:
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev2/stubs/ipv-stub-private-key::::78c42d33-23d3-4bc3-865a-1df55660a5bb}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
 
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
@@ -67,6 +70,7 @@ Mappings:
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::1c764b26-dbfe-488a-aacc-c33a33cdf7ee}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/reverification-jwk.json"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -229,6 +233,13 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authpublicsigningkeyipv
+          AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authIpvPublicSigningKeyJwksEndpoint
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
