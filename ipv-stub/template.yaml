@@ -44,7 +44,7 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::13d29a8d-453e-4786-a485-91eb59967ba8}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::bdc7b7b7-7723-438d-9031-46f7a1498819}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::7621276c-9e71-42dd-9308-d2a651d4f0d2}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
@@ -302,6 +302,7 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authpublicsigningkeyipv
+          DEPLOYMENT_TIMESTAMP: !Ref AWS::StackId
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
