@@ -35,7 +35,10 @@ Then the private key is in private.pem (this goes into secrets manager) and the 
 
 The `Dockerfile` runs a small express server which simulates the API Gateway interface.
 
-N.B. You need to provide the environment variable configuration yourself:
+If you are using the local running configuration in `authentication-api` then the configuration
+should be supplied automatically through its `orchestration-stub.env` file.
+
+If running standalone, you need to provide the environment variable configuration yourself:
 
 - `AUTHENTICATION_BACKEND_URL` - base URL for the auth /token and /userinfo endpoints
 - `AUTHENTICATION_FRONTEND_URL` - base URL for the auth frontend
@@ -45,7 +48,7 @@ N.B. You need to provide the environment variable configuration yourself:
 - `REDIS_URL` - URL of a redis instance to use for tracking sessions
 - `RP_CLIENT_ID` - RP client ID to pass to auth (not the orchestration client id)
 - `RP_SECTOR_HOST` - RP sector host to pass to auth
-- `STUB_URL` - URL of the stub itself, used to generate the callback, typically `http://localhost:4400`
+- `STUB_URL` - URL of the stub itself, used to generate the callback, typically `http://localhost:4400/`
 
 ## Deploying
 
