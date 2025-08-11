@@ -9,6 +9,7 @@ import {
   importJWK,
   importSPKI,
   decodeProtectedHeader,
+  calculateJwkThumbprint,
 } from "jose";
 import { CodedError } from "./result-helper";
 import process from "node:process";
@@ -30,9 +31,10 @@ export async function validateAuthorisationJwt(
 async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
   const header = decodeProtectedHeader(nestedJws);
   const kid = header.kid;
+  logger.info(`JWT header: ${JSON.stringify(header)}`);
 
   if (kid) {
-    logger.info("kid received in decoded protected header");
+    logger.info(`kid received in decoded protected header: ${kid}`);
     return await getPublicKeyFromJwks(kid);
   }
 
@@ -50,9 +52,13 @@ async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
   }
 
   const jwks = await fetchJwks(jwksUri);
+  logger.info(`JWKS contains ${jwks.keys.length} keys`);
+  
   for (const k of jwks.keys) {
-    if (k.kid === kid) {
-      logger.info(`using kid: ${kid}`);
+    const keyHash = await calculateJwkThumbprint(k, "sha256");
+    logger.info(`Comparing kid ${kid} with key thumbprint ${keyHash}`);
+    if (keyHash === kid) {
+      logger.info(`Found matching key for kid: ${kid}`);
       return (await importJWK(k)) as KeyLike;
     }
   }
