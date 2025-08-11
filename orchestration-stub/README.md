@@ -36,7 +36,7 @@ Then the private key is in private.pem (this goes into secrets manager) and the 
 The `Dockerfile` runs a small express server which simulates the API Gateway interface.
 
 If you are using the local running configuration in `authentication-api` then the configuration
-should be supplied automatically through its `orchestration-stub.env` file.
+should be supplied automatically through `.env.local`.
 
 If running standalone, you need to provide the environment variable configuration yourself:
 
