@@ -9,8 +9,8 @@
     "jose": "5.10.0",
     "jsonwebtoken": "^9.0.2",
     "pino": "^9.8.0",
-    "@aws-sdk/client-dynamodb": "^3.788.0",
-    "@aws-sdk/lib-dynamodb": "^3.789.0"
+    "@aws-sdk/client-dynamodb": "^3.864.0",
+    "@aws-sdk/lib-dynamodb": "^3.864.0"
   },
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/ipv",
