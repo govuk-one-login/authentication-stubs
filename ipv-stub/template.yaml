@@ -45,7 +45,7 @@ Mappings:
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::13d29a8d-453e-4786-a485-91eb59967ba8}}"
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::8eb342b8-9d01-46ff-9796-a924b438a61a}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::6f665d29-bf07-4ba1-858a-95a0f1bfc377}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::c3dad3c2-2d8a-4fd7-bddf-8955fc7192fd}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev1:
