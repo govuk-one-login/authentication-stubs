@@ -23,83 +23,99 @@ describe("JwksKeyService", () => {
   describe("getSigningKey", () => {
     it("should use environment variable override for IPV key", async () => {
       process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
-      
+
       const key = await JwksKeyService.getSigningKey(KeyType.IPV);
-      expect(key).to.not.be.undefined;
+      void expect(key).to.not.be.undefined;
     });
 
     it("should use environment variable override for EVCS key", async () => {
       process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = keys.authPublicSigningKeyEVCS;
-      
+
       const key = await JwksKeyService.getSigningKey(KeyType.EVCS);
-      expect(key).to.not.be.undefined;
+      void expect(key).to.not.be.undefined;
     });
 
     it("should fetch from JWKS when no environment variable is set", async () => {
       delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT = "https://example.com/.well-known/jwks.json";
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
 
-      const publicKey = await exportJWK(await importSPKI(keys.authPublicSigningKeyIPV, "ES256"));
+      const publicKey = await exportJWK(
+        await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+      );
       const kid = await calculateJwkThumbprint(publicKey, "sha256");
       const mockJwks = { keys: [{ ...publicKey, kid }] };
 
-      global.fetch = async () => ({
-        ok: true,
-        json: async () => mockJwks,
-      }) as Response;
+      global.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockJwks,
+        }) as Response;
 
       const key = await JwksKeyService.getSigningKey(KeyType.IPV, kid);
-      expect(key).to.not.be.undefined;
+      void expect(key).to.not.be.undefined;
     });
 
     it("should use first key when no kid is provided", async () => {
       delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT = "https://example.com/.well-known/jwks.json";
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
 
-      const publicKey = await exportJWK(await importSPKI(keys.authPublicSigningKeyIPV, "ES256"));
+      const publicKey = await exportJWK(
+        await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+      );
       const mockJwks = { keys: [publicKey] };
 
-      global.fetch = async () => ({
-        ok: true,
-        json: async () => mockJwks,
-      }) as Response;
+      global.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockJwks,
+        }) as Response;
 
       const key = await JwksKeyService.getSigningKey(KeyType.IPV);
-      expect(key).to.not.be.undefined;
+      void expect(key).to.not.be.undefined;
     });
 
     it("should throw error when kid not found in JWKS", async () => {
       delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT = "https://example.com/.well-known/jwks.json";
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
 
       const mockJwks = { keys: [] };
-      global.fetch = async () => ({
-        ok: true,
-        json: async () => mockJwks,
-      }) as Response;
+      global.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockJwks,
+        }) as Response;
 
       try {
         await JwksKeyService.getSigningKey(KeyType.IPV, "nonexistent-kid");
         expect.fail("Should have thrown an error");
-      } catch (error: any) {
-        expect(error.message).to.include("Key not found in JWKS for kid: nonexistent-kid");
+      } catch (error: unknown) {
+        expect((error as Error).message).to.include(
+          "No signing key available for IPV"
+        );
       }
     });
 
     it("should throw error when JWKS fetch fails", async () => {
       delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT = "https://example.com/.well-known/jwks.json";
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
 
-      global.fetch = async () => ({
-        ok: false,
-        statusText: "Not Found",
-      }) as Response;
+      global.fetch = async () =>
+        ({
+          ok: false,
+          statusText: "Not Found",
+        }) as Response;
 
       try {
         await JwksKeyService.getSigningKey(KeyType.IPV);
         expect.fail("Should have thrown an error");
-      } catch (error: any) {
-        expect(error.message).to.include("No signing key available for IPV");
+      } catch (error: unknown) {
+        expect((error as Error).message).to.include(
+          "No signing key available for IPV"
+        );
       }
     });
 
@@ -110,23 +126,27 @@ describe("JwksKeyService", () => {
       try {
         await JwksKeyService.getSigningKey(KeyType.IPV);
         expect.fail("Should have thrown an error");
-      } catch (error: any) {
-        expect(error.message).to.include("No signing key available for IPV");
+      } catch (error: unknown) {
+        expect((error as Error).message).to.include(
+          "No signing key available for IPV"
+        );
       }
     });
 
     it("should prioritize environment variable over JWKS", async () => {
       process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT = "https://example.com/.well-known/jwks.json";
+      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+        "https://example.com/.well-known/jwks.json";
 
       // Mock JWKS to return different key
-      global.fetch = async () => ({
-        ok: true,
-        json: async () => ({ keys: [] }),
-      }) as Response;
+      global.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => ({ keys: [] }),
+        }) as Response;
 
       const key = await JwksKeyService.getSigningKey(KeyType.IPV);
-      expect(key).to.not.be.undefined;
+      void expect(key).to.not.be.undefined;
     });
   });
 });

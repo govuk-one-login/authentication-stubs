@@ -3,12 +3,7 @@ import {
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
 } from "./types";
-import {
-  KeyLike,
-  compactVerify,
-  decodeProtectedHeader,
-} from "jose";
-import { CodedError } from "./result-helper";
+import { KeyLike, compactVerify, decodeProtectedHeader } from "jose";
 import { processJoseError } from "./error-helper";
 import { logger } from "./logger";
 import { JwksKeyService, KeyType } from "../services/jwks-key-service";
@@ -35,8 +30,6 @@ async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
 
   return await JwksKeyService.getSigningKey(KeyType.IPV, kid);
 }
-
-
 
 async function verifyAndDecodeJwt(
   nestedJws: string,
@@ -93,8 +86,6 @@ async function processStorageAccessToken(
 
   return authoriseRequestAsJson;
 }
-
-
 
 async function validateStorageAccessTokenJWT(
   userInfo: EncodedUserInfoClaim

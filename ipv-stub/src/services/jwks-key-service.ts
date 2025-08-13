@@ -21,6 +21,13 @@ export class JwksKeyService {
   private static async fetchJwks(jwksUri: string): Promise<JwksResponse> {
     const response = await fetch(jwksUri);
     if (!response.ok) {
+      // Handle authentication errors for external services
+      if (response.status === 401 || response.status === 403) {
+        throw new CodedError(
+          500,
+          `JWKS endpoint requires authentication: ${response.statusText}`
+        );
+      }
       throw new CodedError(500, `Failed to fetch JWKS: ${response.statusText}`);
     }
     return await response.json();
@@ -60,7 +67,7 @@ export class JwksKeyService {
     if (jwksUri) {
       try {
         const jwks = await this.fetchJwks(jwksUri);
-        
+
         // If kid is provided, look for specific key
         if (kid) {
           for (const k of jwks.keys) {
@@ -80,7 +87,18 @@ export class JwksKeyService {
 
         throw new CodedError(500, `No keys found in JWKS for ${keyType}`);
       } catch (error) {
-        logger.warn(`JWKS fetch failed for ${keyType}, checking fallback: ${error}`);
+        logger.warn(
+          `JWKS fetch failed for ${keyType}, checking fallback: ${error}`
+        );
+        // For authentication errors, provide more specific guidance
+        if (
+          error instanceof CodedError &&
+          error.message.includes("authentication")
+        ) {
+          logger.error(
+            `External JWKS endpoint requires authentication. Consider using environment variables for ${keyType} keys in stub environments.`
+          );
+        }
       }
     }
 
