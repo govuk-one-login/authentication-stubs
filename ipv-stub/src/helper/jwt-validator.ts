@@ -6,14 +6,12 @@ import {
 import {
   KeyLike,
   compactVerify,
-  importJWK,
-  importSPKI,
   decodeProtectedHeader,
 } from "jose";
 import { CodedError } from "./result-helper";
-import process from "node:process";
 import { processJoseError } from "./error-helper";
 import { logger } from "./logger";
+import { JwksKeyService, KeyType } from "../services/jwks-key-service";
 
 export async function validateAuthorisationJwt(
   nestedJws: string
@@ -33,32 +31,12 @@ async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
 
   if (kid) {
     logger.info("kid received in decoded protected header");
-    return await getPublicKeyFromJwks(kid);
   }
 
-  const authSignaturePublicKeyIpv = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
-  if (!authSignaturePublicKeyIpv) {
-    throw new CodedError(500, "Auth IPV signing public key not found");
-  }
-  return await importSPKI(authSignaturePublicKeyIpv, "ES256");
+  return await JwksKeyService.getSigningKey(KeyType.IPV, kid);
 }
 
-async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
-  const jwksUri = process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
-  if (!jwksUri) {
-    throw new CodedError(500, "JWKS URI not found");
-  }
 
-  const jwks = await fetchJwks(jwksUri);
-  for (const k of jwks.keys) {
-    if (k.kid === kid) {
-      logger.info(`using kid: ${kid}`);
-      return (await importJWK(k)) as KeyLike;
-    }
-  }
-
-  throw new CodedError(400, "Key not found in JWKS for provided kid");
-}
 
 async function verifyAndDecodeJwt(
   nestedJws: string,
@@ -116,13 +94,7 @@ async function processStorageAccessToken(
   return authoriseRequestAsJson;
 }
 
-async function fetchJwks(jwksUri: string) {
-  const response = await fetch(jwksUri);
-  if (!response.ok) {
-    throw new CodedError(500, `Failed to fetch JWKS: ${response.statusText}`);
-  }
-  return await response.json();
-}
+
 
 async function validateStorageAccessTokenJWT(
   userInfo: EncodedUserInfoClaim
@@ -138,12 +110,7 @@ async function validateStorageAccessTokenJWT(
     const storageTokenJws =
       userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"].values[0];
 
-    const authSignaturePublicKey = process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS;
-    if (!authSignaturePublicKey) {
-      throw new CodedError(500, "Auth EVCS signing public key not found");
-    }
-
-    const publicJwk = await importSPKI(authSignaturePublicKey, "ES256");
+    const publicJwk = await JwksKeyService.getSigningKey(KeyType.EVCS);
     try {
       ({ payload } = await compactVerify(storageTokenJws, publicJwk));
       const textDecoder = new TextDecoder();

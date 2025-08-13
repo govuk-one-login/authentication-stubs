@@ -55,9 +55,16 @@ async function createJWS(
 }
 
 describe("isValidJwt", async () => {
+  let originalFetch: typeof global.fetch;
+
   beforeEach(() => {
+    originalFetch = global.fetch;
     process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
     process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS = keys.authPublicSigningKeyEVCS;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it("returns true for a valid jwt", async () => {
@@ -238,35 +245,135 @@ describe("isValidJwt", async () => {
   });
 
   it("should use key from JWKS when kid is present in JWT header", async () => {
-    const originalFetch = global.fetch;
+    // Remove environment variable to force JWKS usage
+    delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
+    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+      "https://example.com/.well-known/jwks.json";
 
-    try {
-      process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
-        "https://example.com/.well-known/jwks.json";
+    const privateKey = await importPKCS8(
+      keys.authPrivateSigningKeyIPV,
+      "ES256"
+    );
+    const publicKey = await exportJWK(
+      await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+    );
+    const kid = await calculateJwkThumbprint(publicKey, "sha256");
+    const mockJwks = {
+      keys: [{ ...publicKey, kid }],
+    };
 
-      const privateKey = await importPKCS8(
-        keys.authPrivateSigningKeyIPV,
-        "ES256"
-      );
-      const publicKey = await exportJWK(
-        await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
-      );
-      const kid = await calculateJwkThumbprint(publicKey, "sha256");
-      const mockJwks = {
-        keys: [{ ...publicKey, kid }],
-      };
+    global.fetch = async () =>
+      ({
+        ok: true,
+        json: async () => mockJwks,
+      }) as Response;
 
-      global.fetch = async () =>
-        ({
-          ok: true,
-          json: async () => mockJwks,
-        }) as Response;
+    const sub = "test-sub";
+    const payload = {
+      sub,
+      scope: "reverification",
+      state: "test-state",
+      claims: {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [
+              await createSignedJwt(
+                validSigningAlg,
+                validStorageAccessTokenPayload,
+                keys.authPrivateSigningKeyEVCS
+              ),
+            ],
+          },
+        },
+      },
+    };
 
-      const sub = "test-sub";
-      const payload = {
-        sub,
+    const textEncoder = new TextEncoder();
+    const jwt = await new CompactSign(
+      textEncoder.encode(JSON.stringify(payload))
+    )
+      .setProtectedHeader({ alg: "ES256", kid })
+      .sign(privateKey);
+
+    const result = await validateAuthorisationJwt(jwt);
+    expect(result).to.not.be.a("string");
+    expect(result.sub).to.eq(sub);
+  });
+
+  it("should use JWKS even when no kid is present", async () => {
+    // Remove environment variable to force JWKS usage
+    delete process.env.AUTH_PUBLIC_SIGNING_KEY_IPV;
+    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+      "https://example.com/.well-known/jwks.json";
+
+    const privateKey = await importPKCS8(
+      keys.authPrivateSigningKeyIPV,
+      "ES256"
+    );
+    const publicKey = await exportJWK(
+      await importSPKI(keys.authPublicSigningKeyIPV, "ES256")
+    );
+    const mockJwks = {
+      keys: [publicKey],
+    };
+
+    global.fetch = async () =>
+      ({
+        ok: true,
+        json: async () => mockJwks,
+      }) as Response;
+
+    const sub = "test-sub";
+    const payload = {
+      sub,
+      scope: "reverification",
+      state: "test-state",
+      claims: {
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [
+              await createSignedJwt(
+                validSigningAlg,
+                validStorageAccessTokenPayload,
+                keys.authPrivateSigningKeyEVCS
+              ),
+            ],
+          },
+        },
+      },
+    };
+
+    const textEncoder = new TextEncoder();
+    const jwt = await new CompactSign(
+      textEncoder.encode(JSON.stringify(payload))
+    )
+      .setProtectedHeader({ alg: "ES256" })
+      .sign(privateKey);
+
+    const result = await validateAuthorisationJwt(jwt);
+    expect(result).to.not.be.a("string");
+    expect(result.sub).to.eq(sub);
+  });
+
+  it("should prioritize environment variable over JWKS", async () => {
+    // Set both environment variable and JWKS endpoint
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV = keys.authPublicSigningKeyIPV;
+    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
+      "https://example.com/.well-known/jwks.json";
+
+    // Mock JWKS to return empty keys (should not be used)
+    global.fetch = async () =>
+      ({
+        ok: true,
+        json: async () => ({ keys: [] }),
+      }) as Response;
+
+    const sub = "test-sub";
+    const validSampleJws = await createSignedJwt(
+      validSigningAlg,
+      {
+        sub: sub,
         scope: "reverification",
-        state: "test-state",
         claims: {
           userinfo: {
             "https://vocab.account.gov.uk/v1/storageAccessToken": {
@@ -280,22 +387,14 @@ describe("isValidJwt", async () => {
             },
           },
         },
-      };
+        state: "test-state",
+      },
+      keys.authPrivateSigningKeyIPV
+    );
 
-      const textEncoder = new TextEncoder();
-      const jwt = await new CompactSign(
-        textEncoder.encode(JSON.stringify(payload))
-      )
-        .setProtectedHeader({ alg: "ES256", kid })
-        .sign(privateKey);
-
-      const result = await validateAuthorisationJwt(jwt);
-      expect(result).to.not.be.a("string");
-      expect(result.sub).to.eq(sub);
-    } finally {
-      global.fetch = originalFetch;
-      delete process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
-    }
+    const result = await validateAuthorisationJwt(validSampleJws);
+    expect(result).to.not.be.a("string");
+    expect(result.sub).to.eq(sub);
   });
 });
 

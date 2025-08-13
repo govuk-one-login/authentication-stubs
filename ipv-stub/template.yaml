@@ -47,6 +47,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::8eb342b8-9d01-46ff-9796-a924b438a61a}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::c3dad3c2-2d8a-4fd7-bddf-8955fc7192fd}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/jwks.json"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
@@ -55,6 +56,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::b138706a-0371-4a8c-ae5e-2f6a0b0cf198}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/jwks.json"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
@@ -63,6 +65,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/jwks.json"
 
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
@@ -71,6 +74,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/jwks.json"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -241,6 +245,13 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authIpvPublicSigningKeyJwksEndpoint
+          AUTH_EVCS_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authEvcsPublicSigningKeyJwksEndpoint
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -441,3 +452,64 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
         HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
+Outputs:
+  IPVStubDomainName:
+    Description: Domain name for the IPV stub
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - ipvStubDomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-IPVStubDomainName"
+
+  AuthIPVPublicSigningKeyJwksEndpoint:
+    Description: JWKS endpoint URL for IPV public signing keys
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authIpvPublicSigningKeyJwksEndpoint
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthIPVPublicSigningKeyJwksEndpoint"
+
+  AuthEVCSPublicSigningKeyJwksEndpoint:
+    Description: JWKS endpoint URL for EVCS public signing keys
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authEvcsPublicSigningKeyJwksEndpoint
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthEVCSPublicSigningKeyJwksEndpoint"
+
+  AuthPublicSigningKeyIPVSource:
+    Description: Secrets Manager reference for IPV public signing key
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authpublicsigningkeyipv
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthPublicSigningKeyIPVSource"
+
+  AuthPublicSigningKeyEVCSSource:
+    Description: Secrets Manager reference for EVCS public signing key
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authpublicsigningkeyevcs
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthPublicSigningKeyEVCSSource"
