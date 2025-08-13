@@ -3,21 +3,21 @@ import {
   APIGatewayProxyResult,
   Handler,
 } from "aws-lambda";
-import { logger } from "../helper/logger";
-import renderIPVAuthorize from "./render-ipv-authorize";
+import { logger } from "../helper/logger.js";
+import renderIPVAuthorize from "./render-ipv-authorize.js";
 import {
   CodedError,
   handleErrors,
   methodNotAllowedError,
   successfulHtmlResult,
   successfulJsonResult,
-} from "../helper/result-helper";
+} from "../helper/result-helper.js";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
-import { validateAuthorisationJwt } from "../helper/jwt-validator";
-import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service";
+import { validateAuthorisationJwt } from "../helper/jwt-validator.js";
+import { putReverificationWithAuthCode } from "../services/dynamodb-form-response-service.js";
 import { randomBytes } from "crypto";
-import { processJoseError } from "../helper/error-helper";
-import { Reverification } from "../interfaces/reverification-interface";
+import { processJoseError } from "../helper/error-helper.js";
+import { Reverification } from "../interfaces/reverification-interface.js";
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent

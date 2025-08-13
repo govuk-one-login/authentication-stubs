@@ -2,7 +2,7 @@ import {
   DecodedRequest,
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
-} from "./types";
+} from "./types.js";
 import {
   KeyLike,
   compactVerify,
@@ -10,10 +10,10 @@ import {
   importSPKI,
   decodeProtectedHeader,
 } from "jose";
-import { CodedError } from "./result-helper";
+import { CodedError } from "./result-helper.js";
 import process from "node:process";
-import { processJoseError } from "./error-helper";
-import { logger } from "./logger";
+import { processJoseError } from "./error-helper.js";
+import { logger } from "./logger.js";
 
 export async function validateAuthorisationJwt(
   nestedJws: string

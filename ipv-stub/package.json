@@ -4,6 +4,7 @@
   "main": "index.js",
   "name": "auth-ipv-stub",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "esbuild": "0.25.2",
     "jose": "5.10.0",
@@ -59,9 +60,7 @@
     ],
     "timeout": 20000,
     "recursive": true,
-    "require": [
-      "ts-node/register"
-    ],
+    "loader": "ts-node/esm",
     "exit": true
   }
 }
