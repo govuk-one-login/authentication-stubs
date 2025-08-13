@@ -4,7 +4,9 @@ import {
   EncodedUserInfoClaim,
 } from "./types.js";
 import {
-  KeyLike,
+  CryptoKey,
+  KeyObject,
+  JWK,
   compactVerify,
   importJWK,
   importSPKI,
@@ -27,7 +29,9 @@ export async function validateAuthorisationJwt(
   return await processStorageAccessToken(authoriseRequestAsJson);
 }
 
-async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
+async function getPublicSigningKey(
+  nestedJws: string
+): Promise<CryptoKey | KeyObject | JWK | Uint8Array> {
   const header = decodeProtectedHeader(nestedJws);
   const kid = header.kid;
 
@@ -43,7 +47,9 @@ async function getPublicSigningKey(nestedJws: string): Promise<KeyLike> {
   return await importSPKI(authSignaturePublicKeyIpv, "ES256");
 }
 
-async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
+async function getPublicKeyFromJwks(
+  kid: string
+): Promise<CryptoKey | KeyObject | JWK | Uint8Array> {
   const jwksUri = process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
   if (!jwksUri) {
     throw new CodedError(500, "JWKS URI not found");
@@ -53,7 +59,7 @@ async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
   for (const k of jwks.keys) {
     if (k.kid === kid) {
       logger.info(`using kid: ${kid}`);
-      return (await importJWK(k)) as KeyLike;
+      return await importJWK(k, k.alg || "ES256");
     }
   }
 
@@ -62,7 +68,7 @@ async function getPublicKeyFromJwks(kid: string): Promise<KeyLike> {
 
 async function verifyAndDecodeJwt(
   nestedJws: string,
-  publicJwk: KeyLike
+  publicJwk: CryptoKey | KeyObject | JWK | Uint8Array
 ): Promise<DecodedRequest> {
   let payload;
   try {

@@ -7,7 +7,7 @@
   "type": "module",
   "dependencies": {
     "esbuild": "0.25.2",
-    "jose": "5.10.0",
+    "jose": "6.0.12",
     "jsonwebtoken": "^9.0.2",
     "pino": "^9.8.0",
     "@aws-sdk/client-dynamodb": "^3.864.0",
