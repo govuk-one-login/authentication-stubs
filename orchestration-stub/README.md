@@ -9,7 +9,7 @@ For running a complete stack locally, an express server is run in a docker conta
 ### SAM Local
 
 ```bash
-sam build && docker compose up --detach && sam local start-api --docker-network lambda-local --parameter-overrides 'Environment=local'
+sam build && sam local start-api --parameter-overrides 'Environment=local'
 ```
 
 Live reload
@@ -17,8 +17,6 @@ Live reload
 ```bash
 sam build
 ```
-
-Redis passwords containing special characters should be URL encoded
 
 To generate keypair:
 
@@ -45,7 +43,6 @@ If running standalone, you need to provide the environment variable configuratio
 - `AUTH_PUB_KEY` - public key used for encrypting JAR payloads to auth
 - `COOKIE_DOMAIN` - cookie domain, or `none` to use the default
 - `PRIVATE_KEY` - private key used for signing JAR payloads and private-key-jwt auth
-- `REDIS_URL` - URL of a redis instance to use for tracking sessions
 - `RP_CLIENT_ID` - RP client ID to pass to auth (not the orchestration client id)
 - `RP_SECTOR_HOST` - RP sector host to pass to auth
 - `STUB_URL` - URL of the stub itself, used to generate the callback, typically `http://localhost:4400/`
