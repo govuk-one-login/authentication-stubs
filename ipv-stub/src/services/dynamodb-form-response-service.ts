@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
-import { Reverification } from "../interfaces/reverification-interface";
-import { logger } from "../helper/logger";
-import { truncate } from "../helper/result-helper";
+import { Reverification } from "../interfaces/reverification-interface.js";
+import { logger } from "../helper/logger.js";
+import { truncate } from "../helper/result-helper.js";
 
 const client =
   process.env.ENVIRONMENT === "local"

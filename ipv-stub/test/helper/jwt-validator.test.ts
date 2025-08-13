@@ -1,6 +1,6 @@
 import chai from "chai";
 import { describe } from "mocha";
-import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
+import { validateAuthorisationJwt } from "../../src/helper/jwt-validator.js";
 import {
   importSPKI,
   calculateJwkThumbprint,
@@ -8,7 +8,7 @@ import {
   exportJWK,
   CompactSign,
 } from "jose";
-import keys from "../../src/data/keys.json";
+import keys from "../../src/data/keys.json" assert { type: "json" };
 
 const expect = chai.expect;
 
