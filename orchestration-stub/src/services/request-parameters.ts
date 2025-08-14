@@ -9,6 +9,7 @@ export type RequestParameters = {
   channel: ChannelEnum;
   cookieConsent: string;
   loginHint?: string;
+  redirectUrl?: string;
 };
 
 export const parseRequestParameters = (
@@ -27,6 +28,7 @@ export const parseRequestParameters = (
     channel: getChannel(parsedForm.channel),
     cookieConsent: parsedForm["cookie-consent"] as string,
     loginHint: parsedForm["login-hint"] as string | undefined,
+    redirectUrl: parsedForm["redirect-url"] as string | undefined,
   };
 };
 
