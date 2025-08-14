@@ -44,9 +44,10 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::13d29a8d-453e-4786-a485-91eb59967ba8}}"
-      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
-      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::7621276c-9e71-42dd-9308-d2a651d4f0d2}}"
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::8eb342b8-9d01-46ff-9796-a924b438a61a}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::c3dad3c2-2d8a-4fd7-bddf-8955fc7192fd}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/jwks.json"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
@@ -55,6 +56,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::b138706a-0371-4a8c-ae5e-2f6a0b0cf198}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/jwks.json"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
@@ -63,6 +65,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::988ed5d3-7965-4d82-9afb-664fb9d85fb7}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/jwks.json"
 
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
@@ -71,6 +74,7 @@ Mappings:
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::2fb4142c-bdaf-4c7d-8b25-4f025848020e}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/reverification-jwk.json"
+      authEvcsPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/jwks.json"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -101,6 +105,31 @@ Globals:
       - arm64
 
 Resources:
+  IPVEncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for IPV stub encryption
+      KeyUsage: ENCRYPT_DECRYPT
+      KeySpec: RSA_2048
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-IPVEncryptionKey'
+
+  IPVEncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${AWS::StackName}-ipv-encryption'
+      TargetKeyId: !Ref IPVEncryptionKey
+
   ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -177,6 +206,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /.well-known/jwks.json:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubJwksLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -241,6 +286,14 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authIpvPublicSigningKeyJwksEndpoint
+          AUTH_EVCS_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - authEvcsPublicSigningKeyJwksEndpoint
+          KMS_KEY_ID: !Ref IPVEncryptionKey
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -250,6 +303,12 @@ Resources:
               - "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/${env}/stubs/ipv-stub-private-key-*"
               - env:
                   !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+        - Statement:
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+                - kms:GetPublicKey
+              Resource: !GetAtt IPVEncryptionKey.Arn
       Events:
         Get:
           Type: Api
@@ -271,6 +330,8 @@ Resources:
         External:
           - "@aws-sdk/client-dynamodb"
           - "@aws-sdk/lib-dynamodb"
+          - "@aws-sdk/client-kms"
+          - "@aws-sdk/client-secrets-manager"
         Minify: true
         Sourcemap: true
         Target: node20
@@ -302,6 +363,7 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authpublicsigningkeyipv
+          DEPLOYMENT_TIMESTAMP: !Ref AWS::StackId
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
@@ -369,6 +431,54 @@ Resources:
         - "/aws/lambda/${env}-ipv-stub-reverification"
         - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
+
+  IPVStubJwksLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/jwks.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubJwksLambdaLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !If
+            - UseSubEnvironment
+            - !Ref SubEnvironment
+            - !Ref Environment
+          KMS_KEY_ID: !Ref IPVEncryptionKey
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - kms:GetPublicKey
+              Resource: !GetAtt IPVEncryptionKey.Arn
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /.well-known/jwks.json
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/jwks.ts
+        External:
+          - "@aws-sdk/client-kms"
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
+  IPVStubJwksLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-jwks"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
+
 
   ReverificationTable:
     Type: AWS::DynamoDB::Table
@@ -440,3 +550,82 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
         HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
+Outputs:
+  IPVStubDomainName:
+    Description: Domain name for the IPV stub
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - ipvStubDomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-IPVStubDomainName"
+
+  AuthIPVPublicSigningKeyJwksEndpoint:
+    Description: JWKS endpoint URL for IPV public signing keys (IPV stub endpoint)
+    Value: !Sub "https://${GatewayDomain}/.well-known/jwks.json"
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthIPVPublicSigningKeyJwksEndpoint"
+
+  AuthEVCSPublicSigningKeyJwksEndpoint:
+    Description: JWKS endpoint URL for EVCS public signing keys (IPV stub endpoint)
+    Value: !Sub "https://${GatewayDomain}/.well-known/jwks.json"
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthEVCSPublicSigningKeyJwksEndpoint"
+
+  AuthPublicSigningKeyIPVSource:
+    Description: Secrets Manager reference for IPV public signing key
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authpublicsigningkeyipv
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthPublicSigningKeyIPVSource"
+
+  AuthPublicSigningKeyEVCSSource:
+    Description: Secrets Manager reference for EVCS public signing key
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - authpublicsigningkeyevcs
+    Export:
+      Name: !Sub "${AWS::StackName}-AuthPublicSigningKeyEVCSSource"
+
+  IPVEncryptionKeyId:
+    Description: KMS key ID for IPV encryption
+    Value: !Ref IPVEncryptionKey
+    Export:
+      Name: !Sub "${AWS::StackName}-IPVEncryptionKeyId"
+
+  IPVEncryptionKeyArn:
+    Description: KMS key ARN for IPV encryption
+    Value: !GetAtt IPVEncryptionKey.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-IPVEncryptionKeyArn"
+
+  JwksEndpointUrl:
+    Description: JWKS endpoint URL for IPV public encryption key
+    Value: !Sub "https://${GatewayDomain}/.well-known/jwks.json"
+    Export:
+      Name: !Sub "${AWS::StackName}-JwksEndpointUrl"
+
+  IPVPrivateEncryptionKeySource:
+    Description: Secrets Manager reference for IPV private encryption key
+    Value: !FindInMap
+      - EnvironmentConfiguration
+      - !If
+        - UseSubEnvironment
+        - !Ref SubEnvironment
+        - !Ref Environment
+      - ipvprivateencryptionkey
+    Export:
+      Name: !Sub "${AWS::StackName}-IPVPrivateEncryptionKeySource"
