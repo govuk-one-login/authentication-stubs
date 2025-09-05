@@ -1,6 +1,6 @@
 import * as jose from "jose";
-import { logger } from "./logger";
-import { CodedError } from "./result-helper";
+import { logger } from "./logger.js";
+import { CodedError } from "./result-helper.js";
 
 export function processJoseError(error: unknown) {
   if (error instanceof jose.errors.JOSEError) {
