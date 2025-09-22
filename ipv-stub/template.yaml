@@ -192,7 +192,7 @@ Resources:
                   content:
                     application/json:
                       schema:
-                        $ref: "#/components/schemas/jwksResponse"
+                        type: object
                 500:
                   description: "Error fetching public keys"
                   content: { }
@@ -219,18 +219,6 @@ Resources:
               Principal: "*"
               Action: "execute-api:Invoke"
               Resource: "*"
-        components:
-          schemas:
-            jwksResponse:
-              type: object
-              properties:
-                keys:
-                  type: array
-                  items:
-                    type: object
-              required:
-                - keys
-              additionalProperties: false
 
   ApiGatewayInvokePermissionForLambda:
     Type: AWS::Lambda::Permission
