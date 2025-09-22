@@ -178,6 +178,40 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /.well-known/jwks.json:
+            get:
+              description: "JSON Web Key Set (JWKS) for IPV stub public keys"
+              responses:
+                200:
+                  description: "The list of public keys"
+                  headers:
+                    Cache-Control:
+                      description: "Cache-Control header"
+                      schema:
+                        type: string
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/jwksResponse"
+                500:
+                  description: "Error fetching public keys"
+                  content: { }
+              x-amazon-apigateway-integration:
+                type: aws
+#                credentials:
+#                  Fn::GetAtt: ExternalApiGatewayS3Role.Arn
+                httpMethod: GET
+                uri: !Sub
+                  - "arn:aws:apigateway:eu-west-2:s3:path/${env}-ipv-stub-well-known-jwks/jwks.json"
+                  - env:
+                      !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Cache-Control: "'max-age=300'"
+                  \[45\]\d{2}:
+                    statusCode: 500
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -185,6 +219,18 @@ Resources:
               Principal: "*"
               Action: "execute-api:Invoke"
               Resource: "*"
+        components:
+          schemas:
+            jwksResponse:
+              type: object
+              properties:
+                keys:
+                  type: array
+                  items:
+                    type: object
+              required:
+                - keys
+              additionalProperties: false
 
   ApiGatewayInvokePermissionForLambda:
     Type: AWS::Lambda::Permission
