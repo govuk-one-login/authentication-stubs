@@ -394,6 +394,43 @@ Resources:
         - Key: Name
           Value: Reverification
 
+  # JWKS
+  JwksKeyPair:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key pair for IPV stub
+      KeyUsage: ENCRYPT_DECRYPT
+      KeySpec: RSA_2048
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DefaultAccessPolicy
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: "*"
+          - Sid: AllowPublicKeyAccess
+            Effect: Allow
+            Principal: "*"
+            Action: kms:GetPublicKey
+            Resource: "*"
+      Tags:
+        - Key: Service
+          Value: IPV stubs
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Source
+          Value: govuk-one-login/authentication-stubs
+
+  JwksKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub
+        - "alias/${env}-auth-ipv-stub-jwks-kms-alias"
+        - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      TargetKeyId: !Ref JwksKeyPair
+
   # Domain config
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
