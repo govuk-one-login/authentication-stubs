@@ -431,6 +431,20 @@ Resources:
         - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
       TargetKeyId: !Ref JwksKeyPair
 
+  JwksPublicKeyStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub
+        - "${env}-ipv-stub-well-known-jwks"
+        - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      Tags:
+        - Key: Service
+          Value: IPV stubs
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Source
+          Value: govuk-one-login/authentication-stubs
+
   # Domain config
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
