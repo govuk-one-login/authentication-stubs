@@ -182,7 +182,7 @@ Resources:
             get:
               description: "JSON Web Key Set (JWKS) for IPV stub public keys"
               responses:
-                200:
+                "200":
                   description: "The list of public keys"
                   headers:
                     Cache-Control:
@@ -193,14 +193,14 @@ Resources:
                     application/json:
                       schema:
                         type: object
-                500:
+                "500":
                   description: "Error fetching public keys"
                   content: { }
               x-amazon-apigateway-integration:
-                type: aws
+                type: "aws"
 #                credentials:
 #                  Fn::GetAtt: ExternalApiGatewayS3Role.Arn
-                httpMethod: GET
+                httpMethod: "GET"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:s3:path/${JwksPublicKeyStorageBucket}/jwks.json
                 responses:
