@@ -201,10 +201,8 @@ Resources:
 #                credentials:
 #                  Fn::GetAtt: ExternalApiGatewayS3Role.Arn
                 httpMethod: GET
-                uri: !Sub
-                  - "arn:aws:apigateway:eu-west-2:s3:path/${env}-ipv-stub-well-known-jwks/jwks.json"
-                  - env:
-                      !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:s3:path/${JwksPublicKeyStorageBucket}/jwks.json
                 responses:
                   default:
                     statusCode: 200
