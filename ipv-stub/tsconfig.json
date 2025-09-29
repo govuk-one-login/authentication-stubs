@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "noEmit": true,
     "preserveConstEnums": true,
@@ -12,7 +12,11 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
-    "types": ["node"]
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "esm": true
+  }
 }

@@ -10,12 +10,12 @@ import {
   truncate,
   shouldObfuscate,
   successfulJsonResult,
-} from "../helper/result-helper";
-import { logger } from "../helper/logger";
+} from "../helper/result-helper.js";
+import { logger } from "../helper/logger.js";
 import {
   getReverificationWithAuthCode,
   putReverificationWithAccessToken,
-} from "../services/dynamodb-form-response-service";
+} from "../services/dynamodb-form-response-service.js";
 import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
