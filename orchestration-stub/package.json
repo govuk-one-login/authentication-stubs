@@ -26,7 +26,7 @@
     "jest-junit": "16.0.0",
     "jest-silent-reporter": "0.6.0",
     "prettier": "3.6.2",
-    "ts-jest": "29.4.1",
+    "ts-jest": "29.4.4",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
   },
