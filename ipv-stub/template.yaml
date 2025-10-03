@@ -178,6 +178,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /.well-known/jwks.json:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubJwksLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -190,6 +206,13 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt IPVStubAuthorizeLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+
+  ApiGatewayInvokePermissionForJwksLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt IPVStubJwksLambda.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
 
@@ -371,6 +394,41 @@ Resources:
     Properties:
       LogGroupName: !Sub
         - "/aws/lambda/${env}-ipv-stub-reverification"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
+  # JWKS lambda
+  IPVStubJwksLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/endpoints/jwks.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubJwksLambdaLogGroup
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /.well-known/jwks.json
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/jwks.ts
+        External:
+          - "@aws-sdk/client-kms"
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
+  IPVStubJwksLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-jwks"
         - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
