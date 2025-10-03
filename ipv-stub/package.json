@@ -8,7 +8,7 @@
     "esbuild": "0.25.2",
     "jose": "5.10.0",
     "jsonwebtoken": "^9.0.2",
-    "pino": "^9.9.3",
+    "pino": "^9.13.0",
     "@aws-sdk/client-dynamodb": "^3.876.0",
     "@aws-sdk/lib-dynamodb": "^3.876.0"
   },
