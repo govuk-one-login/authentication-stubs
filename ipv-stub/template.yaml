@@ -44,6 +44,16 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/dev/stubs/ipv-stub-private-key::::13d29a8d-453e-4786-a485-91eb59967ba8}}"
+      ipvpublicencryptionkey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApuWFONCQ572vESMrN0Wj
+        +Q3J866fk0x0GF1TaLJDk7X7RdooUAQo95b1e1Qg+UFHR6P9+Ay1u7xdjmud4w/3
+        zIHQzXejRwy/RruymdimvvJAKfh1nDsQUygssGoCFWcCaq7ywMHx/kKIy1GBh2vY
+        wyOCs1IvK8C8hTEy7hvVQ4vEZu17o+EBgbwX5398DebXXB6SNCKqDZnmLYDfmhGd
+        beQWJg5UIvT2fRNBoevG+N4kZKmjpyANmOKY/J/lYzoHguXhACTFkPzxCkbSaZC/
+        eUfXfBO9PWUTtwaxXrp3pjO421dWvuXfIOrV1YVmUhIpH193j9Roe4C3CGh18urF
+        sQIDAQAB
+        -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::5654ae99-de8f-4f54-a6a6-f8c13b7139f8}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
@@ -52,6 +62,16 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
       hostedZoneId: "Z01488663SVMGDFYGEX88"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev1/stubs/ipv-stub-private-key::::ea3de3c0-a3bb-41f6-9df6-dbf73ee9f75f}}"
+      ipvpublicencryptionkey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArJ8oZkHs+ReeZcUsIeWm
+        bwigustlHH8Qlsb/3SAK1wPb2muVRtQPZjF9TGnu8cof9pHdOo1blpvr8NNTKKTW
+        D+gQRi9NzlPEVWS0Uo7PFNb0CJ4Vzd5Qgrc8GMc35lcgF3UBNFdcLErfr8Mi1/qO
+        zld/NBsLCgG/lQ/s8uoNv9jBtwKko+vR1OPt4ziGL2+OfOU5W6U8gwGexcpNEANx
+        95gokzduQTMQUAuOvM/rQMKYGjUqKbiQyB89Y9o3b6SDF32tEkNkyfJ4tiEYJmrq
+        V3/gq1/DRbG7neNvo/klcojjdmBsrn7eIb310NDJhAvS3CPcWnrcYRFZMdkBNikY
+        9QIDAQAB
+        -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::a0460ed9-9e30-4562-be70-f3b69d4cb35c}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
@@ -60,6 +80,16 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
       hostedZoneId: "Z0283478G72QVGV7VVBG"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev2/stubs/ipv-stub-private-key::::78c42d33-23d3-4bc3-865a-1df55660a5bb}}"
+      ipvpublicencryptionkey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOb0Y+6vaIfR7ThOVIKJ
+        die8s6Db4wifjZW4vnw6x+SOJfSMZTfju9gpN9rgHPkYtkaH8P3cU34Ow1w6nG91
+        OijyX+u1Q/gzt2lSisQOUSGiK6yB0GEcPuQwqt6QH3o11oX78l3uvdQn0cbV3pAY
+        Oce8mkg/ruDHRYw7dR+9F+5oDQ8gk25qQzwyoE7rkTxW5UvPH8kmQ4ioc7O1IoFl
+        MKzhijegD77BqVWK1YRVjwWLGGj/gJQXY6jvEuDVrkMB992Oi0rno+DpCIT0/uZd
+        6xn7WDx0bLme/nKHVKnWCAbpZ7beIQUaZKn/nSrNUlYIpI6DhMzecJDpNS2JvH8V
+        RwIDAQAB
+        -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::785a8715-d904-4951-9125-bfdb7edccc9f}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
@@ -68,6 +98,16 @@ Mappings:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
       ipvprivateencryptionkey: "{{resolve:secretsmanager:/build/stubs/ipv-stub-private-key::::1c764b26-dbfe-488a-aacc-c33a33cdf7ee}}"
+      ipvpublicencryptionkey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo9DGrlCJ1qrrXzeiSeLr
+        6rzPmsIiF6hGxl8B4axJkBsfZWldFpPw1CvX/sP1FtY5fdVdUG7U1uMObcmE43tQ
+        EiBv7vPWZ9wRI7knjc8ncrGmzhU1eeWyrhDIuhnJFm2iCldigLQu7DfCJMWAtsk2
+        g/NMKsC9qYmyHD9QIpQTVt9/HjfzYXFTXtSettNlku2Xi5FjtCpdLEXOMezhRXjF
+        imObuMzdLZYryP17mr2OJy9d+227FCexPG6UYOgH21RtOE9gxC2iLGMdqEmfTQt/
+        G+lrdOD+OMl6qTVg+zJqG3amdPFnb4Vmnp8rOVnio30PFd71JxSqQsED8jjUW6KK
+        FQIDAQAB
+        -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::d29ce375-b48b-4734-bb81-aa01d69c365b}}"
       authIpvPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/reverification-jwk.json"
@@ -101,6 +141,7 @@ Globals:
       - arm64
 
 Resources:
+  # API Gateway
   ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -177,6 +218,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubReverificationLambda.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /.well-known/jwks.json:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IPVStubJwksLambda.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -192,6 +249,13 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
 
+  ApiGatewayInvokePermissionForJwksLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt IPVStubJwksLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+
   ApiGatewayMapping:
     Type: AWS::ApiGateway::BasePathMapping
     DependsOn: Certificate
@@ -200,6 +264,7 @@ Resources:
       DomainName: !Ref GatewayDomain
       RestApiId: !Ref ApiGateway
 
+  # Authorize lambda
   IPVStubAuthorizeLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -283,6 +348,7 @@ Resources:
         - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
+  # Token lambda
   IPVStubTokenLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -330,6 +396,7 @@ Resources:
         - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
+  # Reverification lambda
   IPVStubReverificationLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -370,6 +437,50 @@ Resources:
         - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       RetentionInDays: 30
 
+  # JWKS lambda
+  IPVStubJwksLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/endpoints/jwks.handler
+      LoggingConfig:
+        LogGroup: !Ref IPVStubJwksLambdaLogGroup
+      Environment:
+        Variables:
+          IPV_PUBLIC_ENCRYPTION_KEY: !FindInMap
+            - EnvironmentConfiguration
+            - !If
+              - UseSubEnvironment
+              - !Ref SubEnvironment
+              - !Ref Environment
+            - ipvpublicencryptionkey
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /.well-known/jwks.json
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/jwks.ts
+        External:
+          - "@aws-sdk/client-kms"
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
+  IPVStubJwksLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-ipv-stub-jwks"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
   ReverificationTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -390,6 +501,7 @@ Resources:
         - Key: Name
           Value: Reverification
 
+  # Domain config
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
