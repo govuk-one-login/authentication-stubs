@@ -247,7 +247,7 @@ const jarPayload = (
   };
   const payload: JWTPayload = {
     rp_client_id: process.env.RP_CLIENT_ID,
-    rp_sector_host: process.env.RP_SECTOR_HOST,
+    rp_sector_identifier_host: process.env.RP_SECTOR_HOST,
     rp_redirect_uri: "https://a.example.com/redirect",
     rp_state: RP_STATE,
     client_name: "client",
