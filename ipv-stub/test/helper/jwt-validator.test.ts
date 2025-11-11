@@ -221,7 +221,7 @@ describe("isValidJwt", async () => {
 
   it("should use correct key from JWKS when kid is present in JWT header", async () => {
     const originalFetch = global.fetch;
-    const fetchSpy = sinon.spy()
+    const fetchSpy = sinon.spy();
 
     try {
       process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT =
@@ -251,7 +251,7 @@ describe("isValidJwt", async () => {
       const storageJwks = { keys: [{ ...storagePublicKey, kid: storageKid }] };
 
       global.fetch = async (url) => {
-        fetchSpy(url.toString())
+        fetchSpy(url.toString());
         if (url.toString().includes("storage-jwks.json")) {
           return {
             ok: true,
@@ -265,7 +265,7 @@ describe("isValidJwt", async () => {
           status: 200,
           json: () => Promise.resolve(mockJwks),
         } as Response;
-      }
+      };
 
       const sub = "test-sub";
       const payload = {
@@ -305,7 +305,7 @@ describe("isValidJwt", async () => {
     } finally {
       global.fetch = originalFetch;
       delete process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT;
-      delete process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT
+      delete process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT;
     }
   });
 });
@@ -316,12 +316,12 @@ async function createJWS(
   state: string | undefined,
   claims:
     | {
-    userinfo: {
-      "https://vocab.account.gov.uk/v1/storageAccessToken": {
-        values: [string | null];
-      };
-    };
-  }
+        userinfo: {
+          "https://vocab.account.gov.uk/v1/storageAccessToken": {
+            values: [string | null];
+          };
+        };
+      }
     | null
     | unknown
 ) {

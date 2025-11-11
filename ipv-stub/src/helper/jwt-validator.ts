@@ -13,7 +13,8 @@ export async function validateAuthorisationJwt(
 ): Promise<DecodedRequest | string> {
   const publicJwk = await getPublicSigningKey(
     nestedJws,
-    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT
+    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT,
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV
   );
   const authoriseRequestAsJson = await verifyAndDecodeJwt<DecodedRequest>(
     nestedJws,
@@ -95,7 +96,8 @@ async function validateStorageAccessTokenJWT(
 
     const authSignaturePublicKey = await getPublicSigningKey(
       storageTokenJws,
-      process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT
+      process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT,
+      process.env.AUTH_PUBLIC_SIGNING_KEY_EVCS
     );
     const decodedPayloadAsJson =
       await verifyAndDecodeJwt<DecodedStorageAccessToken>(

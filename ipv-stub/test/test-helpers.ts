@@ -2,8 +2,8 @@ import { CompactSign, importPKCS8 } from "jose";
 
 type ProtectedHeader = {
   alg: string;
-  kid?: string
-}
+  kid?: string;
+};
 
 export async function createSignedJwt(
   header: string,

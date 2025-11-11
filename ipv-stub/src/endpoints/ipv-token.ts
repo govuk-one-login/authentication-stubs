@@ -21,6 +21,7 @@ import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { getPublicSigningKey } from "../helper/jwks-helper";
 import { processJoseError } from "../helper/error-helper";
+import process from "node:process";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -199,7 +200,8 @@ async function handle(
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
   const signingKey = await getPublicSigningKey(
     token,
-    process.env.AUTH_IPV_SIGNING_KEY_JWKS_ENDPOINT
+    process.env.AUTH_IPV_SIGNING_KEY_JWKS_ENDPOINT,
+    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV
   );
   let payload;
   try {
