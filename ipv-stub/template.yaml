@@ -27,6 +27,7 @@ Parameters:
       - none
       - authdev1
       - authdev2
+      - authdev3
 
   CodeSigningConfigArn:
     Type: String
@@ -56,7 +57,6 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::5654ae99-de8f-4f54-a6a6-f8c13b7139f8}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
@@ -74,7 +74,6 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::a0460ed9-9e30-4562-be70-f3b69d4cb35c}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
@@ -92,7 +91,23 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::785a8715-d904-4951-9125-bfdb7edccc9f}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+
+    authdev3:
+      ipvStubDomainName: ipvstub.signin.authdev3.dev.account.gov.uk
+      hostedZoneId: "Z04928373OSDE66G6PJLG"
+      ipvprivateencryptionkey: "{{resolve:secretsmanager:/authdev3/stubs/ipv-stub-private-key::::72268d49-ae13-444b-a772-a46ba18dfce8}}"
+      ipvpublicencryptionkey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyHvYnObfl9G7YwKuskmi
+        wYjcns/8GlRzRm+wpr8akFD7zWUMe36FVdyRmhGw5gchsYlIvapSatO6FNq+9BPm
+        QqQB2HZV9YaNgyeLaCGifdiQBcBCjrafgareWRkOJiulRYbylBQ5Hz7GYdmn+gvl
+        VtV/9PzAWUGMp2Um9mMqnNT+PYVvlKkvlpzvrJc4Dp4d5w+cw+IM1C0b7bE9eQ1M
+        2JOxRePMjv8Ss1g/bhxfcd2jpT+HQZ4YoHVeZwQuGxJiPPYbK+iuVzggKERTp5cJ
+        AbddzK0dWqEjv0I4d22BgTdPr/1KWkPLCnQovfLoAF2DfAsjTnlX+HXvrGpEDjCH
+        nQIDAQAB
+        -----END PUBLIC KEY-----
+      authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev3/stubs/auth-evcs-public-signing-key::::7f35f880-0303-4530-bb15-3f10ed2ed045}}"
+      authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev3/stubs/auth-reverification-public-signing-key::::60f8851d-617f-4a15-abd9-698c6fd3f8c9}}"
 
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
@@ -110,7 +125,6 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/build/stubs/auth-evcs-public-signing-key::::3ef9f3d5-1599-4bc6-b2f8-4584496fc5b1}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/build/stubs/auth-reverification-public-signing-key::::d29ce375-b48b-4734-bb81-aa01d69c365b}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.build.account.gov.uk/.well-known/reverification-jwk.json"
 
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
@@ -299,13 +313,24 @@ Resources:
               - !Ref SubEnvironment
               - !Ref Environment
             - authpublicsigningkeyipv
-          AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT: !FindInMap
-            - EnvironmentConfiguration
-            - !If
-              - UseSubEnvironment
-              - !Ref SubEnvironment
-              - !Ref Environment
-            - authIpvPublicSigningKeyJwksEndpoint
+          AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT: !Join
+            - ""
+            - - "https://"
+              - !ImportValue
+                Fn::Sub:
+                  - "${Env}-api-AuthInternalApiId"
+                  - Env: !If [UseSubEnvironment, !Ref SubEnvironment, "authentication"]
+              - "-"
+              - !ImportValue "vpc-ExecuteApiGatewayEndpointId"
+              - ".execute-api."
+              - !Ref "AWS::Region"
+              - ".amazonaws.com/"
+              - !If
+                - UseSubEnvironment
+                - !Ref SubEnvironment
+                - !Ref Environment
+              - "/.well-known/reverification-jwk.json"
+          
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:

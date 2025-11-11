@@ -35,4 +35,4 @@ node_modules
 *.key
 
 # Localstack
-volume/
+volume/.DS_Store
