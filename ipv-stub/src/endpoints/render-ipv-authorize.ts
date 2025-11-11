@@ -6,7 +6,7 @@ export default function renderIPVAuthorize(
   decodedPayload: DecodedRequest
 ) {
   return renderPage(
-    `<script defer src="https://unpkg.com/pretty-json-custom-element/index.js"></script>
+    `<style>.json-formatter{font-family:monospace;white-space:pre-wrap;background:#f8f8f8;padding:10px;border:1px solid #ddd}</style>
   <h1 class="govuk-heading-l">IPV stub</h1>
   <h3 class="govuk-heading-s">Decrypted JAR header</h3>
   <dl class="govuk-summary-list">
@@ -27,7 +27,7 @@ export default function renderIPVAuthorize(
   </div>
   <div class="govuk-summary-list__row">
     <dd class="govuk-summary-list__value" id="user-info-core-identity-claim">
-        <pretty-json>${JSON.stringify(decodedPayload, null, 2)}</pretty-json>
+        <div class="json-formatter">${JSON.stringify(decodedPayload, null, 2)}</div>
     </dd>
   </div>
   <div class="govuk-summary-list__row">
