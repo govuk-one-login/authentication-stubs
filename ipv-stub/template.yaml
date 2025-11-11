@@ -57,7 +57,7 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/dev/stubs/auth-evcs-public-signing-key::::c891b2a3-08c4-4bc6-8c3a-4134b4d75eeb}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/dev/stubs/auth-reverification-public-signing-key::::5654ae99-de8f-4f54-a6a6-f8c13b7139f8}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.dev.account.gov.uk/.well-known/reverification-jwk.json"
+      authIpvPublicSigningKeyJwksEndpoint: "https://tze402cnbk-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/.well-known/reverification-jwk.json"
 
     authdev1:
       ipvStubDomainName: ipvstub.signin.authdev1.dev.account.gov.uk
