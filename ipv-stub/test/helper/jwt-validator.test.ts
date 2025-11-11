@@ -11,11 +11,7 @@ import keys from "../../src/data/keys.json";
 import sinon from "sinon";
 import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
 import process from "node:process";
-
-type ProtectedHeader = {
-  alg: string;
-  kid?: string
-}
+import { createSignedJwt } from "../test-helpers";
 
 const expect = chai.expect;
 
@@ -33,33 +29,6 @@ const validStorageAccessTokenPayload = {
   iat: 1709047563,
   jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
 };
-
-async function createJWS(
-  sub: string | undefined,
-  scope: string | undefined,
-  state: string | undefined,
-  claims:
-    | {
-        userinfo: {
-          "https://vocab.account.gov.uk/v1/storageAccessToken": {
-            values: [string | null];
-          };
-        };
-      }
-    | null
-    | unknown
-) {
-  return createSignedJwt(
-    validSigningAlg,
-    {
-      sub: sub,
-      scope: scope,
-      claims: claims,
-      state: state,
-    },
-    keys.authPrivateSigningKeyIPV
-  );
-}
 
 describe("isValidJwt", async () => {
   beforeEach(() => {
@@ -86,7 +55,8 @@ describe("isValidJwt", async () => {
                 await createSignedJwt(
                   validSigningAlg,
                   validStorageAccessTokenPayload,
-                  keys.authPrivateSigningKeyEVCS
+                  keys.authPrivateSigningKeyEVCS,
+                  "storage-key-kid"
                 ),
               ],
             },
@@ -94,7 +64,8 @@ describe("isValidJwt", async () => {
         },
         state: "test-state",
       },
-      keys.authPrivateSigningKeyIPV
+      keys.authPrivateSigningKeyIPV,
+      "outer-key-kid"
     );
 
     const expectedParsedJwt = {
@@ -339,19 +310,29 @@ describe("isValidJwt", async () => {
   });
 });
 
-async function createSignedJwt(
-  header: string,
-  payload: unknown,
-  signingKey: string,
-  kid?: string
-) {
-  const textEncoder = new TextEncoder();
-  const privateKey = await importPKCS8(signingKey, header);
-  const protectedHeader: ProtectedHeader = { alg: header };
-  if (kid) {
-    protectedHeader.kid = kid;
+async function createJWS(
+  sub: string | undefined,
+  scope: string | undefined,
+  state: string | undefined,
+  claims:
+    | {
+    userinfo: {
+      "https://vocab.account.gov.uk/v1/storageAccessToken": {
+        values: [string | null];
+      };
+    };
   }
-  return new CompactSign(textEncoder.encode(JSON.stringify(payload)))
-    .setProtectedHeader(protectedHeader)
-    .sign(privateKey);
+    | null
+    | unknown
+) {
+  return createSignedJwt(
+    validSigningAlg,
+    {
+      sub: sub,
+      scope: scope,
+      claims: claims,
+      state: state,
+    },
+    keys.authPrivateSigningKeyIPV
+  );
 }

@@ -3,62 +3,27 @@ import {
   DecodedStorageAccessToken,
   EncodedUserInfoClaim,
 } from "./types";
-import {
-  KeyLike,
-  compactVerify,
-  importJWK,
-} from "jose";
-import * as jose from "jose";
-import { CodedError } from "./result-helper";
+import { compactVerify, KeyLike } from "jose";
 import process from "node:process";
 import { processJoseError } from "./error-helper";
-import { logger } from "./logger";
+import { getPublicSigningKey } from "./jwks-helper";
 
 export async function validateAuthorisationJwt(
   nestedJws: string
 ): Promise<DecodedRequest | string> {
-  const publicJwk = await getPublicSigningKey(nestedJws, process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT);
-  const authoriseRequestAsJson = await verifyAndDecodeJwt<DecodedRequest>(nestedJws, publicJwk);
+  const publicJwk = await getPublicSigningKey(
+    nestedJws,
+    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT
+  );
+  const authoriseRequestAsJson = await verifyAndDecodeJwt<DecodedRequest>(
+    nestedJws,
+    publicJwk
+  );
 
   const validationError = validatePayloadFields(authoriseRequestAsJson);
   if (validationError) return validationError;
 
   return await processStorageAccessToken(authoriseRequestAsJson);
-}
-
-async function getPublicSigningKey(nestedJws: string, jwksUri?: string): Promise<KeyLike> {
-  const header = jose.decodeProtectedHeader(nestedJws);
-  const kid = header.kid;
-
-  if (!kid) {
-    throw new CodedError(500, "kid not found in decoded protected header");
-  }
-
-  if (!jwksUri) {
-    throw new CodedError(500, "JWKS URI not found");
-  }
-
-  return await getPublicKeyFromJwks(kid, jwksUri);
-}
-
-async function getPublicKeyFromJwks(kid: string, jwksUri: string): Promise<KeyLike> {
-  const jwks = await fetchJwks(jwksUri);
-  for (const k of jwks.keys) {
-    if (k.kid === kid) {
-      logger.info(`using kid: ${kid}`);
-      return (await importJWK(k)) as KeyLike;
-    }
-  }
-
-  throw new CodedError(400, "Key not found in JWKS for provided kid");
-}
-
-async function fetchJwks(jwksUri: string) {
-  const response = await fetch(jwksUri);
-  if (!response.ok) {
-    throw new CodedError(500, `Failed to fetch JWKS: ${response.statusText}`);
-  }
-  return await response.json();
 }
 
 async function verifyAndDecodeJwt<T>(
@@ -128,8 +93,15 @@ async function validateStorageAccessTokenJWT(
     const storageTokenJws =
       userInfo["https://vocab.account.gov.uk/v1/storageAccessToken"].values[0];
 
-    const authSignaturePublicKey = await getPublicSigningKey(storageTokenJws, process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT);
-    const decodedPayloadAsJson = await verifyAndDecodeJwt<DecodedStorageAccessToken>(storageTokenJws, authSignaturePublicKey)
+    const authSignaturePublicKey = await getPublicSigningKey(
+      storageTokenJws,
+      process.env.AUTH_IPV_STORAGE_TOKEN_SIGNING_KEY_JWKS_ENDPOINT
+    );
+    const decodedPayloadAsJson =
+      await verifyAndDecodeJwt<DecodedStorageAccessToken>(
+        storageTokenJws,
+        authSignaturePublicKey
+      );
 
     try {
       if (decodedPayloadAsJson.scope !== "reverification") {
