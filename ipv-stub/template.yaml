@@ -300,7 +300,7 @@ Resources:
             - - "https://"
               - !ImportValue
                 Fn::Sub:
-                  - "${Env}-api-ExecuteApiGatewayEndpointId"
+                  - "${Env}-api-AuthInternalApiId"
                   - Env: !If [UseSubEnvironment, !Ref SubEnvironment, "authentication"]
               - "-"
               - !ImportValue "vpc-ExecuteApiGatewayEndpointId"
