@@ -75,7 +75,7 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev1/stubs/auth-evcs-public-signing-key::::d2a26d29-f879-49b7-a8d9-f3eea9948421}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev1/stubs/auth-reverification-public-signing-key::::a0460ed9-9e30-4562-be70-f3b69d4cb35c}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev1.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev2:
       ipvStubDomainName: ipvstub.signin.authdev2.dev.account.gov.uk
@@ -93,7 +93,7 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev2/stubs/auth-evcs-public-signing-key::::a49b05c6-38f3-4a52-8423-d5d76791fc03}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev2/stubs/auth-reverification-public-signing-key::::785a8715-d904-4951-9125-bfdb7edccc9f}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev2.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     authdev3:
       ipvStubDomainName: ipvstub.signin.authdev3.dev.account.gov.uk
@@ -111,7 +111,7 @@ Mappings:
         -----END PUBLIC KEY-----
       authpublicsigningkeyevcs: "{{resolve:secretsmanager:/authdev3/stubs/auth-evcs-public-signing-key::::7f35f880-0303-4530-bb15-3f10ed2ed045}}"
       authpublicsigningkeyipv: "{{resolve:secretsmanager:/authdev3/stubs/auth-reverification-public-signing-key::::60f8851d-617f-4a15-abd9-698c6fd3f8c9}}"
-      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev3.sandpit.account.gov.uk/.well-known/reverification-jwk.json"
+      authIpvPublicSigningKeyJwksEndpoint: "https://auth.authdev3.dev.account.gov.uk/.well-known/reverification-jwk.json"
 
     build:
       ipvStubDomainName: ipvstub.signin.build.account.gov.uk
