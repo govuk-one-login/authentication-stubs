@@ -117,11 +117,47 @@ async function processStorageAccessToken(
 }
 
 async function fetchJwks(jwksUri: string) {
-  const response = await fetch(jwksUri);
-  if (!response.ok) {
-    throw new CodedError(500, `Failed to fetch JWKS: ${response.statusText}`);
+  try {
+    logger.info(`Fetching JWKS from: ${jwksUri}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(jwksUri, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'ipv-stub/1.0.0'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      logger.error(`JWKS fetch failed with status: ${response.status} ${response.statusText}`);
+      throw new CodedError(500, `Failed to fetch JWKS: ${response.status} ${response.statusText}`);
+    }
+    
+    const jwks = await response.json();
+    logger.info(`Successfully fetched JWKS with ${jwks.keys?.length || 0} keys`);
+    return jwks;
+  } catch (error) {
+    if (error instanceof CodedError) {
+      throw error;
+    }
+    
+    logger.error(`JWKS fetch error: ${error}`);
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new CodedError(500, 'JWKS fetch timeout - endpoint unreachable');
+      }
+      if (error.message.includes('fetch failed')) {
+        throw new CodedError(500, `Network error fetching JWKS from ${jwksUri}: ${error.message}`);
+      }
+    }
+    
+    throw new CodedError(500, `Unexpected error fetching JWKS: ${error}`);
   }
-  return await response.json();
 }
 
 async function validateStorageAccessTokenJWT(
