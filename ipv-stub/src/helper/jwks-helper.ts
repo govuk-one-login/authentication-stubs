@@ -90,7 +90,7 @@ async function fetchJwks(jwksUri: string) {
 
 async function getPublicKeyFromBackup(backupSigningKey?: string) {
   if (!backupSigningKey) {
-    throw new CodedError(500, "Public signing public key not found");
+    throw new CodedError(500, "Public signing key not found");
   }
   logger.info("Using backup signing key from env variables");
   return await importSPKI(backupSigningKey, "ES256");

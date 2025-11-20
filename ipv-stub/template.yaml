@@ -153,6 +153,7 @@ Conditions:
           - Fn::Equals:
               - !Ref SubEnvironment
               - none
+  IsBuild: !Equals [!Ref Environment, "build"]
 
 Globals:
   Function:
@@ -184,12 +185,14 @@ Resources:
           DestinationSecurityGroupId:
             Fn::ImportValue: "vpc-AWSServicesEndpointSecurityGroupId"
           Description: Allow HTTPS to VPC endpoint security group
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-          Description: Allow HTTPS to internet
-
+        - !If
+          - IsBuild
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: 0.0.0.0/0
+            Description: Allow HTTPS to internet
+          - !Ref AWS::NoValue
   # API Gateway
   ApiGateway:
     Type: AWS::Serverless::Api

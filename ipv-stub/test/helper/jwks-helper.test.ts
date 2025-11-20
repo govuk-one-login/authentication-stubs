@@ -126,7 +126,7 @@ describe("JwksHelper", async () => {
       expect.fail("Should have thrown an error");
     } catch (error) {
       if (error instanceof CodedError) {
-        expect(error.message).to.include("Public signing public key not found");
+        expect(error.message).to.include("Public signing key not found");
       }
     }
   });
