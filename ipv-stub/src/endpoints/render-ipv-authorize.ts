@@ -1,5 +1,5 @@
-import { renderPage } from "../helper/template";
-import { DecodedRequest } from "../helper/types";
+import { renderPage } from "../helper/template.js";
+import { DecodedRequest } from "../helper/types.js";
 
 export default function renderIPVAuthorize(
   decodedHeader: string,
@@ -42,7 +42,7 @@ export default function renderIPVAuthorize(
     <fieldset class="govuk-fieldset">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
           <h2 class="govuk-fieldset__heading">
-              IPV Response 
+              IPV Response
           </h2>
       </legend>
       <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
