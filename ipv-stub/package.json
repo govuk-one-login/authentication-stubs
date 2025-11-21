@@ -5,12 +5,12 @@
   "name": "auth-ipv-stub",
   "version": "1.0.0",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.876.0",
+    "@aws-sdk/lib-dynamodb": "^3.876.0",
     "esbuild": "0.25.2",
     "jose": "5.10.0",
     "jsonwebtoken": "^9.0.2",
-    "pino": "^10.0.0",
-    "@aws-sdk/client-dynamodb": "^3.876.0",
-    "@aws-sdk/lib-dynamodb": "^3.876.0"
+    "pino": "^10.0.0"
   },
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/ipv",
@@ -37,6 +37,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.14.0",
+    "@types/sinon": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.31.0",
     "chai": "^4.3.6",
@@ -45,6 +46,7 @@
     "globals": "^16.3.0",
     "mocha": "11.7.1",
     "prettier": "3.6.2",
+    "sinon": "^21.0.0",
     "ts-node": "^10.9.2",
     "typescript": "5.9.2"
   },
