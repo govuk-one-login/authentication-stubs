@@ -9,22 +9,8 @@ export const getCookie = (
     return undefined;
   }
 
-  const matchingCookies = cookies
-    .split("; ")
-    .filter((it) => it.startsWith(`${name}=`));
-
-  if (matchingCookies.length <= 1) {
-    return matchingCookies[0]?.split("=")[1];
-  }
-
-  // When multiple cookies exist, prefer the one for the current domain
-  const cookieDomain = process.env.COOKIE_DOMAIN;
-  if (cookieDomain?.includes("authdev")) {
-    // Return the last cookie (most specific domain)
-    return matchingCookies[matchingCookies.length - 1]?.split("=")[1];
-  }
-
-  return matchingCookies[0]?.split("=")[1];
+  const cookie = cookies.split("; ").filter((it) => it.startsWith(`${name}=`));
+  return cookie[0]?.split("=")[1];
 };
 
 export const getOrCreatePersistentSessionId = (
