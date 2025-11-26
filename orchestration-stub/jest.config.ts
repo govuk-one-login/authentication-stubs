@@ -12,5 +12,5 @@ export default {
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   reporters: ["default"],
-  testMatch: ["**.test.ts"],
+  testMatch: ["**/tests/unit/*.test.ts"],
 };
