@@ -3,25 +3,22 @@ import {
   APIGatewayProxyResult,
   Handler,
 } from "aws-lambda";
-import { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import {
   handleErrors,
   methodNotAllowedError,
+  truncate,
   shouldObfuscate,
   successfulJsonResult,
-  truncate,
 } from "../helper/result-helper";
 import { logger } from "../helper/logger";
 import {
   getReverificationWithAuthCode,
   putReverificationWithAccessToken,
 } from "../services/dynamodb-form-response-service";
-import { base64url, compactVerify } from "jose";
+import { base64url } from "jose";
 import { randomBytes } from "crypto";
 import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { getPublicSigningKey } from "../helper/jwks-helper";
-import { processJoseError } from "../helper/error-helper";
-import process from "node:process";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -198,23 +195,14 @@ async function handle(
 }
 
 const verifyJWT = async (token: string): Promise<JwtPayload> => {
-  const signingKey = await getPublicSigningKey(
-    token,
-    process.env.AUTH_IPV_PUBLIC_SIGNING_KEY_JWKS_ENDPOINT,
-    process.env.AUTH_PUBLIC_SIGNING_KEY_IPV
-  );
-  let payload;
-  try {
-    ({ payload } = await compactVerify(token, signingKey));
-  } catch (error) {
-    processJoseError(error);
-  }
+  const signingKey: string = process.env.AUTH_PUBLIC_SIGNING_KEY_IPV as string;
+  const decoded = jwt.verify(token, signingKey, {
+    algorithms: ["ES256"],
+  });
 
-  const decodedPayload = new TextDecoder().decode(payload);
-
-  try {
-    return JSON.parse(decodedPayload);
-  } catch (error) {
-    throw new Error(`Failed to parse JWT payload as JSON: ${error}`);
+  if (typeof decoded === "object" && decoded !== null) {
+    return decoded;
+  } else {
+    throw new Error("Invalid token payload");
   }
 };
