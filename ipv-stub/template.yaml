@@ -168,6 +168,9 @@ Resources:
       StageName: Live
       AlwaysDeploy: true
       EndpointConfiguration: REGIONAL
+      Tags:
+        FMSRegionalPolicy: "false"
+        CustomPolicy: "apistub"
       DefinitionBody:
         openapi: "3.0.1"
         info:
