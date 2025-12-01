@@ -506,6 +506,9 @@ Resources:
       EndpointConfiguration:
         Type: REGIONAL
       OpenApiVersion: 3.0.1
+      Tags:
+        FMSRegionalPolicy: "false"
+        CustomPolicy: "apistub"
       DefinitionBody:
         openapi: "3.0.1"
         info:
