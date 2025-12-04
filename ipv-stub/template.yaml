@@ -184,6 +184,16 @@ Resources:
           DestinationSecurityGroupId:
             Fn::ImportValue: "vpc-AWSServicesEndpointSecurityGroupId"
           Description: Allow HTTPS to VPC endpoint security group
+        - DestinationPrefixListId: pl-b3a742da # See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-aws-managed-prefix-lists.html
+          Description: Allow outgoing HTTPS requests to AWS DynamoDB route from security group
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+        - DestinationPrefixListId: pl-7ca54015 # See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-aws-managed-prefix-lists.html
+          Description: Allow outgoing HTTPS requests to AWS S3 route from security group
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
 
   # API Gateway
   ApiGateway:
