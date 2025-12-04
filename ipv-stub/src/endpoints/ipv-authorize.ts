@@ -84,6 +84,8 @@ async function get(
 async function post(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
+  logger.info("IPV Authorize POST endpoint invoked!");
+
   if (event.body == null) {
     throw new CodedError(400, "Missing request body");
   }
