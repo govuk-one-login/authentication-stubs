@@ -374,9 +374,9 @@ Resources:
         SecurityGroupIds:
           - !Ref LambdaSecurityGroup
         SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdC
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Policies:
         - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
