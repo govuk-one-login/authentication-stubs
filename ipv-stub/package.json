@@ -10,7 +10,7 @@
     "esbuild": "0.25.2",
     "jose": "5.10.0",
     "jsonwebtoken": "^9.0.2",
-    "pino": "^10.0.0"
+    "pino": "^10.1.0"
   },
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/ipv",
