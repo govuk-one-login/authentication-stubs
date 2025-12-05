@@ -44,8 +44,16 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 20.17.0
+      - name: Check npm ignore-scripts config
+        run: |
+          if [ "$(npm config get ignore-scripts)" = "false" ]; then
+            echo "Error: ignore-scripts is set to false"
+            exit 1
+          else
+            echo "ignore-scripts is set to true"
+          fi
       - name: Install dependencies
-        run: npm install
+        run: npm ci --ignore-scripts
         working-directory: ${{ matrix.module }}
       - name: Run linter
         run: npm run lint
