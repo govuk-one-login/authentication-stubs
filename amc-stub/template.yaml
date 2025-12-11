@@ -13,6 +13,38 @@ Parameters:
   Environment:
     Type: String
     Default: dev
+  
+  ArtifactSourceBucket:
+    Type: String
+    Default: none
+  
+  VpcStackName:
+    Type: String
+    Default: none
+  
+  BuildNotificationStackName:
+    Type: String
+    Default: none
+  
+  CodeSigningConfigArn:
+    Type: String
+    Default: none
+  
+  PermissionsBoundary:
+    Type: String
+    Default: none
+  
+  TestRoleArn:
+    Type: String
+    Default: none
+  
+  TrafficTestRoleArn:
+    Type: String
+    Default: none
+  
+  DisableCanaryAlarms:
+    Type: String
+    Default: "false"
 
 Mappings:
   EnvironmentConfiguration:
