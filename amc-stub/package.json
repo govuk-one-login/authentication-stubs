@@ -1,0 +1,66 @@
+{
+  "description": "Authentication stub for AMC",
+  "license": "MIT",
+  "main": "index.js",
+  "name": "auth-amc-stub",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.709.0",
+    "@aws-sdk/lib-dynamodb": "3.709.0",
+    "esbuild": "0.27.1",
+    "jsonwebtoken": "9.0.2",
+    "pino": "9.5.0"
+  },
+  "scripts": {
+    "build": "sam build --template template.yaml --build-dir build/amc",
+    "clean": "rm -rf build/amc & rm -rf build/build.toml",
+    "start:local": "sam local start-api --template build/amc/template.yaml --env-vars parameters.json -p 3000",
+    "compile": "tsc",
+    "pretty": "prettier --write '**/*.ts' '**/*.js'",
+    "pretty-check": "prettier --check '**/*.ts' '**/*.js'",
+    "lint": "eslint . --fix",
+    "test-unit": "mocha"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": true
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.2.0",
+    "@eslint/js": "9.17.0",
+    "@types/aws-lambda": "8.10.154",
+    "@types/aws-sdk": "2.7.0",
+    "@types/chai": "5.0.1",
+    "@types/jsonwebtoken": "9.0.7",
+    "@types/mocha": "10.0.10",
+    "@types/node": "22.10.2",
+    "@types/sinon": "17.0.3",
+    "@typescript-eslint/eslint-plugin": "8.18.1",
+    "@typescript-eslint/parser": "8.18.1",
+    "chai": "5.1.2",
+    "eslint": "9.17.0",
+    "eslint-plugin-no-only-tests": "3.3.0",
+    "globals": "15.13.0",
+    "mocha": "11.0.1",
+    "prettier": "3.4.2",
+    "sinon": "19.0.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.7.2"
+  },
+  "engines": {
+    "node": "22.12.0"
+  },
+  "mocha": {
+    "diff": true,
+    "extension": [
+      "js",
+      "ts"
+    ],
+    "timeout": 20000,
+    "recursive": true,
+    "loader": "ts-node/esm",
+    "exit": true
+  }
+}

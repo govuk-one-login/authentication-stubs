@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AMC Authentication Stub
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+
+Mappings:
+  EnvironmentConfiguration:
+    dev:
+      amcStubDomainName: amcstub.signin.dev.account.gov.uk
+      hostedZoneId: "Z07405851J4NJYGEP1PS7"
+
+    authdev1:
+      amcStubDomainName: amcstub.signin.authdev1.dev.account.gov.uk
+      hostedZoneId: "Z01488663SVMGDFYGEX88"
+
+    authdev2:
+      amcStubDomainName: amcstub.signin.authdev2.dev.account.gov.uk
+      hostedZoneId: "Z0283478G72QVGV7VVBG"
+
+    authdev3:
+      amcStubDomainName: amcstub.signin.authdev3.dev.account.gov.uk
+      hostedZoneId: "Z04928373OSDE66G6PJLG"
+
+    build:
+      amcStubDomainName: amcstub.signin.build.account.gov.uk
+      hostedZoneId: "Z09720813AWZDQSXZBWKJ"
+
+Resources:
+  AMCAuthorizeStubFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: endpoints/amc-authorize.handler
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Events:
+        GetAuthorize:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /authorize
+            Method: GET
+        PostAuthorize:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /authorize
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/amc-authorize.ts
+        Minify: true
+        Sourcemap: true
+        Target: node22
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-ApiGateway
+      StageName: Live
+      EndpointConfiguration:
+        Types: ['REGIONAL']
+      Tags:
+        FMSRegionalPolicy: "false"
+        CustomPolicy: "apistub"
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: "Auth Team AMC Stub"
+          version: "1.0"
+        paths:
+          /authorize:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+        x-amazon-apigateway-policy:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal: "*"
+              Action: "execute-api:Invoke"
+              Resource: "*"
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types: ['REGIONAL']
+      SecurityPolicy: TLS_1_2
+
+  ApiGatewayMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref GatewayDomain
+      RestApiId: !Ref ApiGateway
+      Stage: Live
+
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+      Type: A
+      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      AliasTarget:
+        DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+          HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]

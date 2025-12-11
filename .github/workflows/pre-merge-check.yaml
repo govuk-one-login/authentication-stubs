@@ -14,16 +14,23 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        module: [ orchestration-stub, ipv-stub ]
+        module: [ orchestration-stub, ipv-stub, amc-stub ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: ${{ matrix.module == 'amc-stub' && '22.12.0' || '20.17.0' }}
       - name: Set up SAM cli
         uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
         with:
           use-installer: true  # this caches installation but is only available on Linux x86-64 runners
+      - name: Install esbuild globally
+        if: matrix.module == 'amc-stub'
+        run: npm install -g esbuild --ignore-scripts
       - name: SAM build
         run: |
           cd ${{ matrix.module }}
@@ -34,7 +41,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        module: [ orchestration-stub, ipv-stub ]
+        module: [ orchestration-stub, ipv-stub, amc-stub ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -43,7 +50,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: 20.17.0
+          node-version: ${{ matrix.module == 'amc-stub' && '22.12.0' || '20.17.0' }}
       - name: Check npm ignore-scripts config
         run: |
           if [ "$(npm config get ignore-scripts)" = "false" ]; then
@@ -63,6 +70,6 @@ jobs:
         working-directory: ${{ matrix.module }}
       - name: Run unit tests
 #       todo: add orch-stub unit tests to pre-merge-checks when any are created
-        if: matrix.module == 'ipv-stub'
+        if: matrix.module == 'ipv-stub' || matrix.module == 'amc-stub'
         run: npm run test-unit
         working-directory: ${{ matrix.module }}
