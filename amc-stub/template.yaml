@@ -49,11 +49,13 @@ Resources:
         GetAuthorize:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: GET
         PostAuthorize:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: POST
     Metadata:
@@ -64,6 +66,43 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: node22
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-ApiGateway
+      StageName: Live
+      EndpointConfiguration:
+        Types: ['REGIONAL']
+      Tags:
+        FMSRegionalPolicy: "false"
+        CustomPolicy: "apistub"
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      RegionalCertificateArn: !Ref Certificate
+      EndpointConfiguration:
+        Types: ['REGIONAL']
+      SecurityPolicy: TLS_1_2
+
+  ApiGatewayMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref GatewayDomain
+      RestApiId: !Ref ApiGateway
+      Stage: Live
+
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+      Type: A
+      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      AliasTarget:
+        DNSName: !GetAtt GatewayDomain.RegionalDomainName
+        HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
 
   Certificate:
     Type: AWS::CertificateManager::Certificate
