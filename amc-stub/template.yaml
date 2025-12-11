@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AMC Authentication Stub
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+
+Resources:
+  AMCAuthorizeStubFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: endpoints/amc-authorize.handler
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Events:
+        GetAuthorize:
+          Type: Api
+          Properties:
+            Path: /authorize
+            Method: GET
+        PostAuthorize:
+          Type: Api
+          Properties:
+            Path: /authorize
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/amc-authorize.ts
+        Minify: true
+        Sourcemap: true
+        Target: node22
