@@ -104,8 +104,7 @@ Resources:
     Properties:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
-      EndpointConfiguration:
-        Types: ['REGIONAL']
+      EndpointConfiguration: REGIONAL
       Tags:
         FMSRegionalPolicy: "false"
         CustomPolicy: "apistub"
@@ -129,8 +128,6 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
-                passThroughBehavior: "when_no_match"
-                payloadFormatVersion: "2.0"
             post:
               responses:
                 "200":
@@ -144,8 +141,6 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
-                passThroughBehavior: "when_no_match"
-                payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -159,9 +154,10 @@ Resources:
     Properties:
       DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
       RegionalCertificateArn: !Ref Certificate
-      EndpointConfiguration:
-        Types: ['REGIONAL']
       SecurityPolicy: TLS_1_2
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
 
   ApiGatewayMapping:
     Type: AWS::ApiGateway::BasePathMapping
