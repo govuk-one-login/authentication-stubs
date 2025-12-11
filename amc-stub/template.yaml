@@ -77,6 +77,50 @@ Resources:
       Tags:
         FMSRegionalPolicy: "false"
         CustomPolicy: "apistub"
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: "Auth Team AMC Stub"
+          version: "1.0"
+        paths:
+          /authorize:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+        x-amazon-apigateway-policy:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal: "*"
+              Action: "execute-api:Invoke"
+              Resource: "*"
 
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
