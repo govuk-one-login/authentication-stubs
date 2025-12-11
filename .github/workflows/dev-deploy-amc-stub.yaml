@@ -57,5 +57,5 @@ jobs:
         uses: govuk-one-login/devplatform-upload-action@fda75612a1b0e5a8c84ae7c44a23340e50e5bbde # v3.11.0
         with:
           artifact-bucket-name: ${{ secrets.AMC_STUB_ARTIFACT_BUCKET_NAME }}
-          signing-profile-name: ${{ secrets.AMC_STUB_SIGNING_PROFILE_NAME }}
+          signing-profile-name: ""
           working-directory: ./amc-stub/.aws-sam/build
