@@ -31,16 +31,15 @@ jobs:
       - name: Install esbuild globally
         if: matrix.module == 'amc-stub'
         run: npm install -g esbuild --ignore-scripts
-      - name: CloudFormation lint
+      - name: SAM validate
         if: matrix.module == 'amc-stub'
         run: |
           cd ${{ matrix.module }}
-          pip install cfn-lint
-          cfn-lint template.yaml
+          sam validate --region eu-west-2
       - name: SAM build
         run: |
           cd ${{ matrix.module }}
-          sam build -t template.yaml
+          sam build -t template.yaml --region eu-west-2
 
   test:
     runs-on: ubuntu-latest
