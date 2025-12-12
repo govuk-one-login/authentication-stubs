@@ -1,9 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform:
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
 Description: AMC Authentication Stub
 
 Globals:
   Function:
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
     Timeout: 30
     Runtime: nodejs22.x
     Architectures:
@@ -13,38 +23,42 @@ Parameters:
   Environment:
     Type: String
     Default: dev
-  
+
   ArtifactSourceBucket:
     Type: String
     Default: none
-  
+
   VpcStackName:
     Type: String
     Default: none
-  
+
   BuildNotificationStackName:
     Type: String
     Default: none
-  
+
   CodeSigningConfigArn:
     Type: String
     Default: none
-  
+
   PermissionsBoundary:
     Type: String
     Default: none
-  
+
   TestRoleArn:
     Type: String
     Default: none
-  
+
   TrafficTestRoleArn:
     Type: String
     Default: none
-  
+
   DisableCanaryAlarms:
     Type: String
     Default: "false"
+
+Conditions:
+  UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
+  UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
 
 Mappings:
   EnvironmentConfiguration:
@@ -74,6 +88,8 @@ Resources:
     Properties:
       CodeUri: .
       Handler: endpoints/amc-authorize.handler
+      LoggingConfig:
+        LogGroup: !Ref AMCAuthorizeStubFunctionLogGroup
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
@@ -99,11 +115,18 @@ Resources:
         Sourcemap: true
         Target: node22
 
+  AMCAuthorizeStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-amc-stub-authorize"
+      RetentionInDays: 30
+
   ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
+      AlwaysDeploy: true
       EndpointConfiguration: REGIONAL
       Tags:
         FMSRegionalPolicy: "false"
@@ -128,6 +151,8 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
             post:
               responses:
                 "200":
@@ -141,6 +166,8 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:
           Version: "2012-10-17"
           Statement:
@@ -161,6 +188,7 @@ Resources:
 
   ApiGatewayMapping:
     Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: Certificate
     Properties:
       DomainName: !Ref GatewayDomain
       RestApiId: !Ref ApiGateway
