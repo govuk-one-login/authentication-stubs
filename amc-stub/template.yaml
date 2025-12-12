@@ -22,7 +22,21 @@ Globals:
 Parameters:
   Environment:
     Type: String
-    Default: dev
+    AllowedValues:
+      - dev
+      - build
+
+  SubEnvironment:
+    Type: String
+    Description: >
+      When deploying to dev, optionally configure which sub-environment to deploy to
+      i.e. authdev1, authdev2. This feature is not available for route-to-live environments
+    Default: none
+    AllowedValues:
+      - none
+      - authdev1
+      - authdev2
+      - authdev3
 
   ArtifactSourceBucket:
     Type: String
@@ -59,6 +73,9 @@ Parameters:
 Conditions:
   UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
   UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
+  UseSubEnvironment: !And
+    - !Equals [!Ref Environment, dev]
+    - !Not [!Equals [!Ref SubEnvironment, none]]
 
 Mappings:
   EnvironmentConfiguration:
@@ -92,7 +109,7 @@ Resources:
         LogGroup: !Ref AMCAuthorizeStubFunctionLogGroup
       Environment:
         Variables:
-          ENVIRONMENT: !Ref Environment
+          ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
       Events:
         GetAuthorize:
           Type: Api
@@ -118,7 +135,7 @@ Resources:
   AMCAuthorizeStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-amc-stub-authorize"
+      LogGroupName: !If [UseSubEnvironment, !Sub "/aws/lambda/${SubEnvironment}-amc-stub-authorize", !Sub "/aws/lambda/${Environment}-amc-stub-authorize"]
       RetentionInDays: 30
 
   ApiGateway:
@@ -179,7 +196,7 @@ Resources:
   GatewayDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      DomainName: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcStubDomainName]
       RegionalCertificateArn: !Ref Certificate
       SecurityPolicy: TLS_1_2
       EndpointConfiguration:
@@ -197,9 +214,9 @@ Resources:
   DnsRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+      HostedZoneId: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], hostedZoneId]
       Type: A
-      Name: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      Name: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcStubDomainName]
       AliasTarget:
         DNSName: !GetAtt GatewayDomain.RegionalDomainName
         HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
@@ -207,8 +224,8 @@ Resources:
   Certificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
+      DomainName: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcStubDomainName]
       ValidationMethod: DNS
       DomainValidationOptions:
-        - DomainName: !FindInMap [ EnvironmentConfiguration, !Ref Environment, amcStubDomainName ]
-          HostedZoneId: !FindInMap [ EnvironmentConfiguration, !Ref Environment, hostedZoneId ]
+        - DomainName: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcStubDomainName]
+          HostedZoneId: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], hostedZoneId]
