@@ -35,11 +35,11 @@ jobs:
         if: matrix.module == 'amc-stub'
         run: |
           cd ${{ matrix.module }}
-          sam validate
+          sam validate --region eu-west-2
       - name: SAM build
         run: |
           cd ${{ matrix.module }}
-          sam build -t template.yaml
+          sam build -t template.yaml --region eu-west-2
 
   test:
     runs-on: ubuntu-latest
