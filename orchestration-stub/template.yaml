@@ -13,16 +13,11 @@ Parameters:
     Type: String
     AllowedValues:
       - local
-      - sandpit   # not a recognizable environment to secure pipelines
-      - old-build # not a recognizable environment to secure pipelines
       - dev
       - build
       - staging
       - integration
       - production
-      - dev-apitest     # not a recognizable environment to secure pipelines
-      - build-apitest   # not a recognizable environment to secure pipelines
-      - staging-apitest # not a recognizable environment to secure pipelines
 
   SubEnvironment:
     Type: String
@@ -34,8 +29,6 @@ Parameters:
       - none
       - authdev1
       - authdev2
-      - old-authdev1
-      - old-authdev2
 
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
@@ -148,59 +141,6 @@ Mappings:
       defaultProvisionedConcurrency: 0
       lambdaMemorySize: "128"
 
-    sandpit:
-      cookieDomain: .sandpit.account.gov.uk
-      stubDomain: orchstub.sandpit.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs41htFRe62BIfwQZ0OCT
-        g5p2NHAekvIAJaNb6ZkLuLXYdLBax+2c9f4ALTrltmLMBpgtS6VQg2zO8UmSE4bX
-        +Nhaw2nf3/VRBIlAi2NiD4cUIwNtxIx5qpBeDxb+YR7NuTJ0nFq6u6jv34RB1RWE
-        J1sEOiv9aSPEt6eK8TGL6uZbPGU8CKJuWwPfW1ko/lyuM1HG0G/KAZ8DaLJzOMWX
-        +2aZatj9RHtOCtGxwMrZlU4n/O1gbVPBfXx9RugTi0W4upmeNFR5CsC+WgENkr0v
-        pXEyIW7edR6lDsSYzJI+yurVFyt82Bn7Vo2x5CIoLiH/1ZcKaApNU02/eK/gMBf+
-        EwIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-0027e271c35f828c1"
-      subnetBId: "subnet-0b648700a8ac43736"
-      subnetCId: "subnet-01b7b1c835828eb3d"
-      endpointSgId: "sg-036acdb59028a0c78"
-      vpcId: "vpc-0b6f4a5d72f84ed0c"
-      privateKey: "{{resolve:secretsmanager:sandpit-orchestration-stub-private-key::::4f623556-c691-4352-90f8-33d79b833a79}}"
-      authenticationBackendUrl: "https://48oqh70cm7-vpce-040f33c3489ff777b.execute-api.eu-west-2.amazonaws.com/sandpit/"
-      authenticationFrontendUrl: "https://signin.sandpit.account.gov.uk/"
-      hostedZoneId: placeholder
-      rpClientId: "1Dlz5rYheTqzZASRMmSBtgFIYgZlysnQ"
-      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 0
-      lambdaMemorySize: "128"
-
-    old-authdev1:
-      cookieDomain: .dev.account.gov.uk
-      stubDomain: orchstub-authdev1.signin.dev.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs0gyWacjheeaMslIDBdf
-        4ljBMyrEzAeJW+ZyvGZlV6KhPPCz6lMx8knb/ar1LqkqX1M2hh1qS+ijYtzz4cCE
-        MP/YWuvIL3CkFEUlw1ITwg6TDH9ixFeFHG0K4keHmmAHms5N4zuUKwZWHUgo6nDt
-        LM3o5PIvdz57A1ewtkzLizLBHIhTMImXeHzFyEDH7LufROfJH9lZ079r2sNzfKSm
-        xhgnWpMKrXtYUkYR/+vmvCJcR4okWS5WK9QKh2PUw+fXBRxnaf09sRvvgh2x/I9A
-        wxACgcz//hhZ9O1h3Kt6BTyvhqZ00FwO//2bdosdX9kjCC+bRCwlUToIY0CmzOFO
-        kwIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-04234e8fb1ee28d2c"
-      subnetBId: "subnet-0c91be3c7426cf2e6"
-      subnetCId: "subnet-078749ec82aa5af94"
-      endpointSgId: "sg-0e554161114407ce2"
-      vpcId: "vpc-04918b35a66969280"
-      privateKey: "{{resolve:secretsmanager:authdev1-orchestration-stub-private-key::::ca3923ea-99ba-4e9f-8088-f050e45d5aef}}"
-      authenticationBackendUrl: "https://l31ra96lnc-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev1/"
-      authenticationFrontendUrl: "https://signin.authdev1.dev.account.gov.uk/"
-      hostedZoneId: "Z10132222WVQ7U47816SI"
-      rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
-      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
-      lambdaMemorySize: "128"
-
     authdev1:
       cookieDomain: .authdev1.dev.account.gov.uk
       stubDomain: orchstub.signin.authdev1.dev.account.gov.uk
@@ -224,32 +164,6 @@ Mappings:
       authenticationFrontendUrl: "https://signin.authdev1.dev.account.gov.uk/"
       hostedZoneId: "Z01488663SVMGDFYGEX88"
       rpClientId: "skwdHH2y6ERjJWTPSoAFbSt8lX04OgtI"
-      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
-      lambdaMemorySize: "128"
-
-    old-authdev2:
-      cookieDomain: .dev.account.gov.uk
-      stubDomain: orchstub-authdev2.signin.dev.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuO+7VuYnfrI1q3FR9IbD
-        HHFkmCCl58ZwBHq2RNx8ZMg/wjCWVe8vGsC4xe25QfxpqZYZ+r6HgRSDL+e6WWgG
-        VO0zZFP1b4sEjm2TN6cJOtCmGK9YCdczIV+rUZ8RQdfGd/VBrTwbihVVwcsU/AK/
-        Zn35yyxIOBQBfebpODqXvTNqyZCCnRsEft6NoiB7d0MtQj3pVBpP6zMrAqV7I4nl
-        uUy+EBm5Gjxr1tu4g513kauhbvpsejePvjN4LOyrNVVrbr2Sui874H+BJp7OQOLq
-        R8JLAPX4gEUilflULbVG/JZTulPOyGrDyR656sbh7yuE/rTQBnNSrBibJaAGjlQb
-        DQIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-04234e8fb1ee28d2c"
-      subnetBId: "subnet-0c91be3c7426cf2e6"
-      subnetCId: "subnet-078749ec82aa5af94"
-      endpointSgId: "sg-0e554161114407ce2"
-      vpcId: "vpc-04918b35a66969280"
-      privateKey: "{{resolve:secretsmanager:authdev2-orchestration-stub-private-key::::a008a0fa-23dd-4e2f-b9ab-7494e65f60ec}}"
-      authenticationBackendUrl: "https://8yikw2kek6-vpce-01a1f8e880d273ec6.execute-api.eu-west-2.amazonaws.com/authdev2/"
-      authenticationFrontendUrl: "https://signin.authdev2.dev.account.gov.uk/"
-      hostedZoneId: "Z10132222WVQ7U47816SI"
-      rpClientId: "rPEUe0hRrHqf0i0es1gYjKxE5ceGN7VK"
       rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
       lambdaMemorySize: "128"
 
@@ -306,33 +220,6 @@ Mappings:
       defaultProvisionedConcurrency: 0
       lambdaMemorySize: "128"
 
-    dev-apitest:
-      cookieDomain: .dev.account.gov.uk
-      stubDomain: orchstub-apitest.signin.dev.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0PcOHuVXOuexYZmpOlCo
-        vFcGfezObHnnVTTfnCrS5TBmAEC9JNwH/YFmE/zx84I1dy5fEjll+2GIe8Hcue+W
-        ubQMToFaAAeaqowqjgJYIPjgTubJ+baAP7+6GFPBWkk+LntBRQaoF7YkICT6im9h
-        JTrFb5KxyDNT/j4SCCXlkMTzqmeMVM59NM66MSS7OXsUny9GinG6xhDovUswvU99
-        N7GtGZBYIDmG6IrT/rS9ZosBLeLqCvRAfaYjq0/2EKHcudyeYjPDkkGpBNt7vXJJ
-        A+Ud3Nx8MmuKS3kb8NoDhQJxKxg7lgjAj+Lhb9xr+Y074hdTs5ju2Jx2tmP1y9vl
-        RwIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-0c6f6e7abc765bd57"
-      subnetBId: "subnet-04a0851b2083a2782"
-      subnetCId: "subnet-0c0c7f285b1ef1378"
-      endpointSgId: "sg-0903a817986dc39ef"
-      vpcId: "vpc-0ad3a83e46742a372"
-      privateKey: "{{resolve:secretsmanager:dev-orchestration-stub-private-key::::02a7ed01-c5d6-4562-aef1-cfc25df8ec14}}"
-      authenticationBackendUrl: "https://k3d8ykiz8e-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/"
-      authenticationFrontendUrl: "https://apitest.signin.dev.account.gov.uk/"
-      hostedZoneId: "Z07405851J4NJYGEP1PS7"
-      rpClientId: "J3tedNRsfssnsf4STuc2NNIV1C1gdxBB"
-      rpSectorHost: "rp-dev.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 0
-      lambdaMemorySize: "128"
-
     build:
       cookieDomain: .build.account.gov.uk
       stubDomain: orchstub.signin.build.account.gov.uk
@@ -360,33 +247,6 @@ Mappings:
       defaultProvisionedConcurrency: 0
       lambdaMemorySize: "128"
 
-    build-apitest:
-      cookieDomain: .build.account.gov.uk
-      stubDomain: orchstub-apitest.signin.build.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApLJWOHz7uHLinSJr8XM0
-        fhyq0aLm8HP06lCT7csGUoRav2xybsCsypufvJHbuD5SLkg25/VGFt21KH2g60u8
-        6mV7ULLG/m4hvAiXbwSGdcRTToPS+UULX3YDnDXZHvd+3ypane82+XLjVZ9B2V0i
-        1MGCJ7kiRurXCuE+9Kx/MQYBCqhz/OwHlCe3FJZXKvgnqqpO5ZtyjrxDJSZJpxbi
-        KsVnLksPKV10Z0/XvpJ6oHtOjseetk8TRdekRWBvqCX5MqLjdi1TfiaDu2Tjg2N0
-        dqhoDR3/THktb4KThc+U5EOWCWpH4OIAetYtjFChnkR8kU05Ol9zfdR08uO0RxMk
-        1wIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-03d50d98f5a4829cc"
-      subnetBId: "subnet-055927eafb2d73cd3"
-      subnetCId: "subnet-0778a9775ee5845a3"
-      endpointSgId: "sg-022ad00847f2dc9be"
-      vpcId: "vpc-095e2f57f31498e5d"
-      privateKey: "{{resolve:secretsmanager:build-orchestration-stub-private-key::::00dc89e1-b4de-4be8-9ad2-d8f8dcc46434}}"
-      authenticationBackendUrl: "https://w3nit2qina-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/"
-      authenticationFrontendUrl: "https://apitest.signin.build.account.gov.uk/"
-      hostedZoneId: "Z09720813AWZDQSXZBWKJ"
-      rpClientId: "Ykg9fGyY76On4e8tPvFabK5BIl65EkGH"
-      rpSectorHost: "acceptance-test-rp-build.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 0
-      lambdaMemorySize: "128"
-
     staging:
       cookieDomain: .staging.account.gov.uk
       stubDomain: orchstub.signin.staging.account.gov.uk
@@ -408,33 +268,6 @@ Mappings:
       privateKey: "{{resolve:secretsmanager:staging-orchestration-stub-private-key::::c1f83296-2f8d-458c-8542-f3c919e9be8c}}"
       authenticationBackendUrl: "https://rr86yg3r28-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
       authenticationFrontendUrl: "https://signin.staging.account.gov.uk/"
-      hostedZoneId: "Z06032813E21PC11LZZAB"
-      rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
-      rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 3
-      lambdaMemorySize: "1536"
-
-    staging-apitest:
-      cookieDomain: .staging.account.gov.uk
-      stubDomain: orchstub-apitest.signin.staging.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzZGTSE8TLLtQjdmD6SiF
-        SKbfv63JPCV+acPLQc4MjAKK7yT/QhERkemky+oPBIqCJgUq1gmOzdCAje/QEFlD
-        qwry65oEaUBlWmGlNTPBnUzy/d6mYMfZObsr+yI1HszZE193ABAwtPttCFhFZWov
-        +rF2Oc9dmiAKXuT0whbOXaj1+751w5qJpsMWgHj91at9gdOZ31huoxnLkuAK/rus
-        wEBMjmuOzy5osorLg9RCJQVN91Bp932vQS7hXirDpfBhCuQfYQMjFXv4MhCKnk42
-        pi0FWWzbnn9UcbdcS/Sl5UeuTyCQ+MrunV/XGjIrPMWaFUIQomX1+pCMHkthbQ0J
-        AQIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-096c40365bf722fe9"
-      subnetBId: "subnet-0998c876e86131a63"
-      subnetCId: "subnet-0ff5a12cce4d4228f"
-      endpointSgId: "sg-01743a16df7d6136b"
-      vpcId: "vpc-07cf1e76e27f28e86"
-      privateKey: "{{resolve:secretsmanager:staging-orchestration-stub-private-key::::c1f83296-2f8d-458c-8542-f3c919e9be8c}}"
-      authenticationBackendUrl: "https://8ttd794ay4-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
-      authenticationFrontendUrl: "https://apitest.signin.staging.account.gov.uk/"
       hostedZoneId: "Z06032813E21PC11LZZAB"
       rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
