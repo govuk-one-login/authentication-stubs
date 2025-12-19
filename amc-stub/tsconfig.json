@@ -13,6 +13,6 @@
     "types": ["node", "mocha"],
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*.ts", "scripts/*"],
+  "include": ["src/**/*.ts", "scripts/*", "test/**/*.ts"],
   "exclude": ["node_modules"]
 }
