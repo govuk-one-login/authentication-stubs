@@ -2,7 +2,11 @@ import { describe } from "mocha";
 import "node:process";
 import keys from "../../data/keys.json" with { type: "json" };
 import sinon from "sinon";
-import { createCompositeJWT, TEST_CONSTANTS } from "../test-helpers.ts";
+import {
+  AccessTokenBuilder,
+  CompositeJWTBuilder,
+  TEST_CONSTANTS,
+} from "../test-helpers.ts";
 import { validateCompositeJWT } from "../../src/helpers/jwt-validator.ts";
 import { expect } from "chai";
 import { amcScopes } from "../../src/types/enums.ts";
@@ -20,10 +24,10 @@ describe("jwt validator tests", async () => {
   });
 
   it("should validate the composite JWT", async () => {
-    const JWT = await createCompositeJWT(
+    const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      keys.authPrivateSigningKeyAuthAudience
-    );
+      new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+    ).build();
 
     const { payload } = await validateCompositeJWT(JWT);
 
@@ -44,14 +48,16 @@ describe("jwt validator tests", async () => {
     expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
     expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
     expect(payload.govuk_signin_journey_id).to.equal(TEST_CONSTANTS.JOURNEY_ID);
-    expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT)
+    expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
 
     // Access Token JWT assertions
     expect(payload.access_token.sub).to.equal(TEST_CONSTANTS.SUBJECT);
     expect(payload.access_token.iat).to.be.closeTo(now, 10);
     expect(payload.access_token.nbf).to.be.closeTo(now, 10);
     expect(payload.access_token.exp).to.equal(payload.iat! + 3600);
-    expect(payload.access_token.scope).to.deep.equal([amcScopes.ACCOUNT_DELETE]);
+    expect(payload.access_token.scope).to.deep.equal([
+      amcScopes.ACCOUNT_DELETE,
+    ]);
     expect(payload.access_token.iss).to.equal(TEST_CONSTANTS.ISSUER);
     expect(payload.access_token.aud).to.equal(TEST_CONSTANTS.AUDIENCE);
     expect(payload.access_token.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
