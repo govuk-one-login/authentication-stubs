@@ -1,4 +1,4 @@
-import keys from "../src/data/keys.json" with { type: "json" };
+import keys from "../data/keys.json" with { type: "json" };
 import {
   CompactEncrypt,
   CompactJWSHeaderParameters,
@@ -72,7 +72,7 @@ const createRequestJWT = async () => {
     aud: "{AMC URL}",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
-    scope: '["account-delete"]',
+    scope: amcScopes.ACCOUNT_DELETE,
     state: "S8NJ7uqk5fY4EjNvP_G_FtyJu6pUsvH9jsYni9dMAJw",
     jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
     iat: 1709047563,
@@ -80,6 +80,7 @@ const createRequestJWT = async () => {
     nbf: 1709047563,
     access_token: createAccessToken(sub),
     sub: sub,
+    public_sub: "550e8400-e29b-41d4-a716-446655440000",
     email: "test@digital.cabinet-office.gov.uk",
     govuk_signin_journey_id:
       "lBG99Z78pnrPUbdKDIaHobHV9DE.taUSm4TwLOGNIkmBTF9rzdIDj5s",
