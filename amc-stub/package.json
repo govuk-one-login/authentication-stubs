@@ -16,7 +16,7 @@
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/amc",
     "clean": "rm -rf build/amc & rm -rf build/build.toml",
-    "start:local": "sam local start-api --template build/amc/template.yaml --env-vars parameters.json -p 3000",
+    "start:local": "sam local start-api --template build/amc/template.yaml --env-vars data/parameters.json -p 3000",
     "compile": "tsc",
     "pretty": "prettier --write '**/*.ts' '**/*.js'",
     "pretty-check": "prettier --check '**/*.ts' '**/*.js'",
