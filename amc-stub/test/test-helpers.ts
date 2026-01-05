@@ -2,7 +2,7 @@ import {
   APIGatewayProxyEvent,
   APIGatewayEventRequestContext,
 } from "aws-lambda";
-import { amcScopes, HttpMethod, joseAlgorithms } from "../src/types/enums.js";
+import { AMCScopes, HttpMethod, JoseAlgorithms } from "../src/types/enums.ts";
 import {
   CompactJWSHeaderParameters,
   CompactSign,
@@ -63,7 +63,7 @@ export const createTestEvent = (
 
 export class AccessTokenBuilder {
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
-  private scope: string[] | undefined = [amcScopes.ACCOUNT_DELETE];
+  private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
   private iss: string | undefined = TEST_CONSTANTS.ISSUER;
   private aud: string | undefined = TEST_CONSTANTS.AUDIENCE;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
@@ -75,7 +75,7 @@ export class AccessTokenBuilder {
 
   async build() {
     const protectedHeader = {
-      alg: joseAlgorithms.ES256,
+      alg: JoseAlgorithms.ES256,
       typ: "at+jwt",
     };
 
@@ -142,36 +142,35 @@ const createSignedJwt = async (
   payload: JWTPayload,
   signingKey: string
 ) => {
-  const privateKey = await importPKCS8(signingKey, joseAlgorithms.ES256);
+  const privateKey = await importPKCS8(signingKey, JoseAlgorithms.ES256);
   return await new CompactSign(textEncoder.encode(JSON.stringify(payload)))
     .setProtectedHeader(header)
     .sign(privateKey);
 };
 
 export class CompositeJWTBuilder {
-  private readonly iss = TEST_CONSTANTS.ISSUER;
-  private readonly clientId = TEST_CONSTANTS.CLIENT_ID;
-  private readonly aud = TEST_CONSTANTS.AUDIENCE;
+  private iss: string | undefined = TEST_CONSTANTS.ISSUER;
+  private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
+  private aud: string | undefined = TEST_CONSTANTS.AUDIENCE;
   private readonly responseType = TEST_CONSTANTS.RESPONSE_TYPE;
   private readonly redirectUri = TEST_CONSTANTS.REDIRECT_URI;
-  private readonly scope = [amcScopes.ACCOUNT_DELETE];
+  private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
   private readonly state = TEST_CONSTANTS.STATE;
-  private readonly jti = TEST_CONSTANTS.CLIENT_ASSERTION_JTI;
-  private readonly sub = TEST_CONSTANTS.SUBJECT;
+  private jti: string | undefined = TEST_CONSTANTS.CLIENT_ASSERTION_JTI;
+  private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
   private readonly email = TEST_CONSTANTS.EMAIL;
   private readonly journeyId = TEST_CONSTANTS.JOURNEY_ID;
-  private readonly publicSub = TEST_CONSTANTS.PUBLIC_SUBJECT;
+  private publicSub: string | undefined = TEST_CONSTANTS.PUBLIC_SUBJECT;
   private readonly expiresIn = 300;
 
   constructor(
     private readonly signingKey: string,
-    private readonly accessTokenBuilder: AccessTokenBuilder
+    private readonly accessToken: string
   ) {}
 
   async build() {
-    const protectedHeader = { alg: joseAlgorithms.ES256, typ: "JWT" };
+    const protectedHeader = { alg: JoseAlgorithms.ES256, typ: "JWT" };
     const now = Math.floor(Date.now() / 1000);
-    const accessToken = await this.accessTokenBuilder.build();
 
     const payload = {
       iss: this.iss,
@@ -185,7 +184,7 @@ export class CompositeJWTBuilder {
       iat: now,
       nbf: now,
       exp: now + this.expiresIn,
-      access_token: accessToken,
+      access_token: this.accessToken,
       sub: this.sub,
       email: this.email,
       govuk_signin_journey_id: this.journeyId,
@@ -193,5 +192,46 @@ export class CompositeJWTBuilder {
     };
 
     return createSignedJwt(protectedHeader, payload, this.signingKey);
+  }
+
+  withScope(scope: string | string[] | undefined) {
+    if (!scope) {
+      this.scope = undefined;
+    } else if (Array.isArray(scope)) {
+      this.scope = scope;
+    } else {
+      this.scope = [scope];
+    }
+    return this;
+  }
+
+  withIssuer(issuer: string | undefined) {
+    this.iss = issuer;
+    return this;
+  }
+
+  withAudience(audience: string | undefined) {
+    this.aud = audience;
+    return this;
+  }
+
+  withSubject(sub: string | undefined) {
+    this.sub = sub;
+    return this;
+  }
+
+  withPublicSubject(publicSub: string | undefined) {
+    this.publicSub = publicSub;
+    return this;
+  }
+
+  withClientId(clientId: string | undefined) {
+    this.clientId = clientId;
+    return this;
+  }
+
+  withJti(jti: string | undefined) {
+    this.jti = jti;
+    return this;
   }
 }

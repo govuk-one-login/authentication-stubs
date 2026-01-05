@@ -7,14 +7,21 @@ export interface AccessTokenPayload extends JWTPayload {
   sid: string;
 }
 
-export interface CompositePayload extends JWTPayload {
+interface BasePayload extends JWTPayload {
   client_id: string;
   scope: amcScopes[];
   response_type: string;
   redirect_uri: string;
   state: string;
-  access_token: AccessTokenPayload;
   email: string;
   govuk_signin_journey_id: string;
   public_sub: string;
+}
+
+export interface CompositePayload extends BasePayload {
+  access_token: AccessTokenPayload;
+}
+
+export interface ClientAssertionPayload extends BasePayload {
+  access_token: string;
 }

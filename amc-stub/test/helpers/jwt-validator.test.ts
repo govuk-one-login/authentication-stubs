@@ -27,7 +27,9 @@ describe("jwt validator tests", () => {
   it("should validate the composite JWT", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+      await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      ).build()
     ).build();
 
     const result = await validateCompositeJWT(JWT);
@@ -81,9 +83,9 @@ describe("jwt validator tests", () => {
     it(`should return an error string if the access token scope is ${scope}`, async () => {
       const JWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
-        new AccessTokenBuilder(
-          keys.authPrivateSigningKeyAuthAudience
-        ).withScope(scope)
+        await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+          .withScope(scope)
+          .build()
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -96,9 +98,9 @@ describe("jwt validator tests", () => {
     it(`should return an error string if the access token issuer is ${issuer}`, async () => {
       const JWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
-        new AccessTokenBuilder(
-          keys.authPrivateSigningKeyAuthAudience
-        ).withIssuer(issuer)
+        await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+          .withIssuer(issuer)
+          .build()
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -111,9 +113,9 @@ describe("jwt validator tests", () => {
     it(`should return an error string if the access token audience is ${audience}`, async () => {
       const JWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
-        new AccessTokenBuilder(
-          keys.authPrivateSigningKeyAuthAudience
-        ).withAudience(audience)
+        await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+          .withAudience(audience)
+          .build()
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -125,9 +127,9 @@ describe("jwt validator tests", () => {
   it("should return an error string if the access token payload internal subject is not present", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      new AccessTokenBuilder(
-        keys.authPrivateSigningKeyAuthAudience
-      ).withSubject(undefined)
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withSubject(undefined)
+        .build()
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
@@ -138,9 +140,9 @@ describe("jwt validator tests", () => {
   it("should return an error string if the access token payload client ID is not present", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      new AccessTokenBuilder(
-        keys.authPrivateSigningKeyAuthAudience
-      ).withClientId(undefined)
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withClientId(undefined)
+        .build()
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
@@ -151,13 +153,135 @@ describe("jwt validator tests", () => {
   it("should return an error string if the access token payload jti is not present", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience).withJti(
-        undefined
-      )
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withJti(undefined)
+        .build()
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
       "The access token payload must contain a jti"
+    );
+  });
+
+  // ====================================
+  //   Client Assertion JWT Tests
+  // ====================================
+
+  [
+    "INVALID_SCOPE",
+    undefined,
+    [],
+    [AMCScopes.ACCOUNT_DELETE, "EXTRA_SCOPE"],
+  ].forEach((scope) => {
+    it(`should return an error string when the client assertion payload ${scope} is invalid`, async () => {
+      const JWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        await new AccessTokenBuilder(
+          keys.authPrivateSigningKeyAuthAudience
+        ).build()
+      )
+        .withScope(scope)
+        .build();
+
+      expect(await validateCompositeJWT(JWT)).to.equal(
+        "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'"
+      );
+    });
+  });
+
+  ["INVALID_ISSUER", undefined].forEach((issuer) => {
+    it(`should return an error string if the client assertion issuer is ${issuer}`, async () => {
+      const JWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        await new AccessTokenBuilder(
+          keys.authPrivateSigningKeyAuthAudience
+        ).build()
+      )
+        .withIssuer(issuer)
+        .build();
+
+      expect(await validateCompositeJWT(JWT)).to.equal(
+        "The client assertion JWT payload issuer is invalid"
+      );
+    });
+  });
+
+  ["INVALID_AUDIENCE", undefined].forEach((audience) => {
+    it(`should return an error string if the client assertion audience is ${audience}`, async () => {
+      const JWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        await new AccessTokenBuilder(
+          keys.authPrivateSigningKeyAuthAudience
+        ).build()
+      )
+        .withAudience(audience)
+        .build();
+
+      expect(await validateCompositeJWT(JWT)).to.equal(
+        "The client assertion JWT payload audience is invalid"
+      );
+    });
+  });
+
+  it("should return an error string if the client assertion payload internal subject is not present", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      ).build()
+    )
+      .withSubject(undefined)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The client assertion JWT payload must contain an internal subject"
+    );
+  });
+
+  it("should return an error string if the client assertion payload public subject is not present", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      ).build()
+    )
+      .withPublicSubject(undefined)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The client assertion JWT payload must contain a public subject"
+    );
+  });
+
+  ["INVALID_CLIENT_ID", undefined].forEach((clientId) => {
+    it(`should return an error string if the client assertion client ID is ${clientId}`, async () => {
+      const JWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        await new AccessTokenBuilder(
+          keys.authPrivateSigningKeyAuthAudience
+        ).build()
+      )
+        .withClientId(clientId)
+        .build();
+
+      expect(await validateCompositeJWT(JWT)).to.equal(
+        "The client assertion JWT client ID must be 'auth'"
+      );
+    });
+  });
+
+  it("should return an error string if the client assertion payload jti is not present", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      ).build()
+    )
+      .withJti(undefined)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The client assertion JWT payload must contain a jti"
     );
   });
 });
