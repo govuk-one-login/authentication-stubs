@@ -62,12 +62,12 @@ export const createTestEvent = (
 });
 
 export class AccessTokenBuilder {
-  private readonly sub = TEST_CONSTANTS.SUBJECT;
-  private readonly scope = [amcScopes.ACCOUNT_DELETE];
-  private readonly iss = TEST_CONSTANTS.ISSUER;
-  private readonly aud = TEST_CONSTANTS.AUDIENCE;
-  private readonly clientId = TEST_CONSTANTS.CLIENT_ID;
-  private readonly jti = TEST_CONSTANTS.ACCESS_TOKEN_JTI;
+  private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
+  private scope: string[] | undefined = [amcScopes.ACCOUNT_DELETE];
+  private iss: string | undefined = TEST_CONSTANTS.ISSUER;
+  private aud: string | undefined = TEST_CONSTANTS.AUDIENCE;
+  private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
+  private jti: string | undefined = TEST_CONSTANTS.ACCESS_TOKEN_JTI;
   private readonly sid = TEST_CONSTANTS.SESSION_ID;
   private readonly expiresIn = 3600;
 
@@ -98,6 +98,42 @@ export class AccessTokenBuilder {
       accessTokenPayload,
       this.signingKey
     );
+  }
+
+  withScope(scope: string | string[] | undefined) {
+    if (!scope) {
+      this.scope = undefined;
+    } else if (Array.isArray(scope)) {
+      this.scope = scope;
+    } else {
+      this.scope = [scope];
+    }
+    return this;
+  }
+
+  withIssuer(issuer: string | undefined) {
+    this.iss = issuer;
+    return this;
+  }
+
+  withAudience(audience: string | undefined) {
+    this.aud = audience;
+    return this;
+  }
+
+  withSubject(sub: string | undefined) {
+    this.sub = sub;
+    return this;
+  }
+
+  withClientId(clientId: string | undefined) {
+    this.clientId = clientId;
+    return this;
+  }
+
+  withJti(jti: string | undefined) {
+    this.jti = jti;
+    return this;
   }
 }
 
