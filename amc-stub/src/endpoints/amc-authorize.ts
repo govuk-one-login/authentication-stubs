@@ -1,10 +1,15 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { logger } from "../../logger.js";
-import { CodedError, successfulJsonResult } from "../helpers/result-helper.js";
-import { HttpMethod } from "../types/enums.js";
+import { logger } from "../../logger.ts";
+import {
+  CodedError,
+  successfulHtmlResult,
+  successfulJsonResult,
+} from "../helpers/result-helper.ts";
+import { HttpMethod } from "../types/enums.ts";
 import { compactDecrypt, importPKCS8 } from "jose";
 import { processJoseError } from "../helpers/error-helper.ts";
 import { validateCompositeJWT } from "../helpers/jwt-validator.ts";
+import renderAmcAuthorize from "./render-amc-authorize.ts";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -51,9 +56,19 @@ async function get(event: APIGatewayProxyEvent) {
     throw new CodedError(500, "compactDecrypt returned undefined values");
   }
 
-  const encodedJwt = plaintext.toString();
+  const textDecoder = new TextDecoder();
+  const encodedJwt = textDecoder.decode(plaintext);
 
-  return successfulJsonResult(200, { message: "Great success" });
+  const parsedRequestOrError = await validateCompositeJWT(encodedJwt);
+
+  if (typeof parsedRequestOrError === "string") {
+    throw new CodedError(400, parsedRequestOrError);
+  }
+
+  return successfulHtmlResult(
+    200,
+    renderAmcAuthorize(protectedHeader.alg, parsedRequestOrError.payload)
+  );
 }
 
 function post(_event: APIGatewayProxyEvent) {
