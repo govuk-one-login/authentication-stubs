@@ -33,7 +33,7 @@ async function validateAccessToken(
     return "The access token payload issuer is invalid";
   }
 
-  if (verifiedJWT.payload.aud !== "https://manage.api.account.gov.uk") {
+  if (verifiedJWT.payload.aud !== "https://api.manage.account.gov.uk") {
     return "The access token payload audience is invalid";
   }
 
@@ -77,7 +77,7 @@ async function validateClientAssertionJWT(
     return "The client assertion JWT payload issuer is invalid";
   }
 
-  if (verifiedJWT.payload.aud !== "https://manage.api.account.gov.uk") {
+  if (verifiedJWT.payload.aud !== "https://manage.account.gov.uk") {
     return "The client assertion JWT payload audience is invalid";
   }
 

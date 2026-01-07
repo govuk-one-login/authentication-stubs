@@ -41,7 +41,7 @@ describe("jwt validator tests", () => {
     // Client Assertion JWT assertions
     expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
     expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
-    expect(payload.aud).to.equal(TEST_CONSTANTS.AUDIENCE);
+    expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
     expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
     expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
     expect(payload.scope).to.deep.equal([AMCScopes.ACCOUNT_DELETE]);
@@ -64,7 +64,7 @@ describe("jwt validator tests", () => {
       AMCScopes.ACCOUNT_DELETE,
     ]);
     expect(payload.access_token.iss).to.equal(TEST_CONSTANTS.ISSUER);
-    expect(payload.access_token.aud).to.equal(TEST_CONSTANTS.AUDIENCE);
+    expect(payload.access_token.aud).to.equal(TEST_CONSTANTS.AUTH_AUDIENCE);
     expect(payload.access_token.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
     expect(payload.access_token.sid).to.equal(TEST_CONSTANTS.SESSION_ID);
     expect(payload.access_token.jti).to.equal(TEST_CONSTANTS.ACCESS_TOKEN_JTI);

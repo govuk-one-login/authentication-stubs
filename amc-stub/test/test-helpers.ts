@@ -16,7 +16,8 @@ export const TEST_CONSTANTS = {
   SUBJECT: "urn:fdc:gov.uk:2022:7KWZkhSXFYrmMP_SRsZJU-0Z4AQ",
   CLIENT_ID: "auth",
   ISSUER: "https://signin.account.gov.uk/",
-  AUDIENCE: "https://manage.api.account.gov.uk",
+  AMC_AUDIENCE: "https://manage.account.gov.uk",
+  AUTH_AUDIENCE: "https://api.manage.account.gov.uk",
   REDIRECT_URI: 'https://signin.account.gov.uk/amc/callback/authorize"',
   RESPONSE_TYPE: "code",
   EMAIL: "user@example.gov.uk",
@@ -65,7 +66,7 @@ export class AccessTokenBuilder {
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
   private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
   private iss: string | undefined = TEST_CONSTANTS.ISSUER;
-  private aud: string | undefined = TEST_CONSTANTS.AUDIENCE;
+  private aud: string | undefined = TEST_CONSTANTS.AUTH_AUDIENCE;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
   private jti: string | undefined = TEST_CONSTANTS.ACCESS_TOKEN_JTI;
   private readonly sid = TEST_CONSTANTS.SESSION_ID;
@@ -151,7 +152,7 @@ const createSignedJwt = async (
 export class CompositeJWTBuilder {
   private iss: string | undefined = TEST_CONSTANTS.ISSUER;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
-  private aud: string | undefined = TEST_CONSTANTS.AUDIENCE;
+  private aud: string | undefined = TEST_CONSTANTS.AMC_AUDIENCE;
   private readonly responseType = TEST_CONSTANTS.RESPONSE_TYPE;
   private readonly redirectUri = TEST_CONSTANTS.REDIRECT_URI;
   private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
