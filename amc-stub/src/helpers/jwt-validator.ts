@@ -110,19 +110,7 @@ export async function validateCompositeJWT(
     return clientAssertionResultOrError;
   }
 
-  const {
-    payload: clientAssertionPayload,
-    protectedHeader: clientAssertionHeader,
-  } = clientAssertionResultOrError;
-
-  // TODO: need to change these to return error strings
-  if (clientAssertionHeader.typ !== "JWT") {
-    throw new Error("typ must be 'JWT'");
-  }
-
-  if (clientAssertionHeader.alg !== "ES256") {
-    throw new Error("alg must be ES256");
-  }
+  const { payload: clientAssertionPayload } = clientAssertionResultOrError;
 
   const accessTokenResultOrError = await validateAccessToken(
     clientAssertionPayload.access_token
@@ -132,12 +120,7 @@ export async function validateCompositeJWT(
     return accessTokenResultOrError;
   }
 
-  const { payload: accessTokenPayload, protectedHeader: accessTokenHeader } =
-    accessTokenResultOrError;
-
-  if (accessTokenHeader.typ !== "at+jwt") {
-    throw new Error("typ must be 'at+jwt'");
-  }
+  const { payload: accessTokenPayload } = accessTokenResultOrError;
 
   return {
     payload: {
