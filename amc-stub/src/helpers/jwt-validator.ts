@@ -6,6 +6,7 @@ import {
   CompositePayload,
 } from "../types/types.ts";
 import { AMCScopes } from "../types/enums.ts";
+import { logger } from "../../logger.ts";
 
 async function validateAccessToken(
   accessTokenJWT: string
@@ -26,26 +27,44 @@ async function validateAccessToken(
     !verifiedJWT.payload.scope?.length ||
     !verifiedJWT.payload.scope.every((scope) => validScopes.includes(scope))
   ) {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload contains invalid scopes";
   }
 
   if (verifiedJWT.payload.iss !== "https://signin.account.gov.uk/") {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload issuer is invalid";
   }
 
   if (verifiedJWT.payload.aud !== "https://api.manage.account.gov.uk") {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload audience is invalid";
   }
 
   if (verifiedJWT.payload.sub === undefined) {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload must contain an internal subject";
   }
 
   if (verifiedJWT.payload.client_id === undefined) {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload must contain a client ID";
   }
 
   if (verifiedJWT.payload.jti === undefined) {
+    logger.error("Access token validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The access token payload must contain a jti";
   }
 
@@ -70,30 +89,51 @@ async function validateClientAssertionJWT(
     verifiedJWT.payload.scope?.length !== 1 ||
     verifiedJWT.payload.scope[0] !== AMCScopes.ACCOUNT_DELETE
   ) {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'";
   }
 
   if (verifiedJWT.payload.iss !== "https://signin.account.gov.uk/") {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload issuer is invalid";
   }
 
   if (verifiedJWT.payload.aud !== "https://manage.account.gov.uk") {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload audience is invalid";
   }
 
   if (verifiedJWT.payload.sub === undefined) {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload must contain an internal subject";
   }
 
   if (verifiedJWT.payload.public_sub === undefined) {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload must contain a public subject";
   }
 
   if (verifiedJWT.payload.client_id !== "auth") {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT client ID must be 'auth'";
   }
 
   if (verifiedJWT.payload.jti === undefined) {
+    logger.error("Client assertion validation error", {
+      payload: verifiedJWT.payload,
+    });
     return "The client assertion JWT payload must contain a jti";
   }
 
