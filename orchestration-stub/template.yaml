@@ -17,7 +17,6 @@ Parameters:
       - build
       - staging
       - integration
-      - production
 
   SubEnvironment:
     Type: String
@@ -299,34 +298,6 @@ Mappings:
       hostedZoneId: "Z0653856BRBXRB77AUXG"
       rpClientId: "gjWNvoLYietMjeaOE6Zoww533u18ZUfr"
       rpSectorHost: "rp-integration.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 3
-      lambdaMemorySize: "1536"
-
-    production:
-      accessViaVPNOnly: "Yes"
-      cookieDomain: .account.gov.uk
-      stubDomain: orchstub.signin.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAppKCOhyLiKs5QTB1L+XK
-        Tgs9kosxma0PuagvNkP+UEPd0KumWc4sWlYUzR1D1aPX8AGDSQ1awOIb7PhlE5Ss
-        5LilounpT9Pi+FvHFlGKgQzRO63j9CRXzYxhgHGpruzAAKUQ+6D0cuOdao3YF0zz
-        RmaMSdHB4HsNhxV5DHY+2Rr7GeEfl6lQB8EHTAQzoagsIxihxNieUIGhHcegbCv6
-        X5aV67lUEbjjfvGu888GL8qJakOPNoIn/pMBB5LIKVxbyoCB9nfFZ5fPFxBpLdvy
-        p0qsf76XAFuA3nhupIqkXl8jOIDN3U79V1kAgyS8uoilhhblqAtCoJElEiDYQh1M
-        NQIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-033f6cf615050a93b"
-      subnetBId: "subnet-0038177d6fd032bc2"
-      subnetCId: "subnet-0aa20b375a90748ac"
-      endpointSgId: "sg-088824a661643698d"
-      vpcId: "vpc-06a7d758af9eefddb"
-      privateKey: "{{resolve:secretsmanager:production-orchestration-stub-private-key::::e4ad40c1-ac76-4506-8b2d-0e386c277fac}}"
-      authenticationBackendUrl: "https://9k68v07tz7-vpce-0db136878c87bf2d0.execute-api.eu-west-2.amazonaws.com/production/"
-      authenticationFrontendUrl: "https://apitest.signin.account.gov.uk/"
-      hostedZoneId: "Z09365913VV9SM5DYAJBZ"
-      rpClientId: "5Vfplamzln0AoarlnX5CX4UTqyh59xfA"
-      rpSectorHost: "rp.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 3
       lambdaMemorySize: "1536"
 
