@@ -16,7 +16,6 @@ Parameters:
       - dev
       - build
       - staging
-      - integration
 
   SubEnvironment:
     Type: String
@@ -273,34 +272,6 @@ Mappings:
       defaultProvisionedConcurrency: 3
       lambdaMemorySize: "1536"
 
-    integration:
-      accessViaVPNOnly: "Yes"
-      cookieDomain: .integration.account.gov.uk
-      stubDomain: orchstub.signin.integration.account.gov.uk
-      authPubKey: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAojSigrHTBqF/2xuSptZo
-        rifAahfOOD6BKOfRMZauLYLITU7+AASC+oIUU8vfJ6yMstuLbrpFHQ5lPgnbNQ4h
-        Hp91wzXl2w/4TPgx9sH6AIVEe0nzM7w808jzGK1xkqeDN24TSdTCS9uU340K+1lg
-        vHJ6RPURwpGKmwi/yQs4aEdBswK1qjdwtyz3KQF6a5sI3d4uCwtsLYfwD+yxIVnX
-        L5tIdMLWFTMX7PCN24cwWFMz8JJr5D/3Gujy3oEJgaBLVSkBEQcGcR9zTcF46e0x
-        qZM9NOP2fgb26CFV/vGQj21Jo+z4NK9+3doXwVESaw+8iTvlavUg1l91cJ1iHzde
-        UQIDAQAB
-        -----END PUBLIC KEY-----
-      subnetAId: "subnet-09e770fb9805bf8f3"
-      subnetBId: "subnet-0a36dbbd771a6b262"
-      subnetCId: "subnet-08c27975e04e98a72"
-      endpointSgId: "sg-0a2b2f093fc81a2ec"
-      vpcId: "vpc-04796e8a5bf41b046"
-      privateKey: "{{resolve:secretsmanager:integration-orchestration-stub-private-key::::f04a5553-cc9d-46d5-84bc-61191729bb05}}"
-      authenticationBackendUrl: "https://5wcpjlfg3i-vpce-0df10df14d851e1c9.execute-api.eu-west-2.amazonaws.com/integration/"
-      authenticationFrontendUrl: "https://apitest.signin.integration.account.gov.uk/"
-      hostedZoneId: "Z0653856BRBXRB77AUXG"
-      rpClientId: "gjWNvoLYietMjeaOE6Zoww533u18ZUfr"
-      rpSectorHost: "rp-integration.build.stubs.account.gov.uk"
-      defaultProvisionedConcurrency: 3
-      lambdaMemorySize: "1536"
-
 Resources:
   ApiGateway:
     Type: AWS::Serverless::Api
@@ -317,7 +288,9 @@ Resources:
         openapi: "3.0.1"
         info:
           title:
-            Fn::Sub: "${Environment}-orch-stub"
+            Fn::Sub:
+              - ${Env}-orch-stub
+              - Env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
           version: "1.0"
         paths:
           /orchestration-redirect:
