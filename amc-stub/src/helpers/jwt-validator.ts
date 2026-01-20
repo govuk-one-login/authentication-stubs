@@ -33,16 +33,37 @@ async function validateAccessToken(
     return "The access token payload contains invalid scopes";
   }
 
-  if (verifiedJWT.payload.iss !== "https://signin.account.gov.uk/") {
+  const environment = process.env.ENVIRONMENT || "local";
+  let expectedIssuer: string;
+  if (environment === "local") {
+    expectedIssuer = "https://signin.account.gov.uk/";
+  } else if (environment.startsWith("authdev")) {
+    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk/`;
+  } else {
+    expectedIssuer = `https://signin.${environment}.account.gov.uk/`;
+  }
+
+  if (verifiedJWT.payload.iss !== expectedIssuer) {
     logger.error("Access token validation error", {
       payload: verifiedJWT.payload,
+      expectedIssuer,
     });
     return "The access token payload issuer is invalid";
   }
 
-  if (verifiedJWT.payload.aud !== "https://api.manage.account.gov.uk") {
+  let expectedAudience: string;
+  if (environment === "local") {
+    expectedAudience = "https://manage.account.gov.uk";
+  } else if (environment.startsWith("authdev")) {
+    expectedAudience = `https://manage.${environment}.dev.account.gov.uk`;
+  } else {
+    expectedAudience = `https://manage.${environment}.account.gov.uk`;
+  }
+
+  if (verifiedJWT.payload.aud !== expectedAudience) {
     logger.error("Access token validation error", {
       payload: verifiedJWT.payload,
+      expectedAudience,
     });
     return "The access token payload audience is invalid";
   }
@@ -95,16 +116,37 @@ async function validateClientAssertionJWT(
     return "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'";
   }
 
-  if (verifiedJWT.payload.iss !== "https://signin.account.gov.uk/") {
+  const environment = process.env.ENVIRONMENT || "local";
+  let expectedIssuer: string;
+  if (environment === "local") {
+    expectedIssuer = "https://signin.account.gov.uk/";
+  } else if (environment.startsWith("authdev")) {
+    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk/`;
+  } else {
+    expectedIssuer = `https://signin.${environment}.account.gov.uk/`;
+  }
+
+  if (verifiedJWT.payload.iss !== expectedIssuer) {
     logger.error("Client assertion validation error", {
       payload: verifiedJWT.payload,
+      expectedIssuer,
     });
     return "The client assertion JWT payload issuer is invalid";
   }
 
-  if (verifiedJWT.payload.aud !== "https://manage.account.gov.uk") {
+  let expectedAudience: string;
+  if (environment === "local") {
+    expectedAudience = "https://api.manage.account.gov.uk";
+  } else if (environment.startsWith("authdev")) {
+    expectedAudience = `https://api.manage.${environment}.dev.account.gov.uk`;
+  } else {
+    expectedAudience = `https://api.manage.${environment}.account.gov.uk`;
+  }
+
+  if (verifiedJWT.payload.aud !== expectedAudience) {
     logger.error("Client assertion validation error", {
       payload: verifiedJWT.payload,
+      expectedAudience,
     });
     return "The client assertion JWT payload audience is invalid";
   }
@@ -123,11 +165,11 @@ async function validateClientAssertionJWT(
     return "The client assertion JWT payload must contain a public subject";
   }
 
-  if (verifiedJWT.payload.client_id !== "auth") {
+  if (verifiedJWT.payload.client_id !== "auth_amc") {
     logger.error("Client assertion validation error", {
       payload: verifiedJWT.payload,
     });
-    return "The client assertion JWT client ID must be 'auth'";
+    return "The client assertion JWT client ID must be 'auth_amc'";
   }
 
   if (verifiedJWT.payload.jti === undefined) {

@@ -70,7 +70,7 @@ const createRequestJWT = async () => {
   const requestPayload = {
     iss: "https://signin.account.gov.uk/",
     client_id: "auth",
-    aud: "https://manage.account.gov.uk",
+    aud: "https://api.manage.account.gov.uk",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
     scope: [AMCScopes.ACCOUNT_DELETE],

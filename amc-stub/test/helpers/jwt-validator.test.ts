@@ -14,6 +14,7 @@ import { expect } from "chai";
 
 describe("jwt validator tests", () => {
   beforeEach(() => {
+    process.env.ENVIRONMENT = "local";
     process.env.AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE =
       keys.authPublicSigningKeyAMCAudience;
     process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE =
@@ -22,6 +23,7 @@ describe("jwt validator tests", () => {
 
   afterEach(() => {
     sinon.restore();
+    delete process.env.ENVIRONMENT;
   });
 
   it("should validate the composite JWT", async () => {
@@ -265,7 +267,7 @@ describe("jwt validator tests", () => {
         .build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
-        "The client assertion JWT client ID must be 'auth'"
+        "The client assertion JWT client ID must be 'auth_amc'"
       );
     });
   });

@@ -143,7 +143,10 @@ Resources:
               4uWILIxYS+oErceaX8i0ZXDjz6l562Ig2z2nx7u0fAvZUbDz1+kyjQO1ofpSmJOz
               Dm3hJHTzvZdMgmWQ5J12oQ==
               -----END PRIVATE KEY-----
-            - !Sub '{{resolve:secretsmanager:amc-stub-keys:SecretString:AMC_PRIVATE_ENCRYPTION_KEY}}'
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-private-key}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-private-key}}'
           AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE: !If
             - IsLocalEnvironment
             - |
@@ -151,7 +154,10 @@ Resources:
               MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoghZfjgenZ1l0z4z8ShIJ+FxzgH2
               Y6wLyeUSbI3C5wQfPkoypnAaoBx/5dSH9zjE548rBG94z2gyRn8mrE7fqg==
               -----END PUBLIC KEY-----
-            - !Sub '{{resolve:secretsmanager:amc-stub-keys:SecretString:AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE}}'
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
           AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE: !If
             - IsLocalEnvironment
             - |
@@ -159,7 +165,10 @@ Resources:
               MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExaePS02o9rzy0+qyoDGDgKgEQ8DS
               Qbm8tgWxPnpIkj0pwXHuCm/ENPQRK4cM32T4crC9vArwIzys1lriZp47WA==
               -----END PUBLIC KEY-----
-            - !Sub '{{resolve:secretsmanager:amc-stub-keys:SecretString:AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE}}'
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-auth-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-auth-audience}}'
       Events:
         GetAuthorize:
           Type: Api
