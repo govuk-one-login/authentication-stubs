@@ -23,6 +23,7 @@ Parameters:
   Environment:
     Type: String
     AllowedValues:
+      - local
       - dev
       - build
 
@@ -76,6 +77,7 @@ Conditions:
   UseSubEnvironment: !And
     - !Equals [!Ref Environment, dev]
     - !Not [!Equals [!Ref SubEnvironment, none]]
+  IsLocalEnvironment: !Equals [!Ref Environment, local]
 
 Mappings:
   EnvironmentConfiguration:
@@ -110,6 +112,63 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+          AMC_PRIVATE_ENCRYPTION_KEY: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PRIVATE KEY-----
+              MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCRD7zPmvBh4d1V
+              m8c9CCx2CbvyI0VjmGq3Phic7umdWc110JUf7MJyrcYgehNC35yQS2teQKFgp8q+
+              fGNzu+cRWNv7D1L4hOoK4ksLr6GDPYKx3u1NmxSNmd47OUTOdMI2A0HtH8ViglJU
+              8PC3L9h50vvZm81+TUN7mEdJqNSK9q91Idv411GBtxsOT82GJROU+pWpWUm6nNGg
+              I1eUgdL4VY8oEQ2ITwkAZ5/sHd5gb+ArKTghhvJkOXO4k88LhWUtEggdK7pMxTNQ
+              tNWxwsOFqFW+KvEBWUZEpuMqEe4hwCDwdbJtdA5HKMhwQTuiBdvxpaFE+EIlXqGc
+              3dFco7iLAgMBAAECggEANRKOcGBOCWnTClK7stsuNSN7lWwNI5KsnI1GAQiyBSVJ
+              dAzTuoHrZHyqi9BOAr4AMJS/XBUGVfAdz9J/qmS5dhHOLg0dvJoYbNH9RfHEhFk5
+              W21l4epWuzXr5jweLfDu60cG1EQ2+cMXb0dVspf5Oh0UkrmbldWb1njQwCTaWlq4
+              slyH+wcqTu1UOKjX2lY0/2iPf4TIEhjedpFfDw884DQ/06HVbTFnTScYEUDeY1Tr
+              JZxEs+8+KK69opCzR0303JN70nYyLkzHdvt64kZIQ8sGFzGsbIIQuGxLjTufJnrM
+              sWEI4VbSShbyFxDfmMzaS6KoWWjZ8O0W+PrVwV6VNQKBgQDDPOjhbdv9tEeY+x9T
+              6Ihcjl2pVXDx59iXJyG5IVtAO2IKaVG+QR3/H2P7/F/l9bgMBzWN5pjDSajfo05R
+              YmWm2r9W4fT2KPHIU7T23hX0cg3B9QuyPqAVSl5ynxaG7pAM/UgzvlxTAFroRfcs
+              iq1UPcAL/xs1timxFXIygcg+5QKBgQC+NSUvkWb3THyPCro2+E33LkVX57UJC/er
+              AWnOUcWwOknrUTPw6Xk347YRDyB4zT/2PHCOsALsJVKUuG3H7XPEYVdm3Q5ek/7U
+              8NmbTKwKLS/4z7Ts8X4hfyH3a8nM79m9OKt1+n0+d5l04sWfrEJhW4mB8okDmLOM
+              zYEP5xgyrwKBgBbqMzsiNcvVOQIPl2G1zStv2jZhvNvnplg3U5HzBE7JqXwnWFzI
+              L8kd2hJdULQg3vUqc3KwOgXRw2xcMnkC34Nx8Ts1UhcCPz6P9JF1B4alTFATfsfw
+              6cEV9XfmjDJSFb4wjCTmltd3FzRj4drse+ODS+Mckgj/1GzgY4LiEKqxAoGAKiod
+              1C2nZarO8eau4QCqR+E5/gKfXyIIBSCLE/GMoURKnp+hpAYdmQYhliaETEMzqqI7
+              UWYzP6YGaHF55Jf+0cnCVksqpEyqcQnzMzoL6TWbLMzejqf6DfLg1LhQQ93npsqp
+              N74PhYl9uyuKI5tMG8ju8p+RP/rZ0py7v4q7EoECgYBSWlumCv72JfsN+4/qdK0j
+              5mn5N0rGiS8Zuw5IuZT0AnH4JYCYoiIe2TpgSLZJbYx+WzrASFp/EcIr7+DkxArZ
+              4uWILIxYS+oErceaX8i0ZXDjz6l562Ig2z2nx7u0fAvZUbDz1+kyjQO1ofpSmJOz
+              Dm3hJHTzvZdMgmWQ5J12oQ==
+              -----END PRIVATE KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-private-key}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-private-key}}'
+          AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoghZfjgenZ1l0z4z8ShIJ+FxzgH2
+              Y6wLyeUSbI3C5wQfPkoypnAaoBx/5dSH9zjE548rBG94z2gyRn8mrE7fqg==
+              -----END PUBLIC KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
+          AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExaePS02o9rzy0+qyoDGDgKgEQ8DS
+              Qbm8tgWxPnpIkj0pwXHuCm/ENPQRK4cM32T4crC9vArwIzys1lriZp47WA==
+              -----END PUBLIC KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-auth-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-auth-audience}}'
       Events:
         GetAuthorize:
           Type: Api

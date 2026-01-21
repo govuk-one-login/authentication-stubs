@@ -21,6 +21,18 @@ export class CodedError extends Error {
   }
 }
 
+export function successfulHtmlResult(
+  code: SuccessCode,
+  body: string,
+  headers?: Headers | undefined
+): APIGatewayProxyResult {
+  return {
+    statusCode: code,
+    headers: { ...headers, "Content-Type": "text/html" },
+    body: body,
+  };
+}
+
 export function successfulJsonResult(
   code: SuccessCode,
   body: JsonEntity,

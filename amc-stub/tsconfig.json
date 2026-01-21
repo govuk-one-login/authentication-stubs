@@ -10,8 +10,9 @@
     "sourceMap": true,
     "strict": true,
     "outDir": "dist",
-    "types": ["node", "mocha"]
+    "types": ["node", "mocha"],
+    "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "scripts/*", "test/**/*.ts"],
   "exclude": ["node_modules"]
 }

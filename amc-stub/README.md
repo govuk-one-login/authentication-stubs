@@ -19,27 +19,35 @@ Account Management API for the SSAD flow (Self-Serve Account Deletion).
 
 2. Build the application:
    ```bash
-   sam build
+   npm run build
    ```
 
 3. Start the local API:
    ```bash
-   sam local start-api -p 3001
+   npm run start:local
    ```
 
-4. Test the endpoints:
+The API will be available at `http://localhost:3000`.
+
+### Testing the Authorize GET Flow
+
+1. Generate an encrypted JWT:
    ```bash
-   # Test GET
-   curl http://localhost:3001/authorize
-   
-   # Test POST
-   curl -X POST http://localhost:3001/authorize
-   
-   # Test unsupported method (should return 405)
-   curl -X PUT http://localhost:3001/authorize
+   npx tsx scripts/encrypt-message-locally.ts
+   ```
+   This will output an encrypted JWT token.
+
+2. Test locally by opening in a browser:
+   ```
+   http://localhost:3000/authorize?request=<ENCRYPTED_JWT>
    ```
 
-The API will be available at `http://localhost:3001`.
+3. Test in AWS (dev environment):
+   ```
+   https://amcstub.signin.dev.account.gov.uk/authorize?request=<ENCRYPTED_JWT>
+   ```
+
+You should see an HTML page displaying the decrypted JAR header and payload.
 
 ### Running Tests
 
