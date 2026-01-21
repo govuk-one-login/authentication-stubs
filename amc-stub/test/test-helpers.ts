@@ -15,7 +15,7 @@ const textEncoder = new TextEncoder();
 export const TEST_CONSTANTS = {
   SUBJECT: "urn:fdc:gov.uk:2022:7KWZkhSXFYrmMP_SRsZJU-0Z4AQ",
   CLIENT_ID: "auth_amc",
-  ISSUER: "https://signin.account.gov.uk/",
+  ISSUER: "https://signin.account.gov.uk",
   AMC_AUDIENCE: "https://api.manage.account.gov.uk",
   AUTH_AUDIENCE: "https://manage.account.gov.uk",
   REDIRECT_URI: 'https://signin.account.gov.uk/amc/callback/authorize"',

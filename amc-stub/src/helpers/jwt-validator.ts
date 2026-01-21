@@ -35,11 +35,11 @@ async function validateAccessToken(
   const environment = process.env.ENVIRONMENT || "local";
   let expectedIssuer: string;
   if (environment === "local") {
-    expectedIssuer = "https://signin.account.gov.uk/";
+    expectedIssuer = "https://signin.account.gov.uk";
   } else if (environment.startsWith("authdev")) {
-    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk/`;
+    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk`;
   } else {
-    expectedIssuer = `https://signin.${environment}.account.gov.uk/`;
+    expectedIssuer = `https://signin.${environment}.account.gov.uk`;
   }
 
   if (verifiedJWT.payload.iss !== expectedIssuer) {
@@ -111,11 +111,11 @@ async function validateClientAssertionJWT(
   const environment = process.env.ENVIRONMENT || "local";
   let expectedIssuer: string;
   if (environment === "local") {
-    expectedIssuer = "https://signin.account.gov.uk/";
+    expectedIssuer = "https://signin.account.gov.uk";
   } else if (environment.startsWith("authdev")) {
-    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk/`;
+    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk`;
   } else {
-    expectedIssuer = `https://signin.${environment}.account.gov.uk/`;
+    expectedIssuer = `https://signin.${environment}.account.gov.uk`;
   }
 
   if (verifiedJWT.payload.iss !== expectedIssuer) {
