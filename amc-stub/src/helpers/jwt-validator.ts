@@ -27,10 +27,9 @@ async function validateAccessToken(
     !verifiedJWT.payload.scope?.length ||
     !verifiedJWT.payload.scope.every((scope) => validScopes.includes(scope))
   ) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The access token payload contains invalid scopes";
+    const error = "The access token payload contains invalid scopes";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   const environment = process.env.ENVIRONMENT || "local";
@@ -44,11 +43,9 @@ async function validateAccessToken(
   }
 
   if (verifiedJWT.payload.iss !== expectedIssuer) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-      expectedIssuer,
-    });
-    return "The access token payload issuer is invalid";
+    const error = "The access token payload issuer is invalid";
+    logger.error(error, { payload: verifiedJWT.payload, expectedIssuer });
+    return error;
   }
 
   let expectedAudience: string;
@@ -61,32 +58,27 @@ async function validateAccessToken(
   }
 
   if (verifiedJWT.payload.aud !== expectedAudience) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-      expectedAudience,
-    });
-    return "The access token payload audience is invalid";
+    const error = "The access token payload audience is invalid";
+    logger.error(error, { payload: verifiedJWT.payload, expectedAudience });
+    return error;
   }
 
   if (verifiedJWT.payload.sub === undefined) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The access token payload must contain an internal subject";
+    const error = "The access token payload must contain an internal subject";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   if (verifiedJWT.payload.client_id === undefined) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The access token payload must contain a client ID";
+    const error = "The access token payload must contain a client ID";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   if (verifiedJWT.payload.jti === undefined) {
-    logger.error("Access token validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The access token payload must contain a jti";
+    const error = "The access token payload must contain a jti";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   return verifiedJWT;
@@ -110,10 +102,10 @@ async function validateClientAssertionJWT(
     verifiedJWT.payload.scope?.length !== 1 ||
     verifiedJWT.payload.scope[0] !== AMCScopes.ACCOUNT_DELETE
   ) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'";
+    const error =
+      "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   const environment = process.env.ENVIRONMENT || "local";
@@ -127,11 +119,9 @@ async function validateClientAssertionJWT(
   }
 
   if (verifiedJWT.payload.iss !== expectedIssuer) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-      expectedIssuer,
-    });
-    return "The client assertion JWT payload issuer is invalid";
+    const error = "The client assertion JWT payload issuer is invalid";
+    logger.error(error, { payload: verifiedJWT.payload, expectedIssuer });
+    return error;
   }
 
   let expectedAudience: string;
@@ -144,39 +134,35 @@ async function validateClientAssertionJWT(
   }
 
   if (verifiedJWT.payload.aud !== expectedAudience) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-      expectedAudience,
-    });
-    return "The client assertion JWT payload audience is invalid";
+    const error = "The client assertion JWT payload audience is invalid";
+    logger.error(error, { payload: verifiedJWT.payload, expectedAudience });
+    return error;
   }
 
   if (verifiedJWT.payload.sub === undefined) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The client assertion JWT payload must contain an internal subject";
+    const error =
+      "The client assertion JWT payload must contain an internal subject";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   if (verifiedJWT.payload.public_sub === undefined) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The client assertion JWT payload must contain a public subject";
+    const error =
+      "The client assertion JWT payload must contain a public subject";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   if (verifiedJWT.payload.client_id !== "auth_amc") {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The client assertion JWT client ID must be 'auth_amc'";
+    const error = "The client assertion JWT client ID must be 'auth_amc'";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   if (verifiedJWT.payload.jti === undefined) {
-    logger.error("Client assertion validation error", {
-      payload: verifiedJWT.payload,
-    });
-    return "The client assertion JWT payload must contain a jti";
+    const error = "The client assertion JWT payload must contain a jti";
+    logger.error(error, { payload: verifiedJWT.payload });
+    return error;
   }
 
   return verifiedJWT;

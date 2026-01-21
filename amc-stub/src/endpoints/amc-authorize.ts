@@ -62,6 +62,7 @@ async function get(event: APIGatewayProxyEvent) {
   const parsedRequestOrError = await validateCompositeJWT(encodedJwt);
 
   if (typeof parsedRequestOrError === "string") {
+    logger.error("JWT validation failed", { error: parsedRequestOrError });
     throw new CodedError(400, parsedRequestOrError);
   }
 
