@@ -1,15 +1,15 @@
 import { JWTPayload } from "jose";
-import { amcScopes } from "./enums.ts";
+import { AMCScopes } from "./enums.ts";
 
 export interface AccessTokenPayload extends JWTPayload {
   client_id: string;
-  scope: amcScopes[];
+  scope: AMCScopes[];
   sid: string;
 }
 
 interface BasePayload extends JWTPayload {
   client_id: string;
-  scope: amcScopes[];
+  scope: AMCScopes[];
   response_type: string;
   redirect_uri: string;
   state: string;
@@ -25,3 +25,17 @@ export interface CompositePayload extends BasePayload {
 export interface ClientAssertionPayload extends BasePayload {
   access_token: string;
 }
+
+export interface AMCSuccess {
+  sub: string;
+  success: true;
+}
+
+export interface AMCFailure {
+  sub: string;
+  success: false;
+  failure_code: string;
+  failure_description: string;
+}
+
+export type AMCAuthorizationResult = AMCSuccess | AMCFailure;
