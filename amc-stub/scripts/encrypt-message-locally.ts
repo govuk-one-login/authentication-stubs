@@ -44,8 +44,8 @@ const createAccessToken = async (sub: string) => {
   const accessTokenPayload = {
     sub: sub,
     scope: [AMCScopes.ACCOUNT_DELETE],
-    iss: "https://signin.account.gov.uk/",
-    aud: "https://api.manage.account.gov.uk",
+    iss: "https://signin.account.gov.uk",
+    aud: "https://manage.account.gov.uk",
     exp: now + 3600,
     iat: now,
     client_id: "authentication",
@@ -68,8 +68,8 @@ const createRequestJWT = async () => {
   const sub = "urn:fdc:gov.uk:2022:fake_common_subject_identifier";
   const now = Math.floor(Date.now() / 1000);
   const requestPayload = {
-    iss: "https://signin.account.gov.uk/",
-    client_id: "auth",
+    iss: "https://signin.account.gov.uk",
+    client_id: "auth_amc",
     aud: "https://api.manage.account.gov.uk",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
@@ -104,4 +104,7 @@ const createRequestJWT = async () => {
 };
 
 const encryptedRequest = await createRequestJWT();
-console.log(`Encrypted request:\n------\n${encryptedRequest}`);
+const localUrl = `http://localhost:3000/authorize?request=${encryptedRequest}`;
+
+console.log(`Encrypted request:\n${encryptedRequest}\n`);
+console.log(`Local Authorization URL:\n${localUrl}\n`);
