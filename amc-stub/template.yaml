@@ -182,11 +182,17 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /authorize
             Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AMCAuthorizationResultTable
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
           - src/endpoints/amc-authorize.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
         Target: node22
@@ -269,6 +275,26 @@ Resources:
       DomainName: !Ref GatewayDomain
       RestApiId: !Ref ApiGateway
       Stage: Live
+
+  AMCAuthorizationResultTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub
+        - "${env}-AMCStub-Authorization"
+        - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      KeySchema:
+        - AttributeName: AuthorizationId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: AuthorizationId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Name
+          Value: Authorization
 
   DnsRecord:
     Type: AWS::Route53::RecordSet

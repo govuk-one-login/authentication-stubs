@@ -1,0 +1,17 @@
+services:
+  localstack:
+    container_name: amc-localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4567:4566"
+    environment:
+      - SERVICES=dynamodb
+      - LOCALSTACK_HOST=localhost
+      - DYNAMODB_SHARE_DB=1
+      - DEBUG=${DEBUG:-0}
+      - AWS_ACCESS_KEY_ID=na
+      - AWS_SECRET_ACCESS_KEY=na
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./provision.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"

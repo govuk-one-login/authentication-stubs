@@ -31,6 +31,30 @@ export default function renderAmcAuthorize(
     </dd>
   </div>
   </dl>
+  
+  <form action="/authorize" method="post">
+  <div class="govuk-form-group">
+  <fieldset class="govuk-fieldset">
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h2 class="govuk-fieldset__heading">
+            AMC Response 
+        </h2>
+    </legend>
+    <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+        <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="success" name="response" type="radio" value="success" checked>
+            <label class="govuk-label govuk-radios__label" for="success">
+                Success
+            </label>
+        </div>
+    </div>
+  </fieldset>
+  </div>
+  <button name="continue" value="continue" class="govuk-button">Continue</button>
+  <input type="hidden" name="state" value=${decodedPayload.state}>
+  <input type="hidden" name="sub" value=${decodedPayload.sub}>
+  <input type="hidden" name="redirect_uri" value=${decodedPayload.redirect_uri}>
+  </form>
   `
   );
 }
