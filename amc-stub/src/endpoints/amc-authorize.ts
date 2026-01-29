@@ -6,10 +6,13 @@ import {
   successfulJsonResult,
 } from "../helpers/result-helper.ts";
 import { HttpMethod } from "../types/enums.ts";
-import { compactDecrypt, importPKCS8 } from "jose";
+import { base64url, compactDecrypt, importPKCS8 } from "jose";
 import { processJoseError } from "../helpers/error-helper.ts";
 import { validateCompositeJWT } from "../helpers/jwt-validator.ts";
 import renderAmcAuthorize from "./render-amc-authorize.ts";
+import { randomBytes } from "crypto";
+import { AMCAuthorizationResult } from "../types/types.ts";
+import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -72,10 +75,67 @@ async function get(event: APIGatewayProxyEvent) {
   );
 }
 
-function post(_event: APIGatewayProxyEvent) {
-  return successfulJsonResult(200, {
-    message: "To be implemented as part of AUT-5006",
-  });
+async function post(event: APIGatewayProxyEvent) {
+  logger.info("AMC Authorize POST endpoint invoked!");
+
+  if (event.body == null) {
+    throw new CodedError(400, "Missing request body");
+  }
+
+  const parsedBody = event.body
+    ? Object.fromEntries(new URLSearchParams(event.body))
+    : {};
+
+  const redirectUri = parsedBody["redirect_uri"];
+  if (!redirectUri) {
+    throw new CodedError(500, "redirect_uri not found");
+  }
+
+  const state = parsedBody["state"];
+  if (!state) {
+    throw new CodedError(500, "state not found");
+  }
+
+  const authCode = base64url.encode(randomBytes(32));
+  const sub = parsedBody["sub"];
+  const response = parsedBody["response"];
+
+  const url = new URL(redirectUri);
+  url.searchParams.append("state", state);
+  url.searchParams.append("code", authCode);
+
+  const amcAuthorizationResult: AMCAuthorizationResult = {
+    sub,
+    ...(response === "success"
+      ? { success: true }
+      : {
+          success: false,
+          failure_code: response,
+          failure_description: `${response} error has occurred`,
+        }),
+  };
+
+  try {
+    await putAMCAuthorizationResultWithAuthCode(
+      authCode,
+      amcAuthorizationResult
+    );
+  } catch (error) {
+    throw new CodedError(
+      500,
+      `dynamoDb error on storing reverification with auth code: ${error}`
+    );
+  }
+
+  return successfulJsonResult(
+    302,
+    {
+      message: `Redirecting to ${url.toString()}`,
+    },
+    {
+      Location: url.toString(),
+    }
+  );
 }
 
 function methodNotAllowedError(method: string) {
