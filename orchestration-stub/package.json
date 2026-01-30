@@ -11,7 +11,6 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.34.0",
     "@types/aws-lambda": "8.10.152",
-    "@types/aws-sdk": "2.7.4",
     "@types/express": "^5.0.3",
     "@types/jest": "30.0.0",
     "@types/node": "20.17.6",
