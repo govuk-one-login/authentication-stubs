@@ -18,6 +18,9 @@ function error<T>(message: string): Result<T> {
   return { ok: false, error: { statusCode: 400, body: message } };
 }
 
+const REQUIRED_GRANT_TYPE = "authorization_code";
+const REQUIRED_CLIENT_ASSERTION_TYPE =
+  "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -35,18 +38,23 @@ function post(event: APIGatewayProxyEvent) {
     return { statusCode: 400, body: "Missing request body." };
   }
 
-  const parsedBody = parseBody(event.body)
+  const parsedBody = parseBody(event.body);
 
   if (!parsedBody.ok) return parsedBody.error;
-
-  //TODO: assert on values within the parsed body
 
   return successfulJsonResult(200, {
     message: "To be updated",
   });
 }
 
-type ValidatedParams = Record<"grant_type" | "code" | "redirect_uri" | "client_assertion_type" | "client_assertion", string>;
+type ValidatedParams = Record<
+  | "grant_type"
+  | "code"
+  | "redirect_uri"
+  | "client_assertion_type"
+  | "client_assertion",
+  string
+>;
 
 function parseBody(body: string): Result<Partial<ValidatedParams>> {
   const params = new URLSearchParams(body);
@@ -55,7 +63,7 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
     "code",
     "redirect_uri",
     "client_assertion_type",
-    "client_assertion"
+    "client_assertion",
   ];
   const missingParameters: string[] = [];
 
@@ -81,7 +89,30 @@ function parseBody(body: string): Result<Partial<ValidatedParams>> {
     return error(missingParametersErrorMessage);
   }
 
-  return ok(validParameters);
+  return validateParamValues(validParameters);
+}
+
+function validateParamValues(
+  params: Partial<ValidatedParams>
+): Result<Partial<ValidatedParams>> {
+  const invalidParamMessages = [];
+
+  if (!(params.grant_type === REQUIRED_GRANT_TYPE)) {
+    invalidParamMessages.push(`Invalid grant_type: ${params.grant_type}`);
+  }
+
+  if (!(params.client_assertion_type === REQUIRED_CLIENT_ASSERTION_TYPE)) {
+    invalidParamMessages.push(
+      `Invalid client assertion type: ${params.client_assertion_type}`
+    );
+  }
+
+  if (invalidParamMessages.length > 0) {
+    invalidParamMessages.forEach((invalidMsg) => logger.info(invalidMsg));
+    return error(invalidParamMessages.join(", "));
+  }
+
+  return ok(params);
 }
 
 export function shouldObfuscate(paramName: string): boolean {
