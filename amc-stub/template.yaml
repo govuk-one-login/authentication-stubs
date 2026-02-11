@@ -197,6 +197,39 @@ Resources:
         Sourcemap: true
         Target: node22
 
+  AMCStubTokenFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/amc-token.handler
+      LoggingConfig:
+        LogGroup: !Ref AMCStubTokenFunctionLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /token
+            Method: post
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/amc-token.ts
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
+  AMCStubTokenFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-amc-stub-token"
+        - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      RetentionInDays: 30
+
   AMCAuthorizeStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -248,6 +281,22 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCAuthorizeStubFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+          /token:
+            post:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCStubTokenFunction.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:

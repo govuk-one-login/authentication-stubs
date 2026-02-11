@@ -1,4 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
+import { logger } from "../../logger.ts";
 
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
@@ -43,4 +44,9 @@ export function successfulJsonResult(
     headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   };
+}
+
+export function methodNotAllowedError(method: string) {
+  logger.info(`${method} not allowed`);
+  return new CodedError(405, `Method ${method} not allowed`);
 }
