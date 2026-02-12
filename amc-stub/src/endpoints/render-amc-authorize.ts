@@ -51,9 +51,9 @@ export default function renderAmcAuthorize(
   </fieldset>
   </div>
   <button name="continue" value="continue" class="govuk-button">Continue</button>
-  <input type="hidden" name="state" value=${decodedPayload.state}>
-  <input type="hidden" name="sub" value=${decodedPayload.sub}>
-  <input type="hidden" name="redirect_uri" value=${decodedPayload.redirect_uri}>
+  <input type="hidden" name="state" value="${decodedPayload.state}">
+  <input type="hidden" name="sub" value="${decodedPayload.sub}">
+  <input type="hidden" name="redirect_uri" value="${decodedPayload.redirect_uri}">
   </form>
   `
   );
