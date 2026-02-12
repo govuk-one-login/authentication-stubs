@@ -430,6 +430,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/ipv-token.handler
+      Timeout: 30
       LoggingConfig:
         LogGroup: !Ref IPVStubTokenLambdaLogGroup
       Environment:
@@ -456,8 +457,9 @@ Resources:
         SecurityGroupIds:
           - !Ref LambdaSecurityGroup
         SubnetIds:
-          - Fn::ImportValue: "vpc-PrivateSubnetIdA"
-          - Fn::ImportValue: "vpc-PrivateSubnetIdB"
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Policies:
         - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
