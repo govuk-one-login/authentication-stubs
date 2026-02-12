@@ -5,6 +5,12 @@ import {
   successfulJsonResult,
 } from "../helpers/result-helper.ts";
 import { logger } from "../../logger.ts";
+import {
+  getAMCAuthorizationResult,
+  putAMCAuthorizationResultWithToken,
+} from "../../services/dynamodb-service.ts";
+import { randomBytes } from "crypto";
+import { base64url } from "jose";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -16,6 +22,12 @@ function ok<T>(value: T): Result<T> {
 
 function error<T>(message: string): Result<T> {
   return { ok: false, error: { statusCode: 400, body: message } };
+}
+function errorWithStatusCode<T>(
+  message: string,
+  statusCode: number
+): Result<T> {
+  return { ok: false, error: { statusCode: statusCode, body: message } };
 }
 
 const REQUIRED_GRANT_TYPE = "authorization_code";
@@ -33,7 +45,8 @@ export const handler = async (
   }
 };
 
-function post(event: APIGatewayProxyEvent) {
+async function post(event: APIGatewayProxyEvent) {
+  logger.info("Received POST request to token endpoint");
   if (!event.body) {
     return { statusCode: 400, body: "Missing request body." };
   }
@@ -42,9 +55,41 @@ function post(event: APIGatewayProxyEvent) {
 
   if (!parsedBody.ok) return parsedBody.error;
 
+  if (!parsedBody.value.code)
+    return { statusCode: 400, body: "request missing code" };
+
+  const tokenResult = await exchangeAuthCodeForToken(parsedBody.value.code);
+
+  if (!tokenResult.ok) return tokenResult.error;
+
   return successfulJsonResult(200, {
-    message: "To be updated",
+    access_token: tokenResult.value,
+    token_type: "Bearer",
+    expires_in: 3600,
   });
+}
+
+async function exchangeAuthCodeForToken(
+  authCode: string
+): Promise<Result<string>> {
+  const authorizationResult = await getAMCAuthorizationResult(authCode);
+  if (!authorizationResult) {
+    logger.info("Did not find authorization result record");
+    return error("Missing reverification record.");
+  }
+
+  const accessToken = base64url.encode(randomBytes(32));
+
+  const result = await putAMCAuthorizationResultWithToken(
+    accessToken,
+    authorizationResult
+  );
+
+  if (!result || result.$metadata.httpStatusCode != 200) {
+    return errorWithStatusCode("Failed to write access token record.", 500);
+  }
+
+  return ok(accessToken);
 }
 
 type ValidatedParams = Record<

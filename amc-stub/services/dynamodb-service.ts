@@ -14,6 +14,7 @@ const dynamo = DynamoDBDocument.from(client);
 
 const tableName = `${process.env.ENVIRONMENT}-AMCStub-Authorization`;
 const authCodePrefix = "authcode";
+const tokenPrefix = "token";
 
 export const putAMCAuthorizationResultWithAuthCode = async (
   authCode: string,
@@ -23,6 +24,34 @@ export const putAMCAuthorizationResultWithAuthCode = async (
     TableName: tableName,
     Item: {
       AuthorizationId: [authCodePrefix, authCode].join("-"),
+      authorization: amcAuthorizationResult,
+      ttl: oneHourFromNow(),
+    },
+  });
+};
+
+export const getAMCAuthorizationResult = async (
+  authCode: string
+): Promise<AMCAuthorizationResult | undefined> => {
+  const authorizationId = [authCodePrefix, authCode].join("-");
+  const res = await dynamo.get({
+    TableName: tableName,
+    Key: {
+      AuthorizationId: authorizationId,
+    },
+  });
+
+  return res.Item?.authorization;
+};
+
+export const putAMCAuthorizationResultWithToken = async (
+  token: string,
+  amcAuthorizationResult: AMCAuthorizationResult
+) => {
+  return await dynamo.put({
+    TableName: tableName,
+    Item: {
+      AuthorizationId: [tokenPrefix, token].join("-"),
       authorization: amcAuthorizationResult,
       ttl: oneHourFromNow(),
     },
