@@ -5,6 +5,8 @@ export default function renderAmcAuthorize(
   decodedHeader: string,
   decodedPayload: CompositePayload
 ) {
+  console.log('State value:', decodedPayload.state);
+  console.log('State type:', typeof decodedPayload.state);
   return renderPage(
     `<style>.json-formatter{font-family:monospace;white-space:pre-wrap;background:#f8f8f8;padding:10px;border:1px solid #ddd}</style>
   <h1 class="govuk-heading-l">AMC stub</h1>

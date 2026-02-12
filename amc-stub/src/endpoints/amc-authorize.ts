@@ -68,6 +68,11 @@ async function get(event: APIGatewayProxyEvent) {
     throw new CodedError(400, parsedRequestOrError);
   }
 
+  logger.info("Decoded payload state type:", { 
+    stateType: typeof parsedRequestOrError.payload.state,
+    stateValue: parsedRequestOrError.payload.state 
+  });
+
   return successfulHtmlResult(
     200,
     renderAmcAuthorize(protectedHeader.alg, parsedRequestOrError.payload)
