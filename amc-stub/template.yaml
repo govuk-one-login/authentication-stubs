@@ -213,6 +213,9 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /token
             Method: post
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AMCAuthorizationResultTable
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
