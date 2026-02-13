@@ -141,15 +141,13 @@ async function post(event: APIGatewayProxyEvent) {
   }
 
   logger.info("Returning redirect response", { location: url.toString() });
-  return successfulJsonResult(
-    302,
-    {
-      message: `Redirecting to ${url.toString()}`,
-    },
-    {
+  return {
+    statusCode: 303,
+    headers: {
       Location: url.toString(),
-    }
-  );
+    },
+    body: "",
+  };
 }
 
 function methodNotAllowedError(method: string) {
