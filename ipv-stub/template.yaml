@@ -430,6 +430,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/ipv-token.handler
+      Timeout: 30
       LoggingConfig:
         LogGroup: !Ref IPVStubTokenLambdaLogGroup
       Environment:
@@ -496,6 +497,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/ipv-reverification.handler
+      Timeout: 30
       LoggingConfig:
         LogGroup: !Ref IPVStubReverificationLambdaLogGroup
       Environment:
@@ -537,6 +539,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/endpoints/jwks.handler
+      Timeout: 30
       LoggingConfig:
         LogGroup: !Ref IPVStubJwksLambdaLogGroup
       Environment:
