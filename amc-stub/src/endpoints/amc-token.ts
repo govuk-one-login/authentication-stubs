@@ -10,7 +10,8 @@ import {
   putAMCAuthorizationResultWithToken,
 } from "../../services/dynamodb-service.ts";
 import { randomBytes } from "crypto";
-import { base64url } from "jose";
+import { base64url, jwtVerify } from "jose";
+import { getPublicSigningKey } from "../helpers/jwks-helper.ts";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -23,6 +24,7 @@ function ok<T>(value: T): Result<T> {
 function error<T>(message: string): Result<T> {
   return { ok: false, error: { statusCode: 400, body: message } };
 }
+
 function errorWithStatusCode<T>(
   message: string,
   statusCode: number
@@ -33,6 +35,18 @@ function errorWithStatusCode<T>(
 const REQUIRED_GRANT_TYPE = "authorization_code";
 const REQUIRED_CLIENT_ASSERTION_TYPE =
   "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+
+const environment = process.env.ENVIRONMENT || "local";
+let expectedAudience: string;
+if (environment === "local") {
+  expectedAudience = "https://api.manage.account.gov.uk/token";
+} else if (environment.startsWith("authdev")) {
+  expectedAudience = `https://api.manage.${environment}.dev.account.gov.uk/token`;
+} else {
+  expectedAudience = `https://api.manage.${environment}.account.gov.uk/token`;
+}
+
+const MAX_TOKEN_AGE_SECONDS = 300; // 5 minutes
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -55,10 +69,18 @@ async function post(event: APIGatewayProxyEvent) {
 
   if (!parsedBody.ok) return parsedBody.error;
 
-  if (!parsedBody.value.code)
-    return { statusCode: 400, body: "request missing code" };
+  const params = parsedBody.value;
 
-  const tokenResult = await exchangeAuthCodeForToken(parsedBody.value.code);
+  const validationResult = await validateClientAssertion(
+    params.client_assertion!
+  );
+
+  if (!validationResult.ok) return validationResult.error;
+
+  const clientId = validationResult.value;
+  logger.info(`Authenticated client: ${clientId}`);
+
+  const tokenResult = await exchangeAuthCodeForToken(params.code!);
 
   if (!tokenResult.ok) return tokenResult.error;
 
@@ -67,6 +89,49 @@ async function post(event: APIGatewayProxyEvent) {
     token_type: "Bearer",
     expires_in: 3600,
   });
+}
+
+async function validateClientAssertion(
+  clientAssertion: string
+): Promise<Result<string>> {
+  const publicSigningKeyAMCAudience = await getPublicSigningKey(
+    clientAssertion,
+    undefined,
+    process.env.AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE
+  );
+
+  try {
+    const { payload } = await jwtVerify(
+      clientAssertion,
+      publicSigningKeyAMCAudience,
+      {
+        audience: expectedAudience,
+        algorithms: ["ES256"],
+        clockTolerance: 30,
+      }
+    );
+
+    if (!payload.sub) return error("JWT missing required claim: sub");
+    if (!payload.iss) return error("JWT missing required claim: iss");
+    if (!payload.jti) return error("JWT missing required claim: jti");
+    if (!payload.iat) return error("JWT missing required claim: iat");
+    if (!payload.exp) return error("JWT missing required claim: exp");
+
+    if (payload.sub !== payload.iss) {
+      return error("JWT subject does not match issuer");
+    }
+
+    if (payload.exp - payload.iat > MAX_TOKEN_AGE_SECONDS) {
+      return error("JWT expiration is too far in the future");
+    }
+
+    return ok(payload.sub);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Unknown JWT validation error";
+    logger.info(`Client assertion validation failed: ${message}`);
+    return error(`Client assertion validation failed: ${message}`);
+  }
 }
 
 async function exchangeAuthCodeForToken(
@@ -142,11 +207,11 @@ function validateParamValues(
 ): Result<Partial<ValidatedParams>> {
   const invalidParamMessages = [];
 
-  if (!(params.grant_type === REQUIRED_GRANT_TYPE)) {
+  if (params.grant_type !== REQUIRED_GRANT_TYPE) {
     invalidParamMessages.push(`Invalid grant_type: ${params.grant_type}`);
   }
 
-  if (!(params.client_assertion_type === REQUIRED_CLIENT_ASSERTION_TYPE)) {
+  if (params.client_assertion_type !== REQUIRED_CLIENT_ASSERTION_TYPE) {
     invalidParamMessages.push(
       `Invalid client assertion type: ${params.client_assertion_type}`
     );
