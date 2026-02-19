@@ -72,23 +72,29 @@ async function post(event: APIGatewayProxyEvent) {
 async function exchangeAuthCodeForToken(
   authCode: string
 ): Promise<Result<string>> {
+  logger.info(`Looking up auth code: ${authCode}`);
   const authorizationResult = await getAMCAuthorizationResult(authCode);
   if (!authorizationResult) {
     logger.info("Did not find authorization result record");
     return error("Missing reverification record.");
   }
+  logger.info(`Found authorization result: ${JSON.stringify(authorizationResult)}`);
 
   const accessToken = base64url.encode(randomBytes(32));
+  logger.info(`Generated access token: ${accessToken.slice(0, 8)}...`);
 
   const result = await putAMCAuthorizationResultWithToken(
     accessToken,
     authorizationResult
   );
+  logger.info(`DynamoDB put result: ${JSON.stringify(result.$metadata)}`);
 
   if (!result || result.$metadata.httpStatusCode != 200) {
+    logger.info(`Failed to write token record. Status: ${result?.$metadata?.httpStatusCode}`);
     return errorWithStatusCode("Failed to write access token record.", 500);
   }
 
+  logger.info(`Successfully stored token record with key: token-${accessToken.slice(0, 8)}...`);
   return ok(accessToken);
 }
 
