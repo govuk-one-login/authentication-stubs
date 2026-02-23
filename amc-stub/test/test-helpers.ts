@@ -1,6 +1,7 @@
 import {
   APIGatewayProxyEvent,
   APIGatewayEventRequestContext,
+  APIGatewayProxyEventHeaders,
 } from "aws-lambda";
 import { AMCScopes, HttpMethod, JoseAlgorithms } from "../src/types/enums.ts";
 import {
@@ -33,13 +34,14 @@ export const createTestEvent = (
   httpMethod: HttpMethod,
   path: string = "/test",
   body: string | null = null,
-  queryStringParameters: Record<string, string> | null = null
+  queryStringParameters: Record<string, string> | null = null,
+  headers: APIGatewayProxyEventHeaders = {}
 ): APIGatewayProxyEvent => ({
   httpMethod,
   path,
   body,
   queryStringParameters,
-  headers: {},
+  headers,
   multiValueHeaders: {},
   pathParameters: null,
   multiValueQueryStringParameters: null,
