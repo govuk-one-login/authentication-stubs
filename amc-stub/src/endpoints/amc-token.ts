@@ -60,7 +60,7 @@ export const handler = async (
 };
 
 async function post(event: APIGatewayProxyEvent) {
-  logger.info("Received POST request to token endpoint");
+  logger.info("Received POST request to amc token endpoint");
   if (!event.body) {
     return { statusCode: 400, body: "Missing request body." };
   }

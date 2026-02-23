@@ -28,7 +28,7 @@ export const handler = async (
 };
 
 async function get(event: APIGatewayProxyEvent) {
-  logger.info("IPV Authorize GET endpoint invoked!");
+  logger.info("AMC Authorize GET endpoint invoked!");
 
   if (event.queryStringParameters == null) {
     throw new CodedError(400, "Query string parameters are null");
