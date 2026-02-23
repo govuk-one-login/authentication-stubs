@@ -12,12 +12,28 @@ describe("AMC Journey Outcome Stub Test", () => {
     sinon.restore();
   });
 
+  const SUCCESSFUL_AUTHORIZATION_RESULT = {
+    outcome_id: "9cd4c45f8f33cced99cfaa48394e1acf5e90f6e2616bba40",
+    sub: "urn:fdc:gov.uk:2022:JG0RJI1pYbnanbvPs-j4j5-a-PFcmhry9Qu9NCEp5d4",
+    email: "user@example.com",
+    scope: "account-delete",
+    success: true,
+    journeys: [
+      {
+        journey: "account-delete",
+        timestamp: 1760718467000,
+        success: true,
+        details: {},
+      },
+    ],
+  };
+
   describe("GET handler", () => {
     it("should return 200 with HTML for valid GET request", async () => {
       const headers: APIGatewayProxyEventHeaders = {
         Authorization: "Bearer 123456",
       };
-      stubDynamoGet("123456", { sub: "test-subject-id", success: true });
+      stubDynamoGet("123456", SUCCESSFUL_AUTHORIZATION_RESULT);
       const event = createTestEvent(
         HttpMethod.GET,
         "/journeyoutcome",
@@ -30,6 +46,9 @@ describe("AMC Journey Outcome Stub Test", () => {
 
       expect(result.statusCode).to.eq(200);
       expect(result.headers?.["Content-Type"]).to.eq("application/json");
+      expect(JSON.parse(result.body)).to.deep.eq(
+        SUCCESSFUL_AUTHORIZATION_RESULT
+      );
     });
 
     it("should return 401 for an access token which is not in the database", async () => {

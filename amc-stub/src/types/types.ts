@@ -26,16 +26,25 @@ export interface ClientAssertionPayload extends BasePayload {
   access_token: string;
 }
 
-export interface AMCSuccess {
+export interface AMCAuthorizationResult {
   sub: string;
-  success: true;
+  outcome_id: string;
+  email: string;
+  scope: string;
+  success: boolean;
+  journeys: AMCJourney[];
 }
 
-export interface AMCFailure {
-  sub: string;
-  success: false;
-  failure_code: string;
-  failure_description: string;
+export interface AMCJourney {
+  journey: string;
+  timestamp: number;
+  success: boolean;
+  details: AMCJourneyErrorDetails | object;
 }
 
-export type AMCAuthorizationResult = AMCSuccess | AMCFailure;
+export interface AMCJourneyErrorDetails {
+  error: {
+    code: number;
+    description: string;
+  };
+}
