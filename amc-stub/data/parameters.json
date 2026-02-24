@@ -6,7 +6,8 @@
     "AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExaePS02o9rzy0+qyoDGDgKgEQ8DS\nQbm8tgWxPnpIkj0pwXHuCm/ENPQRK4cM32T4crC9vArwIzys1lriZp47WA==\n-----END PUBLIC KEY-----\n"
   },
   "AMCStubTokenFunction": {
-    "ENVIRONMENT": "local"
+    "ENVIRONMENT": "local",
+    "AUTH_TO_AMC_PUBLIC_SIGNING_KEY": "\"-----BEGIN PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoghZfjgenZ1l0z4z8ShIJ+FxzgH2\\nY6wLyeUSbI3C5wQfPkoypnAaoBx/5dSH9zjE548rBG94z2gyRn8mrE7fqg==\\n-----END PUBLIC KEY-----\\n\","
   },
   "AMCStubJourneyOutcomeFunction": {
     "ENVIRONMENT": "local"

@@ -206,6 +206,17 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+          AUTH_TO_AMC_PUBLIC_SIGNING_KEY: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoghZfjgenZ1l0z4z8ShIJ+FxzgH2
+              Y6wLyeUSbI3C5wQfPkoypnAaoBx/5dSH9zjE548rBG94z2gyRn8mrE7fqg==
+              -----END PUBLIC KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
       Events:
         Post:
           Type: Api
