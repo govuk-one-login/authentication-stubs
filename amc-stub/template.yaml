@@ -206,6 +206,17 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+          AUTH_TO_AMC_PUBLIC_SIGNING_KEY: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoghZfjgenZ1l0z4z8ShIJ+FxzgH2
+              Y6wLyeUSbI3C5wQfPkoypnAaoBx/5dSH9zjE548rBG94z2gyRn8mrE7fqg==
+              -----END PUBLIC KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
       Events:
         Post:
           Type: Api
@@ -225,11 +236,47 @@ Resources:
         Sourcemap: true
         Target: node20
 
+  AMCStubJourneyOutcomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/amc-journey-outcome.handler
+      LoggingConfig:
+        LogGroup: !Ref AMCStubJourneyOutcomeFunctionLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      Events:
+        GetJourneyOutcome:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /journeyoutcome
+            Method: GET
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AMCAuthorizationResultTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/amc-journey-outcome.ts
+        Minify: true
+        Sourcemap: true
+        Target: node20
+
   AMCStubTokenFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub
         - "/aws/lambda/${env}-amc-stub-token"
+        - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
+      RetentionInDays: 30
+
+  AMCStubJourneyOutcomeFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-amc-stub-journey-outcome"
         - env: !If [ UseSubEnvironment, !Ref SubEnvironment, !Ref Environment ]
       RetentionInDays: 30
 
@@ -300,6 +347,22 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCStubTokenFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+          /journeyoutcome:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json
+                  schema:
+                    type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCStubJourneyOutcomeFunction.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
         x-amazon-apigateway-policy:

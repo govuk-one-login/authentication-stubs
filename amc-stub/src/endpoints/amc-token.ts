@@ -60,7 +60,7 @@ export const handler = async (
 };
 
 async function post(event: APIGatewayProxyEvent) {
-  logger.info("Received POST request to token endpoint");
+  logger.info("Received POST request to amc token endpoint");
   if (!event.body) {
     return { statusCode: 400, body: "Missing request body." };
   }
@@ -72,7 +72,8 @@ async function post(event: APIGatewayProxyEvent) {
   const params = parsedBody.value;
 
   const validationResult = await validateClientAssertion(
-    params.client_assertion!
+    params.client_assertion!,
+    process.env.AUTH_TO_AMC_PUBLIC_SIGNING_KEY
   );
 
   if (!validationResult.ok) return validationResult.error;
@@ -92,12 +93,13 @@ async function post(event: APIGatewayProxyEvent) {
 }
 
 async function validateClientAssertion(
-  clientAssertion: string
+  clientAssertion: string,
+  signingKeyBackup?: string
 ): Promise<Result<string>> {
   const publicSigningKeyAMCAudience = await getPublicSigningKey(
     clientAssertion,
     undefined,
-    process.env.AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE
+    signingKeyBackup
   );
 
   try {

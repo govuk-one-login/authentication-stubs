@@ -58,6 +58,20 @@ export const putAMCAuthorizationResultWithToken = async (
   });
 };
 
+export const getAMCAuthorizationResultWithAccessToken = async (
+  accessToken: string
+): Promise<AMCAuthorizationResult | undefined> => {
+  const authorizationId = [tokenPrefix, accessToken].join("-");
+  const res = await dynamo.get({
+    TableName: tableName,
+    Key: {
+      AuthorizationId: authorizationId,
+    },
+  });
+
+  return res.Item?.authorization;
+};
+
 function oneHourFromNow() {
   return Math.floor(Date.now() / 1000) + 3600;
 }

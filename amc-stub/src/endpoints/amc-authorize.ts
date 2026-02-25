@@ -11,7 +11,7 @@ import { processJoseError } from "../helpers/error-helper.ts";
 import { validateCompositeJWT } from "../helpers/jwt-validator.ts";
 import renderAmcAuthorize from "./render-amc-authorize.ts";
 import { randomBytes } from "crypto";
-import { AMCAuthorizationResult } from "../types/types.ts";
+import { AMCAuthorizationResult, AMCJourney } from "../types/types.ts";
 import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
 
 export const handler = async (
@@ -28,7 +28,7 @@ export const handler = async (
 };
 
 async function get(event: APIGatewayProxyEvent) {
-  logger.info("IPV Authorize GET endpoint invoked!");
+  logger.info("AMC Authorize GET endpoint invoked!");
 
   if (event.queryStringParameters == null) {
     throw new CodedError(400, "Query string parameters are null");
@@ -104,16 +104,10 @@ async function post(event: APIGatewayProxyEvent) {
   url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
-  const amcAuthorizationResult: AMCAuthorizationResult = {
+  const amcAuthorizationResult: AMCAuthorizationResult = hardcodedAMCOutcome(
     sub,
-    ...(response === "success"
-      ? { success: true }
-      : {
-          success: false,
-          failure_code: response,
-          failure_description: `${response} error has occurred`,
-        }),
-  };
+    response === "success"
+  );
 
   try {
     await putAMCAuthorizationResultWithAuthCode(
@@ -142,4 +136,34 @@ function methodNotAllowedError(method: string) {
   const sanitizedMethod = method?.replaceAll(/[\r\n\t]/g, "_") || "unknown";
   logger.info(`${sanitizedMethod} not allowed`);
   return new CodedError(405, `Method ${sanitizedMethod} not allowed`);
+}
+
+function hardcodedAMCOutcome(
+  sub: string,
+  success: boolean
+): AMCAuthorizationResult {
+  const randomOutcomeId = base64url.encode(randomBytes(32));
+  const hardcodedEmail = "test@example.com";
+  const hardcodedScope = "account-delete";
+  const hardcodedFailure = {
+    error: {
+      code: 1001,
+      description: "UserSignedOut",
+    },
+  };
+  const details = success ? {} : hardcodedFailure;
+  const harcodedJourney: AMCJourney = {
+    journey: "account-delete",
+    timestamp: Date.now(),
+    success: success,
+    details: details,
+  };
+  return {
+    sub: sub,
+    outcome_id: randomOutcomeId,
+    email: hardcodedEmail,
+    scope: hardcodedScope,
+    success: success,
+    journeys: [harcodedJourney],
+  };
 }

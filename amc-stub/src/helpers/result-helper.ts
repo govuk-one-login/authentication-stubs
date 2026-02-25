@@ -50,3 +50,13 @@ export function methodNotAllowedError(method: string) {
   logger.info(`${method} not allowed`);
   return new CodedError(405, `Method ${method} not allowed`);
 }
+
+export function invalidAccessTokenResult(): APIGatewayProxyResult {
+  return {
+    statusCode: 401,
+    body: "",
+    headers: {
+      "WWW-Authenticate": `Bearer realm="amc-stub", error="invalid_token"`,
+    },
+  };
+}
