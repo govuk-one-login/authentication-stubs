@@ -5,8 +5,8 @@
   "name": "auth-ipv-stub",
   "version": "1.0.0",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.985.0",
-    "@aws-sdk/lib-dynamodb": "^3.985.0",
+    "@aws-sdk/client-dynamodb": "^3.999.0",
+    "@aws-sdk/lib-dynamodb": "^3.999.0",
     "esbuild": "0.25.2",
     "jose": "5.10.0",
     "jsonwebtoken": "^9.0.2",
