@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
+Description: Notify Stub
+
+Globals:
+  Function:
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    Timeout: 30
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - local
+      - dev
+
+  SubEnvironment:
+    Type: String
+    Description: >
+      When deploying to dev, optionally configure which sub-environment to deploy to
+      i.e. authdev1, authdev2. This feature is not available for route-to-live environments
+    Default: none
+    AllowedValues:
+      - none
+      - authdev1
+      - authdev2
+      - authdev3
+
+  CodeSigningConfigArn:
+    Type: String
+    Default: none
+
+  PermissionsBoundary:
+    Type: String
+    Default: none
+
+Conditions:
+  UseCodeSigning: !Not [!Equals [none, !Ref CodeSigningConfigArn]]
+  UsePermissionsBoundary: !Not [!Equals [none, !Ref PermissionsBoundary]]
+  UseSubEnvironment: !And
+    - !Equals [!Ref Environment, dev]
+    - !Not [!Equals [!Ref SubEnvironment, none]]
+  IsLocalEnvironment: !Equals [!Ref Environment, local]
+
+Mappings:
+  EnvironmentConfiguration:
+    local:
+      notifyBaseUrl: http://localhost:3000
+    dev:
+      notifyBaseUrl: https://notifystub.signin.dev.account.gov.uk
+    authdev1:
+      notifyBaseUrl: https://notifystub.signin.authdev1.dev.account.gov.uk
+    authdev2:
+      notifyBaseUrl: https://notifystub.signin.authdev2.dev.account.gov.uk
+    authdev3:
+      notifyBaseUrl: https://notifystub.signin.authdev3.dev.account.gov.uk
+
+Resources:
+  NotifyStubApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      Name: !Sub notify-stub-${Environment}
+
+  SendEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - /aws/lambda/${env}-notify-stub-send-email
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
+  SendEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: dist/src/endpoints/send-email.handler
+      LoggingConfig:
+        LogGroup: !Ref SendEmailFunctionLogGroup
+      Environment:
+        Variables:
+          NOTIFICATIONS_TABLE_NAME: !Ref NotificationsTable
+          NOTIFY_BASE_URL: !If
+            - UseSubEnvironment
+            - !FindInMap [EnvironmentConfiguration, !Ref SubEnvironment, notifyBaseUrl]
+            - !FindInMap [EnvironmentConfiguration, !Ref Environment, notifyBaseUrl]
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotificationsTable
+      Events:
+        SendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NotifyStubApi
+            Path: /v2/notifications/email
+            Method: POST
+
+  SendSmsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - /aws/lambda/${env}-notify-stub-send-sms
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
+  SendSmsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: dist/src/endpoints/send-sms.handler
+      LoggingConfig:
+        LogGroup: !Ref SendSmsFunctionLogGroup
+      Environment:
+        Variables:
+          NOTIFICATIONS_TABLE_NAME: !Ref NotificationsTable
+          NOTIFY_BASE_URL: !If
+            - UseSubEnvironment
+            - !FindInMap [EnvironmentConfiguration, !Ref SubEnvironment, notifyBaseUrl]
+            - !FindInMap [EnvironmentConfiguration, !Ref Environment, notifyBaseUrl]
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotificationsTable
+      Events:
+        SendSms:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NotifyStubApi
+            Path: /v2/notifications/sms
+            Method: POST
+
+  NotificationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub
+        - ${env}-NotifyStub-Notifications
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      KeySchema:
+        - AttributeName: Destination
+          KeyType: HASH
+        - AttributeName: NotificationID
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: Destination
+          AttributeType: S
+        - AttributeName: NotificationID
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Name
+          Value: NotifyStub-Notifications
+
+Outputs:
+  NotifyStubApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${NotifyStubApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/

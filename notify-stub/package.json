@@ -1,0 +1,20 @@
+{
+  "name": "notify-stub",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start:local": "sam local start-api --parameter-overrides 'Environment=local' --warm-containers EAGER",
+    "test-unit": "NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.705.0",
+    "@aws-sdk/lib-dynamodb": "3.705.0",
+    "pino": "10.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.145",
+    "@types/node": "22.10.2",
+    "typescript": "5.7.2"
+  }
+}
