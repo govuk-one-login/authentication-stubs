@@ -2,7 +2,7 @@ import { getPublicSigningKey } from "./jwks-helper.ts";
 import { jwtVerify, JWTVerifyResult } from "jose";
 import {
   AccessTokenPayload,
-  ClientAssertionPayload,
+  AuthorizationRequestPayload,
   CompositePayload,
 } from "../types/types.ts";
 import { AMCScopes } from "../types/enums.ts";
@@ -85,23 +85,23 @@ async function validateAccessToken(
   return verifiedJWT;
 }
 
-async function validateClientAssertionJWT(
-  clientAssertionJWT: string
-): Promise<JWTVerifyResult<ClientAssertionPayload> | string> {
+async function validateAuthorizationRequestJWT(
+  authorizationRequestJWT: string
+): Promise<JWTVerifyResult<AuthorizationRequestPayload> | string> {
   const publicSigningKeyAMCAudience = await getPublicSigningKey(
-    clientAssertionJWT,
+    authorizationRequestJWT,
     undefined,
     process.env.AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE
   );
 
-  const verifiedJWT = await jwtVerify<ClientAssertionPayload>(
-    clientAssertionJWT,
+  const verifiedJWT = await jwtVerify<AuthorizationRequestPayload>(
+    authorizationRequestJWT,
     publicSigningKeyAMCAudience
   );
 
   const validScopes = Object.values(AMCScopes);
   if (!validScopes.includes(verifiedJWT.payload.scope as AMCScopes)) {
-    const error = `The client assertion JWT payload scope should be one of ${validScopes.join(", ")}`;
+    const error = `The authorization request JWT payload scope should be one of ${validScopes.join(", ")}`;
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }
@@ -117,7 +117,7 @@ async function validateClientAssertionJWT(
   }
 
   if (verifiedJWT.payload.iss !== expectedIssuer) {
-    const error = "The client assertion JWT payload issuer is invalid";
+    const error = "The authorization request JWT payload issuer is invalid";
     logger.error(error, { payload: verifiedJWT.payload, expectedIssuer });
     return error;
   }
@@ -132,33 +132,33 @@ async function validateClientAssertionJWT(
   }
 
   if (verifiedJWT.payload.aud !== expectedAudience) {
-    const error = "The client assertion JWT payload audience is invalid";
+    const error = "The authorization request JWT payload audience is invalid";
     logger.error(error, { payload: verifiedJWT.payload, expectedAudience });
     return error;
   }
 
   if (verifiedJWT.payload.sub === undefined) {
     const error =
-      "The client assertion JWT payload must contain an internal subject";
+      "The authorization request JWT payload must contain an internal subject";
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }
 
   if (verifiedJWT.payload.public_sub === undefined) {
     const error =
-      "The client assertion JWT payload must contain a public subject";
+      "The authorization request JWT payload must contain a public subject";
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }
 
   if (verifiedJWT.payload.client_id !== "auth_amc") {
-    const error = "The client assertion JWT client ID must be 'auth_amc'";
+    const error = "The authorization request JWT client ID must be 'auth_amc'";
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }
 
   if (verifiedJWT.payload.jti === undefined) {
-    const error = "The client assertion JWT payload must contain a jti";
+    const error = "The authorization request JWT payload must contain a jti";
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }
@@ -169,17 +169,18 @@ async function validateClientAssertionJWT(
 export async function validateCompositeJWT(
   compositeJWT: string
 ): Promise<{ payload: CompositePayload } | string> {
-  const clientAssertionResultOrError =
-    await validateClientAssertionJWT(compositeJWT);
+  const authorizationRequestResultOrError =
+    await validateAuthorizationRequestJWT(compositeJWT);
 
-  if (typeof clientAssertionResultOrError === "string") {
-    return clientAssertionResultOrError;
+  if (typeof authorizationRequestResultOrError === "string") {
+    return authorizationRequestResultOrError;
   }
 
-  const { payload: clientAssertionPayload } = clientAssertionResultOrError;
+  const { payload: authorizationRequestPayload } =
+    authorizationRequestResultOrError;
 
   const accessTokenResultOrError = await validateAccessToken(
-    clientAssertionPayload.access_token
+    authorizationRequestPayload.access_token
   );
 
   if (typeof accessTokenResultOrError === "string") {
@@ -190,7 +191,7 @@ export async function validateCompositeJWT(
 
   return {
     payload: {
-      ...clientAssertionPayload,
+      ...authorizationRequestPayload,
       access_token: accessTokenPayload,
     } as CompositePayload,
   };

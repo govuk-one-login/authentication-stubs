@@ -22,7 +22,7 @@ export interface CompositePayload extends BasePayload {
   access_token: AccessTokenPayload;
 }
 
-export interface ClientAssertionPayload extends BasePayload {
+export interface AuthorizationRequestPayload extends BasePayload {
   access_token: string;
 }
 

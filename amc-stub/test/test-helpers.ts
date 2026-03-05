@@ -23,7 +23,7 @@ export const TEST_CONSTANTS = {
   RESPONSE_TYPE: "code",
   EMAIL: "user@example.gov.uk",
   STATE: "state_xyz789abc123def456ghi789jkl012",
-  CLIENT_ASSERTION_JTI: "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
+  AUTHORIZATION_REQUEST_JTI: "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
   ACCESS_TOKEN_JTI: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   SESSION_ID: "sess_abc123def456ghi789jkl012mno345pqr",
   JOURNEY_ID: "journey_abc123def456ghi789jkl012mno345",
@@ -153,7 +153,7 @@ export class CompositeJWTBuilder {
   private readonly redirectUri = TEST_CONSTANTS.REDIRECT_URI;
   private scope: string | undefined = AMCScopes.ACCOUNT_DELETE;
   private readonly state = TEST_CONSTANTS.STATE;
-  private jti: string | undefined = TEST_CONSTANTS.CLIENT_ASSERTION_JTI;
+  private jti: string | undefined = TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI;
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
   private readonly email = TEST_CONSTANTS.EMAIL;
   private readonly journeyId = TEST_CONSTANTS.JOURNEY_ID;
