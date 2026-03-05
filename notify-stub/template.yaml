@@ -133,6 +133,12 @@ Resources:
       Handler: list-notifications.handler
       LoggingConfig:
         LogGroup: !Ref ListNotificationsFunctionLogGroup
+      Environment:
+        Variables:
+          NOTIFICATIONS_TABLE_NAME: !Ref NotificationsTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref NotificationsTable
       Events:
         ListNotifications:
           Type: Api
