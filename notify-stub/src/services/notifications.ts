@@ -1,5 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  ScanCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "node:crypto";
 import {
   getTableName,
@@ -64,4 +68,19 @@ export const createNotification = async (
   );
 
   return record;
+};
+
+export const getNotifications = async (): Promise<NotificationRecord[]> => {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: getTableName(),
+    }),
+  );
+  const now = Math.floor(Date.now() / 1000);
+  return ((result.Items || []) as NotificationRecord[])
+    .filter((n) => n.ttl > now)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
 };
