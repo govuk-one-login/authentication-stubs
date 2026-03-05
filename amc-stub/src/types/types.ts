@@ -1,15 +1,14 @@
 import { JWTPayload } from "jose";
-import { AMCScopes } from "./enums.ts";
 
 export interface AccessTokenPayload extends JWTPayload {
   client_id: string;
-  scope: AMCScopes[];
+  scope: string;
   sid: string;
 }
 
 interface BasePayload extends JWTPayload {
   client_id: string;
-  scope: AMCScopes[];
+  scope: string;
   response_type: string;
   redirect_uri: string;
   state: string;

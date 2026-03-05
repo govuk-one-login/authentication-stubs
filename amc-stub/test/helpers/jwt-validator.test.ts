@@ -46,7 +46,7 @@ describe("jwt validator tests", () => {
     expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
     expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
     expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
-    expect(payload.scope).to.deep.equal([AMCScopes.ACCOUNT_DELETE]);
+    expect(payload.scope).to.equal(AMCScopes.ACCOUNT_DELETE);
     expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
     expect(payload.jti).to.equal(TEST_CONSTANTS.CLIENT_ASSERTION_JTI);
     expect(payload.iat).to.be.closeTo(now, 10);
@@ -62,9 +62,7 @@ describe("jwt validator tests", () => {
     expect(payload.access_token.iat).to.be.closeTo(now, 10);
     expect(payload.access_token.nbf).to.be.closeTo(now, 10);
     expect(payload.access_token.exp).to.equal(payload.iat! + 3600);
-    expect(payload.access_token.scope).to.deep.equal([
-      AMCScopes.ACCOUNT_DELETE,
-    ]);
+    expect(payload.access_token.scope).to.equal(AMCScopes.ACCOUNT_DELETE);
     expect(payload.access_token.iss).to.equal(TEST_CONSTANTS.ISSUER);
     expect(payload.access_token.aud).to.equal(TEST_CONSTANTS.AUTH_AUDIENCE);
     expect(payload.access_token.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
@@ -79,8 +77,8 @@ describe("jwt validator tests", () => {
   [
     "INVALID_SCOPE",
     undefined,
-    [],
-    [AMCScopes.ACCOUNT_DELETE, "EXTRA_SCOPE"],
+    "",
+    `${AMCScopes.ACCOUNT_DELETE} EXTRA_SCOPE`,
   ].forEach((scope) => {
     it(`should return an error string if the access token scope is ${scope}`, async () => {
       const JWT = await new CompositeJWTBuilder(
@@ -172,8 +170,8 @@ describe("jwt validator tests", () => {
   [
     "INVALID_SCOPE",
     undefined,
-    [],
-    [AMCScopes.ACCOUNT_DELETE, "EXTRA_SCOPE"],
+    "",
+    `${AMCScopes.ACCOUNT_DELETE} EXTRA_SCOPE`,
   ].forEach((scope) => {
     it(`should return an error string when the client assertion payload ${scope} is invalid`, async () => {
       const JWT = await new CompositeJWTBuilder(
