@@ -1,5 +1,8 @@
 import { renderPage } from "../helpers/template.ts";
-import { CompositePayload, ScopeToResultsMap } from "../types/types.ts";
+import {
+  VerifiedAuthorizationRequestPayload,
+  ScopeToResultsMap,
+} from "../types/types.ts";
 import { AMCScopes } from "../types/enums.js";
 
 const scopeToResultsMap: ScopeToResultsMap = {
@@ -9,7 +12,7 @@ const scopeToResultsMap: ScopeToResultsMap = {
 
 export default function renderAmcAuthorize(
   decodedHeader: string,
-  decodedPayload: CompositePayload,
+  decodedPayload: VerifiedAuthorizationRequestPayload,
   scope: AMCScopes
 ) {
   return renderPage(

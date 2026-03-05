@@ -3,7 +3,7 @@ import { jwtVerify, JWTVerifyResult } from "jose";
 import {
   AccessTokenPayload,
   AuthorizationRequestPayload,
-  CompositePayload,
+  VerifiedAuthorizationRequestPayload,
 } from "../types/types.ts";
 import { AMCScopes } from "../types/enums.ts";
 import { logger } from "../../logger.ts";
@@ -85,7 +85,7 @@ async function validateAccessToken(
   return verifiedJWT;
 }
 
-async function validateAuthorizationRequestJWT(
+async function validateAuthorizationRequest(
   authorizationRequestJWT: string
 ): Promise<JWTVerifyResult<AuthorizationRequestPayload> | string> {
   const publicSigningKeyAMCAudience = await getPublicSigningKey(
@@ -168,9 +168,9 @@ async function validateAuthorizationRequestJWT(
 
 export async function validateCompositeJWT(
   compositeJWT: string
-): Promise<{ payload: CompositePayload } | string> {
+): Promise<{ payload: VerifiedAuthorizationRequestPayload } | string> {
   const authorizationRequestResultOrError =
-    await validateAuthorizationRequestJWT(compositeJWT);
+    await validateAuthorizationRequest(compositeJWT);
 
   if (typeof authorizationRequestResultOrError === "string") {
     return authorizationRequestResultOrError;
@@ -179,9 +179,21 @@ export async function validateCompositeJWT(
   const { payload: authorizationRequestPayload } =
     authorizationRequestResultOrError;
 
-  const accessTokenResultOrError = await validateAccessToken(
-    authorizationRequestPayload.access_token
-  );
+  const { account_management_api_access_token, account_data_api_access_token } =
+    authorizationRequestPayload;
+
+  if (account_management_api_access_token && account_data_api_access_token) {
+    return "The authorization request JWT payload must contain only one access token";
+  }
+
+  const accessToken =
+    account_management_api_access_token ?? account_data_api_access_token;
+
+  if (!accessToken) {
+    return "The authorization request JWT payload must contain an access token";
+  }
+
+  const accessTokenResultOrError = await validateAccessToken(accessToken);
 
   if (typeof accessTokenResultOrError === "string") {
     return accessTokenResultOrError;
@@ -193,6 +205,6 @@ export async function validateCompositeJWT(
     payload: {
       ...authorizationRequestPayload,
       access_token: accessTokenPayload,
-    } as CompositePayload,
+    } as VerifiedAuthorizationRequestPayload,
   };
 }

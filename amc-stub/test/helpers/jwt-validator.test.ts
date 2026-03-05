@@ -9,7 +9,7 @@ import {
 } from "../test-helpers.ts";
 import { validateCompositeJWT } from "../../src/helpers/jwt-validator.ts";
 import { AMCScopes } from "../../src/types/enums.ts";
-import { CompositePayload } from "../../src/types/types.ts";
+import { VerifiedAuthorizationRequestPayload } from "../../src/types/types.ts";
 import { expect } from "chai";
 
 describe("jwt validator tests", () => {
@@ -39,7 +39,9 @@ describe("jwt validator tests", () => {
 
       const result = await validateCompositeJWT(JWT);
       expect(result).to.not.be.a("string");
-      const { payload } = result as { payload: CompositePayload };
+      const { payload } = result as {
+        payload: VerifiedAuthorizationRequestPayload;
+      };
 
       const now = Math.floor(Date.now() / 1000);
 
@@ -168,6 +170,35 @@ describe("jwt validator tests", () => {
 
     expect(await validateCompositeJWT(JWT)).to.equal(
       "The access token payload must contain a jti"
+    );
+  });
+
+  it("should return an error string if no access token is present", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      ""
+    )
+      .withAccountManagementApiAccessToken(undefined)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The authorization request JWT payload must contain an access token"
+    );
+  });
+
+  it("should return an error string if both access token fields are present", async () => {
+    const accessToken = await new AccessTokenBuilder(
+      keys.authPrivateSigningKeyAuthAudience
+    ).build();
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      accessToken
+    )
+      .withAccountDataApiAccessToken(accessToken)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The authorization request JWT payload must contain only one access token"
     );
   });
 

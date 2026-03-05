@@ -18,12 +18,13 @@ interface BasePayload extends JWTPayload {
   public_sub: string;
 }
 
-export interface CompositePayload extends BasePayload {
+export interface VerifiedAuthorizationRequestPayload extends BasePayload {
   access_token: AccessTokenPayload;
 }
 
 export interface AuthorizationRequestPayload extends BasePayload {
-  access_token: string;
+  account_management_api_access_token?: string;
+  account_data_api_access_token?: string;
 }
 
 export interface AMCAuthorizationResult {

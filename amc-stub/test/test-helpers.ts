@@ -159,10 +159,11 @@ export class CompositeJWTBuilder {
   private readonly journeyId = TEST_CONSTANTS.JOURNEY_ID;
   private publicSub: string | undefined = TEST_CONSTANTS.PUBLIC_SUBJECT;
   private readonly expiresIn = 300;
+  private accountDataApiAccessToken: string | undefined = undefined;
 
   constructor(
     private readonly signingKey: string,
-    private readonly accessToken: string
+    private accountManagementApiAccessToken: string | undefined
   ) {}
 
   async build() {
@@ -181,7 +182,8 @@ export class CompositeJWTBuilder {
       iat: now,
       nbf: now,
       exp: now + this.expiresIn,
-      access_token: this.accessToken,
+      account_management_api_access_token: this.accountManagementApiAccessToken,
+      account_data_api_access_token: this.accountDataApiAccessToken,
       sub: this.sub,
       email: this.email,
       govuk_signin_journey_id: this.journeyId,
@@ -208,6 +210,16 @@ export class CompositeJWTBuilder {
 
   withSubject(sub: string | undefined) {
     this.sub = sub;
+    return this;
+  }
+
+  withAccountManagementApiAccessToken(token: string | undefined) {
+    this.accountManagementApiAccessToken = token;
+    return this;
+  }
+
+  withAccountDataApiAccessToken(token: string) {
+    this.accountDataApiAccessToken = token;
     return this;
   }
 
