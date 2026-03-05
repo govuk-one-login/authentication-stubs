@@ -10,6 +10,8 @@
     "pretty-check": "prettier --check '**/*.ts'"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.985.0",
+    "@aws-sdk/lib-dynamodb": "3.985.0",
     "pino": "10.0.0"
   },
   "devDependencies": {
