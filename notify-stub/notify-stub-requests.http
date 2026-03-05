@@ -1,0 +1,12 @@
+### Send SMS Notification
+POST http://localhost:3000/v2/notifications/sms
+Content-Type: application/json
+
+{
+  "phone_number": "+440000000000",
+  "template_id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+  "personalisation": {
+    "otp": "654321"
+  },
+  "reference": "test-sms-001"
+}
