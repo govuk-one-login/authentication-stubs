@@ -14,7 +14,6 @@ interface BasePayload extends JWTPayload {
   redirect_uri: string;
   state: string;
   email: string;
-  govuk_signin_journey_id: string;
   public_sub: string;
 }
 
