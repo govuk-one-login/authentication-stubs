@@ -70,6 +70,22 @@ Resources:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListNotificationsFunction.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
+          /v2/notifications/email:
+            post:
+              responses:
+                "201":
+                  description: Created
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendEmailFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
           /v2/notifications/sms:
             post:
               responses:
@@ -124,6 +140,45 @@ Resources:
             RestApiId: !Ref NotifyStubApi
             Path: /
             Method: GET
+
+  SendEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - /aws/lambda/${env}-notify-stub-send-email
+        - env: !Ref Environment
+      RetentionInDays: 30
+
+  SendEmailFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - src/endpoints/send-email.ts
+    Properties:
+      CodeUri: ./
+      Handler: send-email.handler
+      LoggingConfig:
+        LogGroup: !Ref SendEmailFunctionLogGroup
+      Environment:
+        Variables:
+          NOTIFICATIONS_TABLE_NAME: !Ref NotificationsTable
+          NOTIFY_DOMAIN: !FindInMap [EnvironmentConfiguration, !Ref Environment, notifyStubDomainName]
+          NOTIFY_PROTOCOL: !FindInMap [EnvironmentConfiguration, !Ref Environment, protocol]
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotificationsTable
+      Events:
+        SendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NotifyStubApi
+            Path: /v2/notifications/email
+            Method: POST
 
   SendSmsFunctionLogGroup:
     Type: AWS::Logs::LogGroup

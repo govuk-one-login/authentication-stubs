@@ -1,3 +1,16 @@
+### Send Email Notification
+POST http://localhost:3000/v2/notifications/email
+Content-Type: application/json
+
+{
+  "email_address": "test@example.com",
+  "template_id": "f33517ff-2a88-4f6e-b855-c550268ce08a",
+  "personalisation": {
+    "otp": "123456"
+  },
+  "reference": "test-email-001"
+}
+
 ### Send SMS Notification
 POST http://localhost:3000/v2/notifications/sms
 Content-Type: application/json

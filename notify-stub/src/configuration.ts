@@ -24,6 +24,10 @@ export const getDynamoDbEndpoint = (): string | undefined => {
   return isLocalEnvironment() ? "http://host.docker.internal:4566" : undefined;
 };
 
+export const getFromEmail = (): string => {
+  return process.env.FROM_EMAIL || "notifystub@signin.dev.account.gov.uk";
+};
+
 export const getFromNumber = (): string => {
   return process.env.FROM_NUMBER || "NotifyStub";
 };
