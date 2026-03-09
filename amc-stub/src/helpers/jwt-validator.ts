@@ -124,11 +124,11 @@ async function validateAuthorizationRequest(
 
   let expectedAudience: string;
   if (environment === "local") {
-    expectedAudience = "https://api.manage.account.gov.uk";
+    expectedAudience = "https://manage.account.gov.uk/authorize";
   } else if (environment.startsWith("authdev")) {
-    expectedAudience = `https://api.manage.${environment}.dev.account.gov.uk`;
+    expectedAudience = `https://manage.${environment}.dev.account.gov.uk/authorize`;
   } else {
-    expectedAudience = `https://api.manage.${environment}.account.gov.uk`;
+    expectedAudience = `https://manage.${environment}.account.gov.uk/authorize`;
   }
 
   if (verifiedJWT.payload.aud !== expectedAudience) {

@@ -77,7 +77,7 @@ const createRequestJWT = async (scope: string) => {
   const requestPayload = {
     iss: "https://signin.account.gov.uk",
     client_id: "auth_amc",
-    aud: "https://api.manage.account.gov.uk",
+    aud: "https://manage.account.gov.uk/authorize",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
     scope: scope,

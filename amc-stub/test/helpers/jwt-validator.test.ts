@@ -45,21 +45,21 @@ describe("jwt validator tests", () => {
 
       const now = Math.floor(Date.now() / 1000);
 
-    // Authorization Request JWT assertions
-    expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
-    expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
-    expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
-    expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
-    expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
-    expect(payload.scope).to.equal(scope);
-    expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
-    expect(payload.jti).to.equal(TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI);
-    expect(payload.iat).to.be.closeTo(now, 10);
-    expect(payload.nbf).to.be.closeTo(now, 10);
-    expect(payload.exp).to.equal(payload.iat! + 300);
-    expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
-    expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
-    expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
+      // Authorization Request JWT assertions
+      expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
+      expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
+      expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
+      expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
+      expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
+      expect(payload.scope).to.equal(scope);
+      expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
+      expect(payload.jti).to.equal(TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI);
+      expect(payload.iat).to.be.closeTo(now, 10);
+      expect(payload.nbf).to.be.closeTo(now, 10);
+      expect(payload.exp).to.equal(payload.iat! + 300);
+      expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
+      expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
+      expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
 
       // Access Token JWT assertions
       expect(payload.access_token.sub).to.equal(TEST_CONSTANTS.SUBJECT);
