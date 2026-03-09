@@ -62,16 +62,36 @@ describe("jwt validator tests", () => {
       expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
 
       // Access Token JWT assertions
-      expect(payload.access_token.sub).to.equal(TEST_CONSTANTS.SUBJECT);
-      expect(payload.access_token.iat).to.be.closeTo(now, 10);
-      expect(payload.access_token.nbf).to.be.closeTo(now, 10);
-      expect(payload.access_token.exp).to.equal(payload.iat! + 3600);
-      expect(payload.access_token.scope).to.equal(scope);
-      expect(payload.access_token.iss).to.equal(TEST_CONSTANTS.ISSUER);
-      expect(payload.access_token.aud).to.equal(TEST_CONSTANTS.AUTH_AUDIENCE);
-      expect(payload.access_token.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
-      expect(payload.access_token.sid).to.equal(TEST_CONSTANTS.SESSION_ID);
-      expect(payload.access_token.jti).to.equal(
+      expect(payload.account_management_api_access_token!.sub).to.equal(
+        TEST_CONSTANTS.SUBJECT
+      );
+      expect(payload.account_management_api_access_token!.iat).to.be.closeTo(
+        now,
+        10
+      );
+      expect(payload.account_management_api_access_token!.nbf).to.be.closeTo(
+        now,
+        10
+      );
+      expect(payload.account_management_api_access_token!.exp).to.equal(
+        payload.iat! + 3600
+      );
+      expect(payload.account_management_api_access_token!.scope).to.equal(
+        scope
+      );
+      expect(payload.account_management_api_access_token!.iss).to.equal(
+        TEST_CONSTANTS.ISSUER
+      );
+      expect(payload.account_management_api_access_token!.aud).to.equal(
+        TEST_CONSTANTS.AUTH_AUDIENCE
+      );
+      expect(payload.account_management_api_access_token!.client_id).to.equal(
+        TEST_CONSTANTS.CLIENT_ID
+      );
+      expect(payload.account_management_api_access_token!.sid).to.equal(
+        TEST_CONSTANTS.SESSION_ID
+      );
+      expect(payload.account_management_api_access_token!.jti).to.equal(
         TEST_CONSTANTS.ACCESS_TOKEN_JTI
       );
     });

@@ -201,10 +201,14 @@ export async function validateCompositeJWT(
 
   const { payload: accessTokenPayload } = accessTokenResultOrError;
 
+  const accessTokenFieldName = account_management_api_access_token
+    ? "account_management_api_access_token"
+    : "account_data_api_access_token";
+
   return {
     payload: {
       ...authorizationRequestPayload,
-      access_token: accessTokenPayload,
+      [accessTokenFieldName]: accessTokenPayload,
     } as VerifiedAuthorizationRequestPayload,
   };
 }
