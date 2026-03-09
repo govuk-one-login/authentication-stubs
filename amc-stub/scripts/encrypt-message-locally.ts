@@ -35,7 +35,7 @@ const createSignedJwt = async (
     .sign(privateKey);
 };
 
-const createAccessToken = async (sub: string) => {
+const createAccessToken = async (sub: string, scope: string) => {
   const protectedHeader = {
     alg: JoseAlgorithms.ES256,
     typ: "at+jwt",
@@ -43,7 +43,7 @@ const createAccessToken = async (sub: string) => {
   const now = Math.floor(Date.now() / 1000);
   const accessTokenPayload = {
     sub: sub,
-    scope: [AMCScopes.ACCOUNT_DELETE],
+    scope: scope,
     iss: "https://signin.account.gov.uk",
     aud: "https://manage.account.gov.uk",
     exp: now + 3600,
@@ -60,7 +60,14 @@ const createAccessToken = async (sub: string) => {
   );
 };
 
-const createRequestJWT = async () => {
+const createRequestJWT = async (scope: string) => {
+  if (!scope || !Object.values(AMCScopes).includes(scope as AMCScopes)) {
+    console.log(
+      `You need to pass a valid scope. Valid scopes include [${Object.values(AMCScopes).join(", ")}]`
+    );
+    return;
+  }
+
   const publicKey = await importSPKI(
     amcPublicEncryptionKey,
     JoseAlgorithms.RSA_OAEP_256
@@ -73,13 +80,13 @@ const createRequestJWT = async () => {
     aud: "https://api.manage.account.gov.uk",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
-    scope: [AMCScopes.ACCOUNT_DELETE],
+    scope: scope,
     state: "S8NJ7uqk5fY4EjNvP_G_FtyJu6pUsvH9jsYni9dMAJw",
     jti: "dfccf751-be55-4df4-aa3f-a993193d5216",
     iat: now,
     exp: now + 3600,
     nbf: now,
-    access_token: await createAccessToken(sub),
+    access_token: await createAccessToken(sub, scope),
     sub: sub,
     public_sub: "550e8400-e29b-41d4-a716-446655440000",
     email: "test@digital.cabinet-office.gov.uk",
@@ -102,8 +109,8 @@ const createRequestJWT = async () => {
     })
     .encrypt(publicKey);
 };
-
-const encryptedRequest = await createRequestJWT();
+const scope = process.argv[2];
+const encryptedRequest = await createRequestJWT(scope);
 const localUrl = `http://localhost:3000/authorize?request=${encryptedRequest}`;
 
 console.log(`Encrypted request:\n${encryptedRequest}\n`);
