@@ -19,4 +19,5 @@ export enum JoseAlgorithms {
 
 export enum AMCScopes {
   ACCOUNT_DELETE = "account-delete",
+  PASSKEY_CREATE = "passkey-create",
 }

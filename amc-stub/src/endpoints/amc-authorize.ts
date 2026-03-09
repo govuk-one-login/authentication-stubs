@@ -5,13 +5,18 @@ import {
   successfulHtmlResult,
   successfulJsonResult,
 } from "../helpers/result-helper.ts";
-import { HttpMethod } from "../types/enums.ts";
+import { AMCScopes, HttpMethod } from "../types/enums.ts";
 import { base64url, compactDecrypt, importPKCS8 } from "jose";
 import { processJoseError } from "../helpers/error-helper.ts";
 import { validateCompositeJWT } from "../helpers/jwt-validator.ts";
 import renderAmcAuthorize from "./render-amc-authorize.ts";
 import { randomBytes } from "crypto";
-import { AMCAuthorizationResult, AMCJourney } from "../types/types.ts";
+import {
+  AMCAuthorizationResult,
+  AMCAuthorizeResponse,
+  AMCJourney,
+  ParsedBody,
+} from "../types/types.ts";
 import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
 
 export const handler = async (
@@ -69,9 +74,11 @@ async function get(event: APIGatewayProxyEvent) {
     throw new CodedError(400, parsedRequestOrError);
   }
 
+  const scope = parsedRequestOrError.payload.scope as AMCScopes;
+
   return successfulHtmlResult(
     200,
-    renderAmcAuthorize(protectedHeader.alg, parsedRequestOrError.payload)
+    renderAmcAuthorize(protectedHeader.alg, parsedRequestOrError.payload, scope)
   );
 }
 
@@ -82,31 +89,31 @@ async function post(event: APIGatewayProxyEvent) {
     throw new CodedError(400, "Missing request body");
   }
 
-  const parsedBody = event.body
+  const parsedBody = (event.body
     ? Object.fromEntries(new URLSearchParams(event.body))
-    : {};
+    : {}) as unknown as ParsedBody;
 
   const redirectUri = parsedBody["redirect_uri"];
   if (!redirectUri) {
     throw new CodedError(500, "redirect_uri not found");
   }
 
-  const state = parsedBody["state"];
+  const state = parsedBody.state;
   if (!state) {
     throw new CodedError(500, "state not found");
   }
 
   const authCode = base64url.encode(randomBytes(32));
-  const sub = parsedBody["sub"];
-  const response = parsedBody["response"];
 
   const url = new URL(redirectUri);
   url.searchParams.append("state", state);
   url.searchParams.append("code", authCode);
 
-  const amcAuthorizationResult: AMCAuthorizationResult = hardcodedAMCOutcome(
-    sub,
-    response === "success"
+  const amcAuthorizationResult: AMCAuthorizationResult = buildAMCOutcome(
+    parsedBody.sub,
+    parsedBody.response,
+    parsedBody.email,
+    parsedBody.scope
   );
 
   try {
@@ -138,32 +145,33 @@ function methodNotAllowedError(method: string) {
   return new CodedError(405, `Method ${sanitizedMethod} not allowed`);
 }
 
-function hardcodedAMCOutcome(
+function buildAMCOutcome(
   sub: string,
-  success: boolean
+  response: AMCAuthorizeResponse,
+  email: string,
+  scope: string
 ): AMCAuthorizationResult {
   const randomOutcomeId = base64url.encode(randomBytes(32));
-  const hardcodedEmail = "test@example.com";
-  const hardcodedScope = "account-delete";
-  const hardcodedFailure = {
-    error: {
-      code: 1001,
-      description: "UserSignedOut",
-    },
-  };
-  const details = success ? {} : hardcodedFailure;
-  const harcodedJourney: AMCJourney = {
-    journey: "account-delete",
+  const isSuccess = response === "success";
+  const journey: AMCJourney = {
+    journey: scope,
     timestamp: Date.now(),
-    success: success,
-    details: details,
+    success: isSuccess,
+    details: isSuccess
+      ? {}
+      : {
+          error: {
+            code: 1001,
+            description: response,
+          },
+        },
   };
   return {
     sub: sub,
     outcome_id: randomOutcomeId,
-    email: hardcodedEmail,
-    scope: hardcodedScope,
-    success: success,
-    journeys: [harcodedJourney],
+    email,
+    scope,
+    success: isSuccess,
+    journeys: [journey],
   };
 }

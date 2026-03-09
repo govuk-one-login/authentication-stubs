@@ -6,7 +6,7 @@ import {
   CompositeJWTBuilder,
   createTestEvent,
 } from "../test-helpers.js";
-import { HttpMethod } from "../../src/types/enums.ts";
+import { AMCScopes, HttpMethod } from "../../src/types/enums.ts";
 import keys from "../../data/keys.json" with { type: "json" };
 import { CompactEncrypt, importSPKI } from "jose";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
@@ -34,34 +34,43 @@ describe("AMC Authorize Stub Test", () => {
       process.env.ENVIRONMENT = "local";
     });
 
-    it("should return 200 with HTML for valid GET request", async () => {
-      const accessToken = await new AccessTokenBuilder(
-        keys.authPrivateSigningKeyAuthAudience
-      ).build();
-      const compositeJWT = await new CompositeJWTBuilder(
-        keys.authPrivateSigningKeyAMCAudience,
-        accessToken
-      ).build();
+    [AMCScopes.ACCOUNT_DELETE, AMCScopes.PASSKEY_CREATE].forEach((scope) => {
+      it(`should return 200 with HTML for valid GET request with scope ${scope}`, async () => {
+        const accessToken = await new AccessTokenBuilder(
+          keys.authPrivateSigningKeyAuthAudience
+        )
+          .withScope(scope)
+          .build();
+        const compositeJWT = await new CompositeJWTBuilder(
+          keys.authPrivateSigningKeyAMCAudience,
+          accessToken
+        )
+          .withScope(scope)
+          .build();
 
-      const publicKey = await importSPKI(
-        keys.amcPublicEncryptionKey,
-        "RSA-OAEP-256"
-      );
-      const encryptedJWT = await new CompactEncrypt(
-        textEncoder.encode(compositeJWT)
-      )
-        .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
-        .encrypt(publicKey);
+        const publicKey = await importSPKI(
+          keys.amcPublicEncryptionKey,
+          "RSA-OAEP-256"
+        );
+        const encryptedJWT = await new CompactEncrypt(
+          textEncoder.encode(compositeJWT)
+        )
+          .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+          .encrypt(publicKey);
 
-      const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
-        request: encryptedJWT,
+        const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
+          request: encryptedJWT,
+        });
+
+        const result = await handler(event);
+
+        expect(result.statusCode).to.eq(200);
+        expect(result.headers?.["Content-Type"]).to.eq("text/html");
+        expect(result.body).to.include(
+          `AMC stub (${scope.split("-").join(" ")})`
+        );
+        expect(result.body).to.include("Decrypted JAR header");
       });
-
-      const result = await handler(event);
-
-      expect(result.statusCode).to.eq(200);
-      expect(result.headers?.["Content-Type"]).to.eq("text/html");
-      expect(result.body).to.include("Decrypted JAR header");
     });
 
     it("should return 400 when query string parameters are null", async () => {
