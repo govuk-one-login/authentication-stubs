@@ -1,4 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { logger } from "../../logger.ts";
+import { truncate } from "./truncate-helper.ts";
 
 const REQUIRED_HEADERS = [
   "di-persistent-session-id",
@@ -28,5 +30,14 @@ export function validateRequiredHeaders(
     };
   }
 
+  logger.info("headers are:")
+  for (const header of REQUIRED_HEADERS) {
+    logger.info(`${header}::${shouldObfuscate(header) ? truncate(headers[header]!) : headers[header]}`)
+  }
+
   return null;
 }
+
+function shouldObfuscate(headerName: string): boolean {
+  return ["x-forwarded-for"].includes(headerName);
+};
