@@ -13,6 +13,7 @@ import { randomBytes } from "crypto";
 import { base64url, jwtVerify } from "jose";
 import { getPublicSigningKey } from "../helpers/jwks-helper.ts";
 import { validateRequiredHeaders } from "../helpers/expected-headers-helper.ts";
+import { truncate } from "../helpers/truncate-helper.ts";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -236,12 +237,4 @@ function validateParamValues(
 
 export function shouldObfuscate(paramName: string): boolean {
   return ["code", "client_assertion"].includes(paramName);
-}
-
-export function truncate(value: string): string {
-  if (value.length <= 8) {
-    return value; // don't obfuscate if value is very short
-  } else {
-    return `${value.slice(0, 4)}...${value.slice(-4)}`;
-  }
 }

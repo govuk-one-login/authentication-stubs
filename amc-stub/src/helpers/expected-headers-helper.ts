@@ -30,9 +30,11 @@ export function validateRequiredHeaders(
     };
   }
 
-  logger.info("headers are:")
+  logger.info("headers are:");
   for (const header of REQUIRED_HEADERS) {
-    logger.info(`${header}::${shouldObfuscate(header) ? truncate(headers[header]!) : headers[header]}`)
+    logger.info(
+      `${header}::${shouldObfuscate(header) ? truncate(headers[header]!) : headers[header]}`
+    );
   }
 
   return null;
@@ -40,4 +42,4 @@ export function validateRequiredHeaders(
 
 function shouldObfuscate(headerName: string): boolean {
   return ["x-forwarded-for"].includes(headerName);
-};
+}
