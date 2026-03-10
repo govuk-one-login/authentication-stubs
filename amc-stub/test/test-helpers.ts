@@ -66,7 +66,7 @@ export const createTestEvent = (
 
 export class AccessTokenBuilder {
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
-  private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
+  private scope: string | undefined = AMCScopes.ACCOUNT_DELETE;
   private iss: string | undefined = TEST_CONSTANTS.ISSUER;
   private aud: string | undefined = TEST_CONSTANTS.AUTH_AUDIENCE;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
@@ -104,13 +104,7 @@ export class AccessTokenBuilder {
   }
 
   withScope(scope: string | string[] | undefined) {
-    if (!scope) {
-      this.scope = undefined;
-    } else if (Array.isArray(scope)) {
-      this.scope = scope;
-    } else {
-      this.scope = [scope];
-    }
+    this.scope = Array.isArray(scope) ? scope.join(" ") : scope;
     return this;
   }
 
@@ -157,7 +151,7 @@ export class CompositeJWTBuilder {
   private aud: string | undefined = TEST_CONSTANTS.AMC_AUDIENCE;
   private readonly responseType = TEST_CONSTANTS.RESPONSE_TYPE;
   private readonly redirectUri = TEST_CONSTANTS.REDIRECT_URI;
-  private scope: string[] | undefined = [AMCScopes.ACCOUNT_DELETE];
+  private scope: string | undefined = AMCScopes.ACCOUNT_DELETE;
   private readonly state = TEST_CONSTANTS.STATE;
   private jti: string | undefined = TEST_CONSTANTS.CLIENT_ASSERTION_JTI;
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
@@ -198,13 +192,7 @@ export class CompositeJWTBuilder {
   }
 
   withScope(scope: string | string[] | undefined) {
-    if (!scope) {
-      this.scope = undefined;
-    } else if (Array.isArray(scope)) {
-      this.scope = scope;
-    } else {
-      this.scope = [scope];
-    }
+    this.scope = Array.isArray(scope) ? scope.join(" ") : scope;
     return this;
   }
 

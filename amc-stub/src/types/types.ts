@@ -1,15 +1,15 @@
 import { JWTPayload } from "jose";
-import { AMCScopes } from "./enums.ts";
+import { AMCScopes } from "./enums.js";
 
 export interface AccessTokenPayload extends JWTPayload {
   client_id: string;
-  scope: AMCScopes[];
+  scope: string;
   sid: string;
 }
 
 interface BasePayload extends JWTPayload {
   client_id: string;
-  scope: AMCScopes[];
+  scope: string;
   response_type: string;
   redirect_uri: string;
   state: string;
@@ -47,4 +47,26 @@ export interface AMCJourneyErrorDetails {
     code: number;
     description: string;
   };
+}
+
+type AMCScopesValues = (typeof AMCScopes)[keyof typeof AMCScopes];
+
+export type ScopeToResultsMap = {
+  [a in AMCScopesValues]: string;
+};
+
+type PasskeysCreateResponse = "fail" | "success" | "back" | "skip";
+type AccountDeleteResponse = "success";
+
+export type AMCAuthorizeResponse =
+  | PasskeysCreateResponse
+  | AccountDeleteResponse;
+
+export interface ParsedBody {
+  sub: string;
+  response: AMCAuthorizeResponse;
+  state: string;
+  redirect_uri: string;
+  email: string;
+  scope: AMCScopesValues;
 }

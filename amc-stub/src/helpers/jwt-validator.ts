@@ -24,8 +24,9 @@ async function validateAccessToken(
 
   const validScopes = Object.values(AMCScopes);
   if (
-    !verifiedJWT.payload.scope?.length ||
-    !verifiedJWT.payload.scope.every((scope) => validScopes.includes(scope))
+    !verifiedJWT.payload.scope
+      ?.split(" ")
+      .every((s) => validScopes.includes(s as AMCScopes))
   ) {
     const error = "The access token payload contains invalid scopes";
     logger.error(error, { payload: verifiedJWT.payload });
@@ -98,12 +99,9 @@ async function validateClientAssertionJWT(
     publicSigningKeyAMCAudience
   );
 
-  if (
-    verifiedJWT.payload.scope?.length !== 1 ||
-    verifiedJWT.payload.scope[0] !== AMCScopes.ACCOUNT_DELETE
-  ) {
-    const error =
-      "The client assertion JWT payload scope should be 'ACCOUNT_DELETE'";
+  const validScopes = Object.values(AMCScopes);
+  if (!validScopes.includes(verifiedJWT.payload.scope as AMCScopes)) {
+    const error = `The client assertion JWT payload scope should be one of ${validScopes.join(", ")}`;
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }

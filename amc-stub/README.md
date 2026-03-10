@@ -8,7 +8,7 @@ Account Management API for the SSAD flow (Self-Serve Account Deletion).
 
 ### Prerequisites
 - Node.js 22.12.0 (use `nvm use` to switch to the correct version)
-- AWS SAM CLI
+- AWS SAM CLI version >= 1.150 (recommend the latest)
 - Docker (for LocalStack DynamoDB)
 
 ### Running Locally
@@ -53,8 +53,8 @@ npm run start:local
 
 **Terminal 3 - Generate test URL and test:**
 ```bash
-# Generate encrypted JWT
-npx tsx scripts/encrypt-message-locally.ts
+# Generate encrypted JWT where scope is one of AMCScopes
+npx tsx scripts/encrypt-message-locally.ts {scope}
 
 # Copy the encrypted JWT output, then test:
 curl "http://localhost:3000/authorize?request=<PASTE_ENCRYPTED_JWT_HERE>"
