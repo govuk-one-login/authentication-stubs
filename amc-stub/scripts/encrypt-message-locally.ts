@@ -77,7 +77,7 @@ const createRequestJWT = async (scope: string) => {
   const requestPayload = {
     iss: "https://signin.account.gov.uk",
     client_id: "auth_amc",
-    aud: "https://api.manage.account.gov.uk",
+    aud: "https://manage.account.gov.uk/authorize",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
     scope: scope,
@@ -90,8 +90,6 @@ const createRequestJWT = async (scope: string) => {
     sub: sub,
     public_sub: "550e8400-e29b-41d4-a716-446655440000",
     email: "test@digital.cabinet-office.gov.uk",
-    govuk_signin_journey_id:
-      "lBG99Z78pnrPUbdKDIaHobHV9DE.taUSm4TwLOGNIkmBTF9rzdIDj5s",
   };
 
   const signedPayload = await new CompactSign(
