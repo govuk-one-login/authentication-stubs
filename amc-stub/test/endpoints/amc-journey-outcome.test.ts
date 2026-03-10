@@ -28,10 +28,20 @@ describe("AMC Journey Outcome Stub Test", () => {
     ],
   };
 
+  const commonHeaders = {
+    "di-persistent-session-id": "persistent-session-id-12345",
+    "session-id": "some session id",
+    "client-session-id": "some client session id",
+    "txma-audit-encoded": "some encoded device details",
+    "x-forwarded-for": "some ip address",
+    "user-language": "en",
+  };
+
   describe("GET handler", () => {
     it("should return 200 with HTML for valid GET request", async () => {
       const headers: APIGatewayProxyEventHeaders = {
         Authorization: "Bearer 123456",
+        ...commonHeaders,
       };
       stubDynamoGet("123456", SUCCESSFUL_AUTHORIZATION_RESULT);
       const event = createTestEvent(
@@ -55,6 +65,7 @@ describe("AMC Journey Outcome Stub Test", () => {
       const unknownAccessToken = "bearer-token-not-in-database";
       const headers: APIGatewayProxyEventHeaders = {
         Authorization: `Bearer ${unknownAccessToken}`,
+        ...commonHeaders,
       };
       stubDynamoGet(unknownAccessToken);
       const event = createTestEvent(
@@ -70,8 +81,31 @@ describe("AMC Journey Outcome Stub Test", () => {
       expect(result.statusCode).to.eq(401);
     });
 
+    it("should return 400 for missing headers", async () => {
+      const headersWithoutPersistentSessionId: APIGatewayProxyEventHeaders = {
+        Authorization: "Bearer 123456",
+        "session-id": "some session id",
+        "client-session-id": "some client session id",
+        "txma-audit-encoded": "some encoded device details",
+        "x-forwarded-for": "some ip address",
+        "user-language": "en",
+      };
+      stubDynamoGet("123456", SUCCESSFUL_AUTHORIZATION_RESULT);
+      const event = createTestEvent(
+        HttpMethod.GET,
+        "/journeyoutcome",
+        null,
+        null,
+        headersWithoutPersistentSessionId
+      );
+
+      const result = await handler(event);
+
+      expect(result.statusCode).to.eq(400);
+    });
+
     it("should return 401 for invalid HTTP method", async () => {
-      const headersWithoutBearerAccess = { foo: "bar" };
+      const headersWithoutBearerAccess = { foo: "bar", ...commonHeaders };
       const event = createTestEvent(
         HttpMethod.GET,
         "/journeyoutcome",
