@@ -12,6 +12,7 @@ import {
 import { randomBytes } from "crypto";
 import { base64url, jwtVerify } from "jose";
 import { getPublicSigningKey } from "../helpers/jwks-helper.ts";
+import { validateRequiredHeaders } from "../helpers/expected-headers-helper.ts";
 
 type Result<T> =
   | { ok: true; value: T }
@@ -63,6 +64,12 @@ async function post(event: APIGatewayProxyEvent) {
   logger.info("Received POST request to amc token endpoint");
   if (!event.body) {
     return { statusCode: 400, body: "Missing request body." };
+  }
+
+  const maybeHeaderValidationErrorResponse = validateRequiredHeaders(event);
+
+  if (maybeHeaderValidationErrorResponse) {
+    return maybeHeaderValidationErrorResponse;
   }
 
   const parsedBody = parseBody(event.body);
