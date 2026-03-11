@@ -15,10 +15,18 @@ export function validateRequiredHeaders(
   event: APIGatewayProxyEvent
 ): APIGatewayProxyResult | null {
   const headers = event.headers || {};
+  const lowerCaseHeaders: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (value) {
+      lowerCaseHeaders[key.toLowerCase()] = value;
+    }
+  }
+
   const missingHeaders: string[] = [];
 
   for (const header of REQUIRED_HEADERS) {
-    if (!headers[header]) {
+    if (!lowerCaseHeaders[header]) {
       missingHeaders.push(header);
     }
   }
@@ -33,7 +41,7 @@ export function validateRequiredHeaders(
   logger.info("headers are:");
   for (const header of REQUIRED_HEADERS) {
     logger.info(
-      `${header}::${shouldObfuscate(header) ? truncate(headers[header]!) : headers[header]}`
+      `${header}::${shouldObfuscate(header) ? truncate(lowerCaseHeaders[header]!) : lowerCaseHeaders[header]}`
     );
   }
 

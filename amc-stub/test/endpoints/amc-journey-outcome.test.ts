@@ -33,7 +33,7 @@ describe("AMC Journey Outcome Stub Test", () => {
     "session-id": "some session id",
     "client-session-id": "some client session id",
     "txma-audit-encoded": "some encoded device details",
-    "x-forwarded-for": "some ip address",
+    "X-Forwarded-For": "some ip address",
     "user-language": "en",
   };
 

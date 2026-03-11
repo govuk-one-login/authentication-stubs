@@ -19,12 +19,27 @@ describe("validateRequiredHeaders", () => {
     expect(result).to.equal(null);
   });
 
+  it("should match headers case insensitively", () => {
+    const event = createTestEvent(HttpMethod.GET, "/test", null, null, {
+      "Di-Persistent-Session-Id": "persistent-session-123",
+      "Session-id": "session-456",
+      "Client-Session-Id": "client-456",
+      "Txma-Audit-Encoded": "audit-789",
+      "X-Forwarded-For": "192.168.1.1",
+      "User-Language": "en",
+    });
+
+    const result = validateRequiredHeaders(event);
+
+    expect(result).to.equal(null);
+  });
+
   it("should return 400 error when di-persistent-session-id is missing", () => {
     const event = createTestEvent(HttpMethod.GET, "/test", null, null, {
       "session-id": "session-123",
       "client-session-id": "client-456",
       "txma-audit-encoded": "audit-789",
-      "x-forwarded-for": "192.168.1.1",
+      "X-Forwarded-For": "192.168.1.1",
       "user-language": "en",
     });
 
