@@ -7,6 +7,7 @@ import {
   successfulJsonResult,
 } from "../helpers/result-helper.ts";
 import { getAMCAuthorizationResultWithAccessToken } from "../../services/dynamodb-service.ts";
+import { validateRequiredHeaders } from "../helpers/expected-headers-helper.ts";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -21,6 +22,12 @@ export const handler = async (
 
 async function get(event: APIGatewayProxyEvent) {
   logger.info("AMC journey outcome endpoint invoked!");
+
+  const maybeHeaderValidationErrorResponse = validateRequiredHeaders(event);
+
+  if (maybeHeaderValidationErrorResponse) {
+    return maybeHeaderValidationErrorResponse;
+  }
 
   const accessToken = getAccessToken(event);
   if (!accessToken) {
