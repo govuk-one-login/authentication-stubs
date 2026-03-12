@@ -1,0 +1,12 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb
+      - DYNAMODB_SHARE_DB=1 # Removes regions and allows NoSQL Workbench to work.
+      - DEBUG=${DEBUG:-0}
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./provision.sh:/etc/localstack/init/ready.d/provision.sh
