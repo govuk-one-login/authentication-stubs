@@ -84,22 +84,27 @@ Mappings:
     dev:
       amcStubDomainName: amcstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
+      amcJwksEndpoint: "https://tze402cnbk-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/.well-known/amc-jwks.json"
 
     authdev1:
       amcStubDomainName: amcstub.signin.authdev1.dev.account.gov.uk
       hostedZoneId: "Z01488663SVMGDFYGEX88"
+      amcJwksEndpoint: "https://5fgwu5kpd2-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev1/.well-known/amc-jwks.json"
 
     authdev2:
       amcStubDomainName: amcstub.signin.authdev2.dev.account.gov.uk
       hostedZoneId: "Z0283478G72QVGV7VVBG"
+      amcJwksEndpoint: "https://nw0dah7bxk-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev2/.well-known/amc-jwks.json"
 
     authdev3:
       amcStubDomainName: amcstub.signin.authdev3.dev.account.gov.uk
       hostedZoneId: "Z04928373OSDE66G6PJLG"
+      amcJwksEndpoint: "https://y3s69ubaz5-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev3/.well-known/amc-jwks.json"
 
     build:
       amcStubDomainName: amcstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
+      amcJwksEndpoint: "https://7ecg8e1o73-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/.well-known/amc-jwks.json"
 
 Resources:
   LambdaSecurityGroup:
@@ -194,6 +199,7 @@ Resources:
               - UseSubEnvironment
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-auth-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-auth-audience}}'
+          AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
       Events:
         GetAuthorize:
           Type: Api
@@ -211,6 +217,11 @@ Resources:
         - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/GET/.well-known/amc-jwks.json"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -250,6 +261,7 @@ Resources:
               - UseSubEnvironment
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
+          AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
       Events:
         Post:
           Type: Api
@@ -261,6 +273,11 @@ Resources:
         - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/GET/.well-known/amc-jwks.json"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
