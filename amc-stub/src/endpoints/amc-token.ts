@@ -106,7 +106,7 @@ async function validateClientAssertion(
 ): Promise<Result<string>> {
   const publicSigningKeyAMCAudience = await getPublicSigningKey(
     clientAssertion,
-    undefined,
+    process.env.AMC_JWKS_ENDPOINT,
     signingKeyBackup
   );
 

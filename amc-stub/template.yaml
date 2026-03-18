@@ -84,27 +84,57 @@ Mappings:
     dev:
       amcStubDomainName: amcstub.signin.dev.account.gov.uk
       hostedZoneId: "Z07405851J4NJYGEP1PS7"
+      amcJwksEndpoint: "https://tze402cnbk-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/dev/.well-known/amc-jwks.json"
 
     authdev1:
       amcStubDomainName: amcstub.signin.authdev1.dev.account.gov.uk
       hostedZoneId: "Z01488663SVMGDFYGEX88"
+      amcJwksEndpoint: "https://5fgwu5kpd2-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev1/.well-known/amc-jwks.json"
 
     authdev2:
       amcStubDomainName: amcstub.signin.authdev2.dev.account.gov.uk
       hostedZoneId: "Z0283478G72QVGV7VVBG"
+      amcJwksEndpoint: "https://nw0dah7bxk-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev2/.well-known/amc-jwks.json"
 
     authdev3:
       amcStubDomainName: amcstub.signin.authdev3.dev.account.gov.uk
       hostedZoneId: "Z04928373OSDE66G6PJLG"
+      amcJwksEndpoint: "https://y3s69ubaz5-vpce-0b907325ae3bfe3ce.execute-api.eu-west-2.amazonaws.com/authdev3/.well-known/amc-jwks.json"
 
     build:
       amcStubDomainName: amcstub.signin.build.account.gov.uk
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
+      amcJwksEndpoint: "https://7ecg8e1o73-vpce-042c5d3d97d7438d9.execute-api.eu-west-2.amazonaws.com/build/.well-known/amc-jwks.json"
 
 Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AMC Stub Lambda functions
+      VpcId:
+        Fn::ImportValue: "vpc-VpcId"
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          DestinationSecurityGroupId:
+            Fn::ImportValue: "vpc-AWSServicesEndpointSecurityGroupId"
+          Description: Allow HTTPS to VPC endpoint security group
+        - DestinationPrefixListId: pl-b3a742da # See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-aws-managed-prefix-lists.html
+          Description: Allow outgoing HTTPS requests to AWS DynamoDB route from security group
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
   AMCAuthorizeStubFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       CodeUri: .
       Handler: endpoints/amc-authorize.handler
       LoggingConfig:
@@ -169,6 +199,7 @@ Resources:
               - UseSubEnvironment
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-auth-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-auth-audience}}'
+          AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
       Events:
         GetAuthorize:
           Type: Api
@@ -183,8 +214,14 @@ Resources:
             Path: /authorize
             Method: POST
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/GET/.well-known/amc-jwks.json"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -200,6 +237,13 @@ Resources:
   AMCStubTokenFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Handler: src/amc-token.handler
       LoggingConfig:
         LogGroup: !Ref AMCStubTokenFunctionLogGroup
@@ -217,6 +261,7 @@ Resources:
               - UseSubEnvironment
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
+          AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
       Events:
         Post:
           Type: Api
@@ -225,8 +270,14 @@ Resources:
             Path: /token
             Method: post
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/GET/.well-known/amc-jwks.json"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -239,6 +290,13 @@ Resources:
   AMCStubJourneyOutcomeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Handler: src/amc-journey-outcome.handler
       LoggingConfig:
         LogGroup: !Ref AMCStubJourneyOutcomeFunctionLogGroup
@@ -253,6 +311,7 @@ Resources:
             Path: /journeyoutcome
             Method: GET
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
     Metadata:

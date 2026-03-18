@@ -13,7 +13,7 @@ async function validateAccessToken(
 ): Promise<JWTVerifyResult<AccessTokenPayload> | string> {
   const publicSigningKeyAuthAudience = await getPublicSigningKey(
     accessTokenJWT,
-    undefined,
+    process.env.AMC_JWKS_ENDPOINT,
     process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE
   );
 
@@ -90,7 +90,7 @@ async function validateAuthorizationRequest(
 ): Promise<JWTVerifyResult<AuthorizationRequestPayload> | string> {
   const publicSigningKeyAMCAudience = await getPublicSigningKey(
     authorizationRequestJWT,
-    undefined,
+    process.env.AMC_JWKS_ENDPOINT,
     process.env.AUTH_PUBLIC_SIGNING_KEY_AMC_AUDIENCE
   );
 
