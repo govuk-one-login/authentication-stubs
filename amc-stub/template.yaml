@@ -102,9 +102,34 @@ Mappings:
       hostedZoneId: "Z09720813AWZDQSXZBWKJ"
 
 Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AMC Stub Lambda functions
+      VpcId:
+        Fn::ImportValue: "vpc-VpcId"
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          DestinationSecurityGroupId:
+            Fn::ImportValue: "vpc-AWSServicesEndpointSecurityGroupId"
+          Description: Allow HTTPS to VPC endpoint security group
+        - DestinationPrefixListId: pl-b3a742da # See https://docs.aws.amazon.com/vpc/latest/userguide/working-with-aws-managed-prefix-lists.html
+          Description: Allow outgoing HTTPS requests to AWS DynamoDB route from security group
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
   AMCAuthorizeStubFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       CodeUri: .
       Handler: endpoints/amc-authorize.handler
       LoggingConfig:
@@ -183,6 +208,7 @@ Resources:
             Path: /authorize
             Method: POST
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
     Metadata:
@@ -200,6 +226,13 @@ Resources:
   AMCStubTokenFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Handler: src/amc-token.handler
       LoggingConfig:
         LogGroup: !Ref AMCStubTokenFunctionLogGroup
@@ -225,6 +258,7 @@ Resources:
             Path: /token
             Method: post
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
     Metadata:
@@ -239,6 +273,13 @@ Resources:
   AMCStubJourneyOutcomeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
       Handler: src/amc-journey-outcome.handler
       LoggingConfig:
         LogGroup: !Ref AMCStubJourneyOutcomeFunctionLogGroup
@@ -253,6 +294,7 @@ Resources:
             Path: /journeyoutcome
             Method: GET
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref AMCAuthorizationResultTable
     Metadata:
