@@ -62,5 +62,8 @@
     "recursive": true,
     "loader": "ts-node/esm",
     "exit": true
+  },
+  "overrides": {
+    "fast-xml-parser": ">=5.5.6"
   }
 }

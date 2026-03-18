@@ -64,5 +64,8 @@
       "ts-node/register"
     ],
     "exit": true
+  },
+  "overrides": {
+    "fast-xml-parser": ">=5.5.6"
   }
 }
