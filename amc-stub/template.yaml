@@ -262,6 +262,10 @@ Resources:
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-amc-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-amc-audience}}'
           AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
+          ALLOWED_USED_REDIRECT_URIS: !If
+            - UseSubEnvironment
+            - !Sub "https://signin.${SubEnvironment}.dev.account.gov.uk/sfad-callback"
+            - !Sub "https://signin.${Environment}.account.gov.uk/sfad-callback"
       Events:
         Post:
           Type: Api
