@@ -11,5 +11,9 @@
   },
   "AMCStubJourneyOutcomeFunction": {
     "ENVIRONMENT": "local"
+  },
+  "AMCJwksFunction": {
+    "ENVIRONMENT": "local",
+    "AMC_PUBLIC_ENCRYPTION_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkQ+8z5rwYeHdVZvHPQgs\ndgm78iNFY5hqtz4YnO7pnVnNddCVH+zCcq3GIHoTQt+ckEtrXkChYKfKvnxjc7vn\nEVjb+w9S+ITqCuJLC6+hgz2Csd7tTZsUjZneOzlEznTCNgNB7R/FYoJSVPDwty/Y\nedL72ZvNfk1De5hHSajUivavdSHb+NdRgbcbDk/NhiUTlPqVqVlJupzRoCNXlIHS\n+FWPKBENiE8JAGef7B3eYG/gKyk4IYbyZDlzuJPPC4VlLRIIHSu6TMUzULTVscLD\nhahVvirxAVlGRKbjKhHuIcAg8HWybXQORyjIcEE7ogXb8aWhRPhCJV6hnN3RXKO4\niwIDAQAB\n-----END PUBLIC KEY-----\n"
   }
 }
