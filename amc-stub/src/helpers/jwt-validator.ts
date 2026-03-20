@@ -49,18 +49,27 @@ async function validateAccessToken(
     return error;
   }
 
-  let expectedAudience: string;
+  let expectedAudiences: string[];
   if (environment === "local") {
-    expectedAudience = "https://manage.account.gov.uk";
+    expectedAudiences = [
+      "https://manage.account.gov.uk",
+      "https://account.account.gov.uk",
+    ];
   } else if (environment.startsWith("authdev")) {
-    expectedAudience = `https://manage.${environment}.dev.account.gov.uk`;
+    expectedAudiences = [
+      `https://manage.${environment}.dev.account.gov.uk`,
+      `https://account.${environment}.dev.account.gov.uk`,
+    ];
   } else {
-    expectedAudience = `https://manage.${environment}.account.gov.uk`;
+    expectedAudiences = [
+      `https://manage.${environment}.account.gov.uk`,
+      `https://account.${environment}.account.gov.uk`,
+    ];
   }
 
-  if (verifiedJWT.payload.aud !== expectedAudience) {
+  if (!expectedAudiences.includes(verifiedJWT.payload.aud as string)) {
     const error = "The access token payload audience is invalid";
-    logger.error(error, { payload: verifiedJWT.payload, expectedAudience });
+    logger.error(error, { payload: verifiedJWT.payload, expectedAudiences });
     return error;
   }
 
