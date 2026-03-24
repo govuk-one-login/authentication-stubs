@@ -227,6 +227,17 @@ function validateParamValues(
     );
   }
 
+  const allowedUsedRedirectUris = (process.env.ALLOWED_USED_REDIRECT_URIS ?? "")
+    .split(",")
+    .map((u) => u.trim())
+    .filter(Boolean);
+  if (
+    allowedUsedRedirectUris.length > 0 &&
+    !allowedUsedRedirectUris.includes(params.redirect_uri!)
+  ) {
+    invalidParamMessages.push(`Invalid redirect_uri: ${params.redirect_uri}`);
+  }
+
   if (invalidParamMessages.length > 0) {
     invalidParamMessages.forEach((invalidMsg) => logger.info(invalidMsg));
     return error(invalidParamMessages.join(", "));
