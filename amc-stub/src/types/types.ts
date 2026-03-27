@@ -56,7 +56,7 @@ export type ScopeToResultsMap = {
   [a in AMCScopesValues]: string;
 };
 
-type PasskeysCreateResponse = "fail" | "success" | "back" | "skip";
+type PasskeysCreateResponse = "success" | "back" | "skip";
 type AccountDeleteResponse = "success";
 
 export type AMCAuthorizeResponse =

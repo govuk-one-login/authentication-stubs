@@ -149,23 +149,35 @@ function buildAMCOutcome(
   sub: string,
   response: AMCAuthorizeResponse,
   email: string,
-  scope: string
+  scope: AMCScopes
 ): AMCAuthorizationResult {
   const randomOutcomeId = base64url.encode(randomBytes(32));
   const isSuccess = response === "success";
+
+  let details = {};
+  if (!isSuccess) {
+    const errorDescription = responseToErrorDescriptionMap[scope]?.[response];
+    if (!errorDescription) {
+      throw new CodedError(
+        500,
+        `Cannot find error description for response: ${response}`
+      );
+    }
+    details = {
+      error: {
+        code: 1001,
+        description: errorDescription,
+      },
+    };
+  }
+
   const journey: AMCJourney = {
     journey: scope,
     timestamp: Date.now(),
     success: isSuccess,
-    details: isSuccess
-      ? {}
-      : {
-          error: {
-            code: 1001,
-            description: response,
-          },
-        },
+    details,
   };
+
   return {
     sub: sub,
     outcome_id: randomOutcomeId,
@@ -175,3 +187,14 @@ function buildAMCOutcome(
     journeys: [journey],
   };
 }
+
+const responseToErrorDescriptionMap: Record<
+  AMCScopes,
+  Record<string, string>
+> = {
+  [AMCScopes.PASSKEY_CREATE]: {
+    back: "UserBackedOutOfJourney",
+    skip: "UserAbortedJourney",
+  },
+  [AMCScopes.ACCOUNT_DELETE]: {},
+};
