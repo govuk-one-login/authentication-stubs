@@ -264,8 +264,8 @@ Resources:
           AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
           ALLOWED_USED_REDIRECT_URIS: !If
             - UseSubEnvironment
-            - !Sub "https://signin.${SubEnvironment}.dev.account.gov.uk/sfad-callback"
-            - !Sub "https://signin.${Environment}.account.gov.uk/sfad-callback"
+            - !Sub "https://signin.${SubEnvironment}.dev.account.gov.uk/sfad-callback, https://signin.${SubEnvironment}.dev.account.gov.uk/create-passkey-callback"
+            - !Sub "https://signin.${Environment}.account.gov.uk/sfad-callback, https://signin.${Environment}.account.gov.uk/create-passkey-callback"
       Events:
         Post:
           Type: Api
