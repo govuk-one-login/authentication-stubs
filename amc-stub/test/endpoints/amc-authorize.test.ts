@@ -129,12 +129,13 @@ describe("AMC Authorize Stub Test", () => {
       expect(result.headers?.["Location"]).to.include("code=");
     });
 
-    it("should return 302 redirect with auth code for failure response", async () => {
+    it("should return 302 redirect with auth code for valid failure response", async () => {
       const body = new URLSearchParams({
         redirect_uri: "https://signin.account.gov.uk/callback",
         state: "test-state-456",
         sub: "urn:fdc:gov.uk:2022:test-subject",
-        response: "access_denied",
+        response: "skip",
+        scope: "passkey-create",
       }).toString();
 
       const event = createTestEvent(HttpMethod.POST, "/authorize", body);
@@ -197,6 +198,28 @@ describe("AMC Authorize Stub Test", () => {
         expect(error).to.be.instanceOf(Error);
         expect((error as { code: number }).code).to.eq(500);
         expect((error as Error).message).to.eq("state not found");
+      }
+    });
+
+    it("should return 500 when failure response is invalid", async () => {
+      const body = new URLSearchParams({
+        redirect_uri: "https://signin.account.gov.uk/callback",
+        state: "test-state-456",
+        sub: "urn:fdc:gov.uk:2022:test-subject",
+        response: "invalid response",
+      }).toString();
+
+      const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+      try {
+        await handler(event);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(Error);
+        expect((error as { code: number }).code).to.eq(500);
+        expect((error as Error).message).to.eq(
+          "Cannot find error description for response: invalid response"
+        );
       }
     });
   });

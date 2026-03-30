@@ -76,13 +76,6 @@ function getPasskeyCreateResults() {
         </div>
 
   <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="fail" name="response" type="radio" value="fail">
-            <label class="govuk-label govuk-radios__label" for="fail">
-                Fail
-            </label>
-        </div>
-
-  <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="back" name="response" type="radio" value="back">
             <label class="govuk-label govuk-radios__label" for="back">
                 Back
