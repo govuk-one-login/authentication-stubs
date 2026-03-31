@@ -28,11 +28,8 @@ jobs:
         uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
         with:
           use-installer: true  # this caches installation but is only available on Linux x86-64 runners
-      - name: Install esbuild globally
-        if: matrix.module == 'amc-stub'
-        run: npm install -g esbuild --ignore-scripts
       - name: Install build packages
-        if: matrix.module == 'notify-stub'
+        if: matrix.module == 'amc-stub' || matrix.module == 'notify-stub'
         run: |
           cd ${{ matrix.module }}
           npm ci --ignore-scripts
