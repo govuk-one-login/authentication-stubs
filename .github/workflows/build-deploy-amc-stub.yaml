@@ -39,6 +39,9 @@ jobs:
           role-to-assume: ${{ secrets.AMC_STUB_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
       - name: SAM validate
         run: sam validate
 
