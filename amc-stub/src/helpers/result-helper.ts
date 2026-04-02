@@ -60,3 +60,31 @@ export function invalidAccessTokenResult(): APIGatewayProxyResult {
     },
   };
 }
+
+export async function handleErrors(
+  getResult: () => Promise<APIGatewayProxyResult>
+): Promise<APIGatewayProxyResult> {
+  try {
+    return await getResult();
+  } catch (error) {
+    if (error instanceof CodedError) {
+      logger.error(error.message);
+      return {
+        statusCode: error.code,
+        body: JSON.stringify({
+          message: error.message,
+        }),
+      };
+    }
+
+    const errorStr =
+      error instanceof Error ? error.message : JSON.stringify(error);
+    logger.error(errorStr);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: `Encountered an unhandled exception: ${errorStr}`,
+      }),
+    };
+  }
+}

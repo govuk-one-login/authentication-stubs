@@ -327,6 +327,65 @@ Resources:
         Sourcemap: true
         Target: node20
 
+  AMCJwksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: vpc-ProtectedSubnetIdA
+          - Fn::ImportValue: vpc-ProtectedSubnetIdB
+          - Fn::ImportValue: vpc-ProtectedSubnetIdC
+      CodeUri: .
+      Handler: endpoints/amc-jwks.handler
+      LoggingConfig:
+        LogGroup: !Ref AMCJwksFunctionLogGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+          AMC_PUBLIC_ENCRYPTION_KEY: !If
+            - IsLocalEnvironment
+            - |
+              -----BEGIN PUBLIC KEY-----
+              MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkQ+8z5rwYeHdVZvHPQgs
+              dgm78iNFY5hqtz4YnO7pnVnNddCVH+zCcq3GIHoTQt+ckEtrXkChYKfKvnxjc7vn
+              EVjb+w9S+ITqCuJLC6+hgz2Csd7tTZsUjZneOzlEznTCNgNB7R/FYoJSVPDwty/Y
+              edL72ZvNfk1De5hHSajUivavdSHb+NdRgbcbDk/NhiUTlPqVqVlJupzRoCNXlIHS
+              +FWPKBENiE8JAGef7B3eYG/gKyk4IYbyZDlzuJPPC4VlLRIIHSu6TMUzULTVscLD
+              hahVvirxAVlGRKbjKhHuIcAg8HWybXQORyjIcEE7ogXb8aWhRPhCJV6hnN3RXKO4
+              iwIDAQAB
+              -----END PUBLIC KEY-----
+            - !If
+              - UseSubEnvironment
+              - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-encryption-key}}'
+              - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-encryption-key}}'
+      Events:
+        GetJwks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /.well-known/amc-jwks.json
+            Method: GET
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/endpoints/amc-jwks.ts
+        Minify: true
+        Sourcemap: true
+        Target: node22
+
+  AMCJwksFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${env}-amc-stub-jwks"
+        - env: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
+      RetentionInDays: 30
+
   AMCStubTokenFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -410,6 +469,22 @@ Resources:
                 httpMethod: "POST"
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCStubTokenFunction.Arn}/invocations
+                passThroughBehavior: "when_no_match"
+                payloadFormatVersion: "2.0"
+          /.well-known/amc-jwks.json:
+            get:
+              responses:
+                "200":
+                  description: OK
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                httpMethod: "POST"
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AMCJwksFunction.Arn}/invocations
                 passThroughBehavior: "when_no_match"
                 payloadFormatVersion: "2.0"
           /journeyoutcome:
