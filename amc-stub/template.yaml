@@ -200,7 +200,6 @@ Resources:
               - !Sub '{{resolve:secretsmanager:/${SubEnvironment}/stubs/amc-stub-public-key-auth-audience}}'
               - !Sub '{{resolve:secretsmanager:/${Environment}/stubs/amc-stub-public-key-auth-audience}}'
           AMC_JWKS_ENDPOINT: !FindInMap [EnvironmentConfiguration, !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment], amcJwksEndpoint]
-          DUMMY_ENV_VAR: hello
       Events:
         GetAuthorize:
           Type: Api
@@ -345,7 +344,6 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !If [UseSubEnvironment, !Ref SubEnvironment, !Ref Environment]
-          DUMMY_ENV_VAR: hello
           AMC_PUBLIC_ENCRYPTION_KEY: !If
             - IsLocalEnvironment
             - |
