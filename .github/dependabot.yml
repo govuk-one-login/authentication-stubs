@@ -47,3 +47,35 @@ updates:
       time: "03:00"
     cooldown:
       default-days: 7
+  - package-ecosystem: npm
+    directory: "/amc-stub"
+    open-pull-requests-limit: 10
+    groups:
+      npm-eslint-dependencies:
+        patterns:
+          - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 22" ]
+    target-branch: main
+    schedule:
+      interval: daily
+      time: "03:00"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: npm
+    directory: "/notify-stub"
+    open-pull-requests-limit: 10
+    groups:
+      npm-eslint-dependencies:
+        patterns:
+          - "*eslint*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [ "> 24" ]
+    target-branch: main
+    schedule:
+      interval: daily
+      time: "03:00"
+    cooldown:
+      default-days: 7
