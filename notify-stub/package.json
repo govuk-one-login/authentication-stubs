@@ -18,7 +18,7 @@
     "@types/aws-lambda": "8.10.145",
     "@types/node": "24.0.3",
     "esbuild": "0.25.2",
-    "prettier": "3.6.2",
+    "prettier": "3.8.1",
     "typescript": "5.7.2"
   }
 }
