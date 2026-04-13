@@ -21,3 +21,8 @@ export enum AMCScopes {
   ACCOUNT_DELETE = "account-delete",
   PASSKEY_CREATE = "passkey-create",
 }
+
+export enum AccessTokenApi {
+  ACCOUNT_MANAGEMENT = "account-management",
+  ACCOUNT_DATA = "account-data",
+}
