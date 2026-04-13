@@ -1,5 +1,5 @@
 import { JWTPayload } from "jose";
-import { AMCScopes } from "./enums.js";
+import { AccessTokenApi, AMCScopes } from "./enums.js";
 
 export interface AccessTokenPayload extends JWTPayload {
   client_id: string;
@@ -71,3 +71,11 @@ export interface ParsedBody {
   email: string;
   scope: AMCScopesValues;
 }
+
+export interface JwksConfig {
+  jwksEndpoint: string;
+  backupKey: string;
+}
+
+export type AccessTokenApiType =
+  (typeof AccessTokenApi)[keyof typeof AccessTokenApi];

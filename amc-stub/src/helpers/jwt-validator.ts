@@ -1,20 +1,42 @@
 import { getPublicSigningKey } from "./jwks-helper.ts";
 import { jwtVerify, JWTVerifyResult } from "jose";
 import {
+  AccessTokenApiType,
   AccessTokenPayload,
   AuthorizationRequestPayload,
+  JwksConfig,
   VerifiedAuthorizationRequestPayload,
 } from "../types/types.ts";
-import { AMCScopes } from "../types/enums.ts";
+import { AccessTokenApi, AMCScopes } from "../types/enums.ts";
 import { logger } from "../../logger.ts";
 
+const getAccessTokenConfig = () =>
+  new Map<AccessTokenApiType, JwksConfig>([
+    [
+      AccessTokenApi.ACCOUNT_MANAGEMENT,
+      {
+        jwksEndpoint: process.env.AMC_JWKS_ENDPOINT as string,
+        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
+      },
+    ],
+    [
+      AccessTokenApi.ACCOUNT_DATA,
+      {
+        jwksEndpoint: process.env.AD_JWKS_ENDPOINT as string,
+        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
+      },
+    ],
+  ]);
+
 async function validateAccessToken(
-  accessTokenJWT: string
+  accessTokenJWT: string,
+  tokenType: AccessTokenApiType
 ): Promise<JWTVerifyResult<AccessTokenPayload> | string> {
+  const accessTokenConfig = getAccessTokenConfig();
   const publicSigningKeyAuthAudience = await getPublicSigningKey(
     accessTokenJWT,
-    process.env.AMC_JWKS_ENDPOINT,
-    process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE
+    accessTokenConfig.get(tokenType)?.jwksEndpoint,
+    accessTokenConfig.get(tokenType)?.backupKey
   );
 
   const verifiedJWT = await jwtVerify<AccessTokenPayload>(
@@ -197,12 +219,18 @@ export async function validateCompositeJWT(
 
   const accessToken =
     account_management_api_access_token ?? account_data_api_access_token;
+  const tokenType: AccessTokenApiType = account_management_api_access_token
+    ? AccessTokenApi.ACCOUNT_MANAGEMENT
+    : AccessTokenApi.ACCOUNT_DATA;
 
   if (!accessToken) {
     return "The authorization request JWT payload must contain an access token";
   }
 
-  const accessTokenResultOrError = await validateAccessToken(accessToken);
+  const accessTokenResultOrError = await validateAccessToken(
+    accessToken,
+    tokenType
+  );
 
   if (typeof accessTokenResultOrError === "string") {
     return accessTokenResultOrError;
