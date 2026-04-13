@@ -60,7 +60,7 @@ describe("validateRequiredHeaders", () => {
 
     expect(result?.statusCode).to.eq(400);
     expect(result?.body).to.eq(
-      "Missing required headers: client-session-id, txma-audit-encoded, session-id, x-forwarded-for, user-language"
+      "Missing required headers: client-session-id, session-id, x-forwarded-for, user-language"
     );
   });
 
@@ -71,7 +71,7 @@ describe("validateRequiredHeaders", () => {
 
     expect(result?.statusCode).to.eq(400);
     expect(result?.body).to.eq(
-      "Missing required headers: di-persistent-session-id, client-session-id, txma-audit-encoded, session-id, x-forwarded-for, user-language"
+      "Missing required headers: di-persistent-session-id, client-session-id, session-id, x-forwarded-for, user-language"
     );
   });
 });
