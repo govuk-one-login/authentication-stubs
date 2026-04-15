@@ -5,6 +5,7 @@ import { truncate } from "./truncate-helper.ts";
 const REQUIRED_HEADERS = [
   "di-persistent-session-id",
   "client-session-id",
+  "txma-audit-encoded",
   "session-id",
   "x-forwarded-for",
   "user-language",
