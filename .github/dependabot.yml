@@ -2,16 +2,16 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: "/"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 8
     target-branch: main
     schedule:
-      interval: daily
-      time: "03:00"
+      interval: "cron"
+      cronjob: "0 3 1,15 * *"
     cooldown:
       default-days: 7
   - package-ecosystem: npm
     directory: "/orchestration-stub"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     groups:
       npm-babel-dependencies:
         patterns:
@@ -27,13 +27,13 @@ updates:
           - "version-update:semver-patch"
     target-branch: main
     schedule:
-      interval: daily
-      time: "03:00"
+      interval: "cron"
+      cronjob: "0 3 1,15 * *"
     cooldown:
       default-days: 7
   - package-ecosystem: npm
     directory: "/ipv-stub"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     groups:
       npm-eslint-dependencies:
         patterns:
@@ -49,13 +49,13 @@ updates:
           - "version-update:semver-patch"
     target-branch: main
     schedule:
-      interval: daily
-      time: "03:00"
+      interval: "cron"
+      cronjob: "0 3 1,15 * *"
     cooldown:
       default-days: 7
   - package-ecosystem: npm
     directory: "/amc-stub"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     groups:
       npm-eslint-dependencies:
         patterns:
@@ -68,13 +68,13 @@ updates:
           - "version-update:semver-patch"
     target-branch: main
     schedule:
-      interval: daily
-      time: "03:00"
+      interval: "cron"
+      cronjob: "0 3 1,15 * *"
     cooldown:
       default-days: 7
   - package-ecosystem: npm
     directory: "/notify-stub"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     groups:
       npm-eslint-dependencies:
         patterns:
@@ -87,7 +87,7 @@ updates:
           - "version-update:semver-patch"
     target-branch: main
     schedule:
-      interval: daily
-      time: "03:00"
+      interval: "cron"
+      cronjob: "0 3 1,15 * *"
     cooldown:
       default-days: 7
