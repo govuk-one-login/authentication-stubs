@@ -10,7 +10,7 @@
     "@aws-sdk/lib-dynamodb": "3.1027.0",
     "jsonwebtoken": "9.0.2",
     "pino": "9.5.0",
-    "jose": "6.1.3"
+    "jose": "6.2.2"
   },
   "scripts": {
     "build": "sam build --template template.yaml --build-dir build/amc",
