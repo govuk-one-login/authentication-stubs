@@ -44,6 +44,14 @@ async function get(event: APIGatewayProxyEvent) {
     throw new CodedError(400, "Request query string parameter not found");
   }
 
+  if (!event.queryStringParameters["scope"]) {
+    throw new CodedError(400, "scope query string parameter not found");
+  }
+
+  if (!event.queryStringParameters["redirect_uri"]) {
+    throw new CodedError(400, "redirect_uri query string parameter not found");
+  }
+
   const amcPrivateEncryptionKey = process.env.AMC_PRIVATE_ENCRYPTION_KEY;
   if (!amcPrivateEncryptionKey) {
     throw new CodedError(500, "Private encryption key not found");

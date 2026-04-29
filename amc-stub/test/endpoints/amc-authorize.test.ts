@@ -60,6 +60,8 @@ describe("AMC Authorize Stub Test", () => {
 
         const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
           request: encryptedJWT,
+          scope: scope,
+          redirect_uri: "https://example.com/callback",
         });
 
         const result = await handler(event);
@@ -99,6 +101,41 @@ describe("AMC Authorize Stub Test", () => {
         expect((error as { code: number }).code).to.eq(400);
         expect((error as Error).message).to.eq(
           "Request query string parameter not found"
+        );
+      }
+    });
+
+    it("should return 400 when scope parameter is missing", async () => {
+      const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
+        request: "some-encrypted-jwt",
+      });
+
+      try {
+        await handler(event);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(Error);
+        expect((error as { code: number }).code).to.eq(400);
+        expect((error as Error).message).to.eq(
+          "scope query string parameter not found"
+        );
+      }
+    });
+
+    it("should return 400 when redirect_uri parameter is missing", async () => {
+      const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
+        request: "some-encrypted-jwt",
+        scope: "passkey-create",
+      });
+
+      try {
+        await handler(event);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(Error);
+        expect((error as { code: number }).code).to.eq(400);
+        expect((error as Error).message).to.eq(
+          "redirect_uri query string parameter not found"
         );
       }
     });
