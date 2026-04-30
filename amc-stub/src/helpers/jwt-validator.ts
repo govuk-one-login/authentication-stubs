@@ -137,23 +137,17 @@ async function validateAuthorizationRequest(
     return error;
   }
 
-  const environment = process.env.ENVIRONMENT || "local";
-  let expectedIssuer: string;
-  if (environment === "local") {
-    expectedIssuer = "https://signin.account.gov.uk";
-  } else if (environment.startsWith("authdev")) {
-    expectedIssuer = `https://signin.${environment}.dev.account.gov.uk`;
-  } else {
-    expectedIssuer = `https://signin.${environment}.account.gov.uk`;
-  }
-
-  if (verifiedJWT.payload.iss !== expectedIssuer) {
+  if (verifiedJWT.payload.iss !== "auth") {
     const error = "The authorization request JWT payload issuer is invalid";
-    logger.error(error, { payload: verifiedJWT.payload, expectedIssuer });
+    logger.error(error, {
+      payload: verifiedJWT.payload,
+      expectedIssuer: "auth",
+    });
     return error;
   }
 
   let expectedAudience: string;
+  const environment = process.env.ENVIRONMENT || "local";
   if (environment === "local") {
     expectedAudience = "https://manage.account.gov.uk/authorize";
   } else if (environment.startsWith("authdev")) {
@@ -182,8 +176,8 @@ async function validateAuthorizationRequest(
     return error;
   }
 
-  if (verifiedJWT.payload.client_id !== "auth_amc") {
-    const error = "The authorization request JWT client ID must be 'auth_amc'";
+  if (verifiedJWT.payload.client_id !== "auth") {
+    const error = "The authorization request JWT client ID must be 'auth'";
     logger.error(error, { payload: verifiedJWT.payload });
     return error;
   }

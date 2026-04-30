@@ -15,8 +15,9 @@ const textEncoder = new TextEncoder();
 
 export const TEST_CONSTANTS = {
   SUBJECT: "urn:fdc:gov.uk:2022:7KWZkhSXFYrmMP_SRsZJU-0Z4AQ",
-  CLIENT_ID: "auth_amc",
-  ISSUER: "https://signin.account.gov.uk",
+  CLIENT_ID: "auth",
+  ISSUER: "auth",
+  ACCESS_TOKEN_ISSUER: "https://signin.account.gov.uk",
   AMC_AUDIENCE: "https://manage.account.gov.uk/authorize",
   AUTH_AUDIENCE: "https://manage.account.gov.uk",
   REDIRECT_URI: 'https://signin.account.gov.uk/amc/callback/authorize"',
@@ -66,7 +67,7 @@ export const createTestEvent = (
 export class AccessTokenBuilder {
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
   private scope: string | undefined = AMCScopes.ACCOUNT_DELETE;
-  private iss: string | undefined = TEST_CONSTANTS.ISSUER;
+  private iss: string | undefined = TEST_CONSTANTS.ACCESS_TOKEN_ISSUER;
   private aud: string | undefined = TEST_CONSTANTS.AUTH_AUDIENCE;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
   private jti: string | undefined = TEST_CONSTANTS.ACCESS_TOKEN_JTI;

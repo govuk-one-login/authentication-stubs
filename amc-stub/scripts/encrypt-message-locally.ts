@@ -76,7 +76,7 @@ const createRequestJWT = async (scope: string) => {
   const now = Math.floor(Date.now() / 1000);
   const requestPayload = {
     iss: "https://signin.account.gov.uk",
-    client_id: "auth_amc",
+    client_id: "auth",
     aud: "https://manage.account.gov.uk/authorize",
     response_type: "code",
     redirect_uri: "https://signin.account.gov.uk/{callback_endpoint}",
