@@ -80,7 +80,7 @@ describe("jwt validator tests", () => {
         scope
       );
       expect(payload.account_management_api_access_token!.iss).to.equal(
-        TEST_CONSTANTS.ISSUER
+        TEST_CONSTANTS.ACCESS_TOKEN_ISSUER
       );
       expect(payload.account_management_api_access_token!.aud).to.equal(
         TEST_CONSTANTS.AUTH_AUDIENCE
@@ -321,7 +321,7 @@ describe("jwt validator tests", () => {
         .build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
-        "The authorization request JWT client ID must be 'auth_amc'"
+        "The authorization request JWT client ID must be 'auth'"
       );
     });
   });
