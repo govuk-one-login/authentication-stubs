@@ -267,7 +267,7 @@ Mappings:
       authenticationBackendUrl: "https://8ttd794ay4-vpce-07078f5f005fe5efc.execute-api.eu-west-2.amazonaws.com/staging/"
       authenticationFrontendUrl: "https://signin.staging.account.gov.uk/"
       hostedZoneId: "Z06032813E21PC11LZZAB"
-      rpClientId: "nsR2wZ7EebJ2VOzE1LUa9iAVadunWQP3"
+      rpClientId: "staging-orch-stub"
       rpSectorHost: "perf-test-rp-staging.build.stubs.account.gov.uk"
       defaultProvisionedConcurrency: 3
       lambdaMemorySize: "1536"
