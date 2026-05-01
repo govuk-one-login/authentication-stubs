@@ -55,7 +55,11 @@ describe("AMC Authorize Stub Test", () => {
         const encryptedJWT = await new CompactEncrypt(
           textEncoder.encode(compositeJWT)
         )
-          .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+          .setProtectedHeader({
+            alg: "RSA-OAEP-256",
+            enc: "A256GCM",
+            kid: "test-key-id",
+          })
           .encrypt(publicKey);
 
         const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
@@ -87,6 +91,41 @@ describe("AMC Authorize Stub Test", () => {
         expect((error as Error).message).to.eq(
           "Query string parameters are null"
         );
+      }
+    });
+
+    it("should return 400 when kid is missing from JWE header", async () => {
+      const accessToken = await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      ).build();
+      const compositeJWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        accessToken
+      ).build();
+
+      const publicKey = await importSPKI(
+        keys.amcPublicEncryptionKey,
+        "RSA-OAEP-256"
+      );
+      const encryptedJWT = await new CompactEncrypt(
+        textEncoder.encode(compositeJWT)
+      )
+        .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+        .encrypt(publicKey);
+
+      const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
+        request: encryptedJWT,
+        scope: "account-delete",
+        redirect_uri: "https://example.com/callback",
+      });
+
+      try {
+        await handler(event);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(Error);
+        expect((error as { code: number }).code).to.eq(400);
+        expect((error as Error).message).to.eq("JAR header is missing kid");
       }
     });
 

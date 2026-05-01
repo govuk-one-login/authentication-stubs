@@ -72,6 +72,10 @@ async function get(event: APIGatewayProxyEvent) {
     throw new CodedError(500, "compactDecrypt returned undefined values");
   }
 
+  if (!protectedHeader.kid) {
+    throw new CodedError(400, "JAR header is missing kid");
+  }
+
   const textDecoder = new TextDecoder();
   const encodedJwt = textDecoder.decode(plaintext);
 
