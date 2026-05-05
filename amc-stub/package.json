@@ -42,7 +42,7 @@
     "esbuild": "0.28.0",
     "eslint": "10.2.0",
     "eslint-plugin-no-only-tests": "3.3.0",
-    "globals": "17.4.0",
+    "globals": "17.5.0",
     "mocha": "11.7.5",
     "prettier": "3.8.1",
     "sinon": "21.1.0",
