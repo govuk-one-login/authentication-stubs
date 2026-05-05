@@ -20,7 +20,7 @@
     "eslint": "^10.2.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "express": "^5.1.0",
-    "globals": "^17.4.0",
+    "globals": "^17.5.0",
     "jest": "30.3.0",
     "jest-junit": "16.0.0",
     "jest-silent-reporter": "0.6.0",
