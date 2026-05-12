@@ -14,7 +14,7 @@ import { randomBytes } from "crypto";
 import {
   AMCAuthorizationResult,
   AMCAuthorizeResponse,
-  AMCJourney,
+  AMCAction,
   ParsedBody,
 } from "../types/types.ts";
 import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
@@ -183,8 +183,8 @@ function buildAMCOutcome(
     };
   }
 
-  const journey: AMCJourney = {
-    journey: scope,
+  const action: AMCAction = {
+    action: scope,
     timestamp: Date.now(),
     success: isSuccess,
     details,
@@ -196,7 +196,7 @@ function buildAMCOutcome(
     email,
     scope,
     success: isSuccess,
-    journeys: [journey],
+    actions: [action],
   };
 }
 
