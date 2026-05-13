@@ -243,6 +243,7 @@ const jarPayload = (
       local_account_id: "",
       public_account_id: "",
       legacy_account_id: "",
+      account_data_api_access_token: "",
     },
   };
   const payload: JWTPayload = {
