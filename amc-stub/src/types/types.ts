@@ -33,17 +33,17 @@ export interface AMCAuthorizationResult {
   email: string;
   scope: string;
   success: boolean;
-  journeys: AMCJourney[];
+  actions: AMCAction[];
 }
 
-export interface AMCJourney {
-  journey: string;
+export interface AMCAction {
+  action: string;
   timestamp: number;
   success: boolean;
-  details: AMCJourneyErrorDetails | object;
+  details: AMCActionErrorDetails | object;
 }
 
-export interface AMCJourneyErrorDetails {
+export interface AMCActionErrorDetails {
   error: {
     code: number;
     description: string;
