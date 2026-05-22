@@ -34,7 +34,7 @@ describe("AMC Authorize Stub Test", () => {
       process.env.ENVIRONMENT = "local";
     });
 
-    [AMCScopes.ACCOUNT_DELETE, AMCScopes.PASSKEY_CREATE].forEach((scope) => {
+    Object.values(AMCScopes).forEach((scope) => {
       it(`should return 200 with HTML for valid GET request with scope ${scope}`, async () => {
         const accessToken = await new AccessTokenBuilder(
           keys.authPrivateSigningKeyAuthAudience

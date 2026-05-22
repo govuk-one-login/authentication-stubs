@@ -18,8 +18,10 @@ export enum JoseAlgorithms {
 }
 
 export enum AMCScopes {
-  ACCOUNT_DELETE = "account-delete",
   PASSKEY_CREATE = "passkey-create",
+  PASSKEY_RETRIEVE = "passkey-retrieve",
+  PASSKEY_UPDATE = "passkey-update",
+  PASSKEY_DELETE = "passkey-delete",
 }
 
 export enum AccessTokenApi {
