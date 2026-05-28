@@ -7,7 +7,13 @@ import {
   JwksConfig,
   VerifiedAuthorizationRequestPayload,
 } from "../types/types.ts";
-import { AccessTokenApi, AMCScopes } from "../types/enums.ts";
+import {
+  AccessTokenApi,
+  AccountDataAccessTokenScopes,
+  AccessTokenFieldName,
+  AMCScopes,
+  SFADAccessTokenScopes,
+} from "../types/enums.ts";
 import { logger } from "../../logger.ts";
 
 const getAccessTokenConfig = () =>
@@ -44,11 +50,15 @@ async function validateAccessToken(
     publicSigningKeyAuthAudience
   );
 
-  const validScopes = Object.values(AMCScopes);
+  const scopesByTokenType: Record<AccessTokenApi, string[]> = {
+    [AccessTokenApi.ACCOUNT_DATA]: Object.values(AccountDataAccessTokenScopes),
+    [AccessTokenApi.ACCOUNT_MANAGEMENT]: Object.values(SFADAccessTokenScopes),
+  };
+
+  const validScopes = scopesByTokenType[tokenType];
+
   if (
-    !verifiedJWT.payload.scope
-      ?.split(" ")
-      .every((s) => validScopes.includes(s as AMCScopes))
+    !verifiedJWT.payload.scope?.split(" ").every((s) => validScopes.includes(s))
   ) {
     const error = "The access token payload contains invalid scopes";
     logger.error(error, { payload: verifiedJWT.payload });
@@ -211,15 +221,28 @@ export async function validateCompositeJWT(
     return "The authorization request JWT payload must contain only one access token";
   }
 
+  const expectedTokenField =
+    authorizationRequestPayload.scope === AMCScopes.ACCOUNT_DELETE
+      ? AccessTokenFieldName.ACCOUNT_MANAGEMENT
+      : AccessTokenFieldName.ACCOUNT_DATA;
+
   const accessToken =
     account_management_api_access_token ?? account_data_api_access_token;
-  const tokenType: AccessTokenApiType = account_management_api_access_token
-    ? AccessTokenApi.ACCOUNT_MANAGEMENT
-    : AccessTokenApi.ACCOUNT_DATA;
+  const actualTokenField = account_management_api_access_token
+    ? AccessTokenFieldName.ACCOUNT_MANAGEMENT
+    : AccessTokenFieldName.ACCOUNT_DATA;
 
   if (!accessToken) {
     return "The authorization request JWT payload must contain an access token";
   }
+
+  if (actualTokenField !== expectedTokenField) {
+    return `The access token field does not match the outer scope. Expected ${expectedTokenField} for scope ${authorizationRequestPayload.scope}`;
+  }
+
+  const tokenType: AccessTokenApiType = account_management_api_access_token
+    ? AccessTokenApi.ACCOUNT_MANAGEMENT
+    : AccessTokenApi.ACCOUNT_DATA;
 
   const accessTokenResultOrError = await validateAccessToken(
     accessToken,
@@ -232,14 +255,10 @@ export async function validateCompositeJWT(
 
   const { payload: accessTokenPayload } = accessTokenResultOrError;
 
-  const accessTokenFieldName = account_management_api_access_token
-    ? "account_management_api_access_token"
-    : "account_data_api_access_token";
-
   return {
     payload: {
       ...authorizationRequestPayload,
-      [accessTokenFieldName]: accessTokenPayload,
+      [actualTokenField]: accessTokenPayload,
     } as VerifiedAuthorizationRequestPayload,
   };
 }

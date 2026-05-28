@@ -29,6 +29,7 @@ logs/
 # Contract Tests
 /*/src/test/pact/
 node_modules
+dist/
 .infracost
 
 *.pem
