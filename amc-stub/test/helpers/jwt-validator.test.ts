@@ -8,7 +8,11 @@ import {
   TEST_CONSTANTS,
 } from "../test-helpers.ts";
 import { validateCompositeJWT } from "../../src/helpers/jwt-validator.ts";
-import { AMCScopes } from "../../src/types/enums.ts";
+import {
+  AccountDataAccessTokenScopes,
+  AMCScopes,
+  SFADAccessTokenScopes,
+} from "../../src/types/enums.ts";
 import { VerifiedAuthorizationRequestPayload } from "../../src/types/types.ts";
 import { expect } from "chai";
 
@@ -26,75 +30,143 @@ describe("jwt validator tests", () => {
     delete process.env.ENVIRONMENT;
   });
 
-  [AMCScopes.ACCOUNT_DELETE, AMCScopes.PASSKEY_CREATE].forEach((scope) => {
-    it(`should validate the composite JWT for scope ${scope}`, async () => {
-      const JWT = await new CompositeJWTBuilder(
-        keys.authPrivateSigningKeyAMCAudience,
-        await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
-          .withScope(scope)
-          .build()
-      )
-        .withScope(scope)
-        .build();
+  it(`should validate the composite JWT for scope account-delete`, async () => {
+    const allSFADScopes = Object.values(SFADAccessTokenScopes);
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope(allSFADScopes)
+        .build(),
+      undefined
+    )
+      .withScope(AMCScopes.ACCOUNT_DELETE)
+      .build();
 
-      const result = await validateCompositeJWT(JWT);
-      expect(result).to.not.be.a("string");
-      const { payload } = result as {
-        payload: VerifiedAuthorizationRequestPayload;
-      };
+    const result = await validateCompositeJWT(JWT);
+    expect(result).to.not.be.a("string");
+    const { payload } = result as {
+      payload: VerifiedAuthorizationRequestPayload;
+    };
 
-      const now = Math.floor(Date.now() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
-      // Authorization Request JWT assertions
-      expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
-      expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
-      expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
-      expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
-      expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
-      expect(payload.scope).to.equal(scope);
-      expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
-      expect(payload.jti).to.equal(TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI);
-      expect(payload.iat).to.be.closeTo(now, 10);
-      expect(payload.nbf).to.be.closeTo(now, 10);
-      expect(payload.exp).to.equal(payload.iat! + 300);
-      expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
-      expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
-      expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
+    // Authorization Request JWT assertions
+    expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
+    expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
+    expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
+    expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
+    expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
+    expect(payload.scope).to.equal(AMCScopes.ACCOUNT_DELETE);
+    expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
+    expect(payload.jti).to.equal(TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI);
+    expect(payload.iat).to.be.closeTo(now, 10);
+    expect(payload.nbf).to.be.closeTo(now, 10);
+    expect(payload.exp).to.equal(payload.iat! + 300);
+    expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
+    expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
+    expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
 
-      // Access Token JWT assertions
-      expect(payload.account_management_api_access_token!.sub).to.equal(
-        TEST_CONSTANTS.SUBJECT
-      );
-      expect(payload.account_management_api_access_token!.iat).to.be.closeTo(
-        now,
-        10
-      );
-      expect(payload.account_management_api_access_token!.nbf).to.be.closeTo(
-        now,
-        10
-      );
-      expect(payload.account_management_api_access_token!.exp).to.equal(
-        payload.iat! + 3600
-      );
-      expect(payload.account_management_api_access_token!.scope).to.equal(
-        scope
-      );
-      expect(payload.account_management_api_access_token!.iss).to.equal(
-        TEST_CONSTANTS.ACCESS_TOKEN_ISSUER
-      );
-      expect(payload.account_management_api_access_token!.aud).to.equal(
-        TEST_CONSTANTS.AUTH_AUDIENCE
-      );
-      expect(payload.account_management_api_access_token!.client_id).to.equal(
-        TEST_CONSTANTS.CLIENT_ID
-      );
-      expect(payload.account_management_api_access_token!.sid).to.equal(
-        TEST_CONSTANTS.SESSION_ID
-      );
-      expect(payload.account_management_api_access_token!.jti).to.equal(
-        TEST_CONSTANTS.ACCESS_TOKEN_JTI
-      );
-    });
+    // Access Token JWT assertions
+    expect(payload.account_management_api_access_token!.sub).to.equal(
+      TEST_CONSTANTS.SUBJECT
+    );
+    expect(payload.account_management_api_access_token!.iat).to.be.closeTo(
+      now,
+      10
+    );
+    expect(payload.account_management_api_access_token!.nbf).to.be.closeTo(
+      now,
+      10
+    );
+    expect(payload.account_management_api_access_token!.exp).to.equal(
+      payload.iat! + 3600
+    );
+    expect(payload.account_management_api_access_token!.scope).to.equal(
+      allSFADScopes.join(" ")
+    );
+    expect(payload.account_management_api_access_token!.iss).to.equal(
+      TEST_CONSTANTS.ACCESS_TOKEN_ISSUER
+    );
+    expect(payload.account_management_api_access_token!.aud).to.equal(
+      TEST_CONSTANTS.AUTH_AUDIENCE
+    );
+    expect(payload.account_management_api_access_token!.client_id).to.equal(
+      TEST_CONSTANTS.CLIENT_ID
+    );
+    expect(payload.account_management_api_access_token!.sid).to.equal(
+      TEST_CONSTANTS.SESSION_ID
+    );
+    expect(payload.account_management_api_access_token!.jti).to.equal(
+      TEST_CONSTANTS.ACCESS_TOKEN_JTI
+    );
+  });
+
+  it(`should validate the composite JWT for scope passkey-create`, async () => {
+    const allAccountDataScopes = Object.values(AccountDataAccessTokenScopes);
+    const accessToken = await new AccessTokenBuilder(
+      keys.authPrivateSigningKeyAuthAudience
+    )
+      .withScope(allAccountDataScopes)
+      .build();
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      undefined,
+      accessToken
+    )
+      .withScope(AMCScopes.PASSKEY_CREATE)
+      .build();
+
+    const result = await validateCompositeJWT(JWT);
+    expect(result).to.not.be.a("string");
+    const { payload } = result as {
+      payload: VerifiedAuthorizationRequestPayload;
+    };
+
+    const now = Math.floor(Date.now() / 1000);
+
+    // Authorization Request JWT assertions
+    expect(payload.iss).to.equal(TEST_CONSTANTS.ISSUER);
+    expect(payload.client_id).to.equal(TEST_CONSTANTS.CLIENT_ID);
+    expect(payload.aud).to.equal(TEST_CONSTANTS.AMC_AUDIENCE);
+    expect(payload.response_type).to.equal(TEST_CONSTANTS.RESPONSE_TYPE);
+    expect(payload.redirect_uri).to.equal(TEST_CONSTANTS.REDIRECT_URI);
+    expect(payload.scope).to.equal(AMCScopes.PASSKEY_CREATE);
+    expect(payload.state).to.equal(TEST_CONSTANTS.STATE);
+    expect(payload.jti).to.equal(TEST_CONSTANTS.AUTHORIZATION_REQUEST_JTI);
+    expect(payload.iat).to.be.closeTo(now, 10);
+    expect(payload.nbf).to.be.closeTo(now, 10);
+    expect(payload.exp).to.equal(payload.iat! + 300);
+    expect(payload.sub).to.equal(TEST_CONSTANTS.SUBJECT);
+    expect(payload.email).to.equal(TEST_CONSTANTS.EMAIL);
+    expect(payload.public_sub).to.equal(TEST_CONSTANTS.PUBLIC_SUBJECT);
+
+    // Access Token JWT assertions
+    expect(payload.account_data_api_access_token!.sub).to.equal(
+      TEST_CONSTANTS.SUBJECT
+    );
+    expect(payload.account_data_api_access_token!.iat).to.be.closeTo(now, 10);
+    expect(payload.account_data_api_access_token!.nbf).to.be.closeTo(now, 10);
+    expect(payload.account_data_api_access_token!.exp).to.equal(
+      payload.iat! + 3600
+    );
+    expect(payload.account_data_api_access_token!.scope).to.equal(
+      allAccountDataScopes.join(" ")
+    );
+    expect(payload.account_data_api_access_token!.iss).to.equal(
+      TEST_CONSTANTS.ACCESS_TOKEN_ISSUER
+    );
+    expect(payload.account_data_api_access_token!.aud).to.equal(
+      TEST_CONSTANTS.AUTH_AUDIENCE
+    );
+    expect(payload.account_data_api_access_token!.client_id).to.equal(
+      TEST_CONSTANTS.CLIENT_ID
+    );
+    expect(payload.account_data_api_access_token!.sid).to.equal(
+      TEST_CONSTANTS.SESSION_ID
+    );
+    expect(payload.account_data_api_access_token!.jti).to.equal(
+      TEST_CONSTANTS.ACCESS_TOKEN_JTI
+    );
   });
 
   // ====================================
@@ -105,14 +177,15 @@ describe("jwt validator tests", () => {
     "INVALID_SCOPE",
     undefined,
     "",
-    `${AMCScopes.ACCOUNT_DELETE} EXTRA_SCOPE`,
+    `${SFADAccessTokenScopes.ACCOUNT_DELETE} EXTRA_SCOPE`,
   ].forEach((scope) => {
     it(`should return an error string if the access token scope is ${scope}`, async () => {
       const JWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
           .withScope(scope)
-          .build()
+          .build(),
+        undefined
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -127,7 +200,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
           .withIssuer(issuer)
-          .build()
+          .build(),
+        undefined
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -142,7 +216,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
           .withAudience(audience)
-          .build()
+          .build(),
+        undefined
       ).build();
 
       expect(await validateCompositeJWT(JWT)).to.equal(
@@ -156,7 +231,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
         .withSubject(undefined)
-        .build()
+        .build(),
+      undefined
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
@@ -169,7 +245,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
         .withClientId(undefined)
-        .build()
+        .build(),
+      undefined
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
@@ -182,7 +259,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
         .withJti(undefined)
-        .build()
+        .build(),
+      undefined
     ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
@@ -193,10 +271,9 @@ describe("jwt validator tests", () => {
   it("should return an error string if no access token is present", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
-      ""
-    )
-      .withAccountManagementApiAccessToken(undefined)
-      .build();
+      undefined,
+      undefined
+    ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
       "The authorization request JWT payload must contain an access token"
@@ -209,13 +286,48 @@ describe("jwt validator tests", () => {
     ).build();
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
+      accessToken,
       accessToken
-    )
-      .withAccountDataApiAccessToken(accessToken)
-      .build();
+    ).build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
       "The authorization request JWT payload must contain only one access token"
+    );
+  });
+
+  it("should return an error when outer scope is account-delete but access token is in account_data_api_access_token", async () => {
+    const accessToken = await new AccessTokenBuilder(
+      keys.authPrivateSigningKeyAuthAudience
+    ).build();
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      undefined,
+      accessToken
+    )
+      .withScope(AMCScopes.ACCOUNT_DELETE)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The access token field does not match the outer scope. Expected account_management_api_access_token for scope account-delete"
+    );
+  });
+
+  it("should return an error when outer scope is passkey-create but access token is in account_management_api_access_token", async () => {
+    const accessToken = await new AccessTokenBuilder(
+      keys.authPrivateSigningKeyAuthAudience
+    )
+      .withScope(AccountDataAccessTokenScopes.PASSKEY_CREATE)
+      .build();
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      accessToken,
+      undefined
+    )
+      .withScope(AMCScopes.PASSKEY_CREATE)
+      .build();
+
+    expect(await validateCompositeJWT(JWT)).to.equal(
+      "The access token field does not match the outer scope. Expected account_data_api_access_token for scope passkey-create"
     );
   });
 
@@ -234,7 +346,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(
           keys.authPrivateSigningKeyAuthAudience
-        ).build()
+        ).build(),
+        undefined
       )
         .withScope(scope)
         .build();
@@ -251,7 +364,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(
           keys.authPrivateSigningKeyAuthAudience
-        ).build()
+        ).build(),
+        undefined
       )
         .withIssuer(issuer)
         .build();
@@ -268,7 +382,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(
           keys.authPrivateSigningKeyAuthAudience
-        ).build()
+        ).build(),
+        undefined
       )
         .withAudience(audience)
         .build();
@@ -284,7 +399,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(
         keys.authPrivateSigningKeyAuthAudience
-      ).build()
+      ).build(),
+      undefined
     )
       .withSubject(undefined)
       .build();
@@ -299,7 +415,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(
         keys.authPrivateSigningKeyAuthAudience
-      ).build()
+      ).build(),
+      undefined
     )
       .withPublicSubject(undefined)
       .build();
@@ -315,7 +432,8 @@ describe("jwt validator tests", () => {
         keys.authPrivateSigningKeyAMCAudience,
         await new AccessTokenBuilder(
           keys.authPrivateSigningKeyAuthAudience
-        ).build()
+        ).build(),
+        undefined
       )
         .withClientId(clientId)
         .build();
@@ -331,7 +449,8 @@ describe("jwt validator tests", () => {
       keys.authPrivateSigningKeyAMCAudience,
       await new AccessTokenBuilder(
         keys.authPrivateSigningKeyAuthAudience
-      ).build()
+      ).build(),
+      undefined
     )
       .withJti(undefined)
       .build();

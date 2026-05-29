@@ -6,7 +6,12 @@ import {
   CompositeJWTBuilder,
   createTestEvent,
 } from "../test-helpers.js";
-import { AMCScopes, HttpMethod } from "../../src/types/enums.ts";
+import {
+  AccountDataAccessTokenScopes,
+  AMCScopes,
+  HttpMethod,
+  SFADAccessTokenScopes,
+} from "../../src/types/enums.ts";
 import keys from "../../data/keys.json" with { type: "json" };
 import { CompactEncrypt, importSPKI } from "jose";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
@@ -34,47 +39,15 @@ describe("AMC Authorize Stub Test", () => {
       process.env.ENVIRONMENT = "local";
     });
 
-    [AMCScopes.ACCOUNT_DELETE, AMCScopes.PASSKEY_CREATE].forEach((scope) => {
+    [AMCScopes.PASSKEY_CREATE, AMCScopes.ACCOUNT_DELETE].forEach((scope) => {
       it(`should return 200 with HTML for valid GET request with scope ${scope}`, async () => {
-        const accessToken = await new AccessTokenBuilder(
-          keys.authPrivateSigningKeyAuthAudience
-        )
-          .withScope(scope)
-          .build();
-        const compositeJWT = await new CompositeJWTBuilder(
-          keys.authPrivateSigningKeyAMCAudience,
-          accessToken
-        )
-          .withScope(scope)
-          .build();
-
-        const publicKey = await importSPKI(
-          keys.amcPublicEncryptionKey,
-          "RSA-OAEP-256"
-        );
-        const encryptedJWT = await new CompactEncrypt(
-          textEncoder.encode(compositeJWT)
-        )
-          .setProtectedHeader({
-            alg: "RSA-OAEP-256",
-            enc: "A256GCM",
-            kid: "test-key-id",
-          })
-          .encrypt(publicKey);
-
-        const event = createTestEvent(HttpMethod.GET, "/authorize", null, {
-          request: encryptedJWT,
-          scope: scope,
-          redirect_uri: "https://example.com/callback",
-        });
+        const event = await createSuccessfulTestEventForAMCScope(scope);
 
         const result = await handler(event);
 
         expect(result.statusCode).to.eq(200);
         expect(result.headers?.["Content-Type"]).to.eq("text/html");
-        expect(result.body).to.include(
-          `AMC stub (${scope.split("-").join(" ")})`
-        );
+        expect(result.body).to.include(`AMC stub (${scope.replace("-", " ")})`);
         expect(result.body).to.include("Decrypted JAR header");
       });
     });
@@ -100,7 +73,8 @@ describe("AMC Authorize Stub Test", () => {
       ).build();
       const compositeJWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
-        accessToken
+        accessToken,
+        undefined
       ).build();
 
       const publicKey = await importSPKI(
@@ -315,3 +289,50 @@ describe("AMC Authorize Stub Test", () => {
     });
   });
 });
+
+async function createSuccessfulTestEventForAMCScope(amcScope: AMCScopes) {
+  const accessToken = await new AccessTokenBuilder(
+    keys.authPrivateSigningKeyAuthAudience
+  )
+    .withScope(
+      amcScope === AMCScopes.ACCOUNT_DELETE
+        ? Object.values(SFADAccessTokenScopes)
+        : Object.values(AccountDataAccessTokenScopes)
+    )
+    .build();
+
+  const builder =
+    amcScope === AMCScopes.ACCOUNT_DELETE
+      ? new CompositeJWTBuilder(
+          keys.authPrivateSigningKeyAMCAudience,
+          accessToken,
+          undefined
+        )
+      : new CompositeJWTBuilder(
+          keys.authPrivateSigningKeyAMCAudience,
+          undefined,
+          accessToken
+        );
+
+  const compositeJWT = await builder.withScope(amcScope).build();
+
+  const publicKey = await importSPKI(
+    keys.amcPublicEncryptionKey,
+    "RSA-OAEP-256"
+  );
+  const encryptedJWT = await new CompactEncrypt(
+    textEncoder.encode(compositeJWT)
+  )
+    .setProtectedHeader({
+      alg: "RSA-OAEP-256",
+      enc: "A256GCM",
+      kid: "test-key-id",
+    })
+    .encrypt(publicKey);
+
+  return createTestEvent(HttpMethod.GET, "/authorize", null, {
+    request: encryptedJWT,
+    scope: amcScope,
+    redirect_uri: "https://example.com/callback",
+  });
+}
