@@ -64,6 +64,7 @@
     "exit": true
   },
   "overrides": {
-    "fast-xml-parser": ">=5.5.6"
+    "fast-xml-parser": ">=5.5.6",
+    "serialize-javascript": ">=7.0.5"
   }
 }
