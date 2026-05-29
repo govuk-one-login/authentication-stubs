@@ -48,5 +48,8 @@
     "unit-ci": "jest --ci --silent --colors --config jest.config.ci.ts --testLocationInResults",
     "unit:watch": "jest --watch"
   },
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "overrides": {
+    "uuid": ">=11.1.1"
+  }
 }
