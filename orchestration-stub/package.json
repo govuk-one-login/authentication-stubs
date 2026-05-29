@@ -35,6 +35,9 @@
   "license": "MIT",
   "main": "index.js",
   "name": "orch-stub",
+  "overrides": {
+    "qs": ">=6.15.2"
+  },
   "scripts": {
     "build": "esbuild src/server.ts --bundle --minify --sourcemap --platform=node --outdir=build",
     "compile": "tsc",
