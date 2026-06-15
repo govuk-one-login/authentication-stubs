@@ -39,7 +39,7 @@
     "@typescript-eslint/eslint-plugin": "8.59.0",
     "@typescript-eslint/parser": "8.59.0",
     "chai": "6.2.2",
-    "esbuild": "0.28.0",
+    "esbuild": "0.28.1",
     "eslint": "10.2.0",
     "eslint-plugin-no-only-tests": "3.3.0",
     "globals": "17.6.0",
