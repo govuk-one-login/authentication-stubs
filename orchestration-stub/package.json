@@ -5,7 +5,7 @@
   },
   "description": "Orchestration stub for Authentication",
   "devDependencies": {
-    "@babel/core": "7.29.0",
+    "@babel/core": "7.29.7",
     "@babel/preset-env": "7.29.2",
     "@babel/preset-typescript": "7.29.7",
     "@eslint/eslintrc": "^3.3.1",
@@ -36,7 +36,7 @@
   "main": "index.js",
   "name": "orch-stub",
   "overrides": {
-    "qs": ">=6.15.2"
+    "uuid": ">=11.1.1"
   },
   "scripts": {
     "build": "esbuild src/server.ts --bundle --minify --sourcemap --platform=node --outdir=build",
@@ -48,8 +48,5 @@
     "unit-ci": "jest --ci --silent --colors --config jest.config.ci.ts --testLocationInResults",
     "unit:watch": "jest --watch"
   },
-  "version": "1.0.0",
-  "overrides": {
-    "uuid": ">=11.1.1"
-  }
+  "version": "1.0.0"
 }
