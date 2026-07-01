@@ -185,7 +185,8 @@ function buildAMCOutcome(
 
   const action: AMCAction = {
     action: scope,
-    timestamp: Date.now(),
+    startedAt: Date.now(),
+    completedAt: Date.now(),
     success: isSuccess,
     details,
   };

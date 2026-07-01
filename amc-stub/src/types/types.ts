@@ -38,7 +38,8 @@ export interface AMCAuthorizationResult {
 
 export interface AMCAction {
   action: string;
-  timestamp: number;
+  startedAt: number;
+  completedAt: number;
   success: boolean;
   details: AMCActionErrorDetails | object;
 }
