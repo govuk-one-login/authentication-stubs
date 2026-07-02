@@ -21,7 +21,8 @@ describe("AMC Journey Outcome Stub Test", () => {
     actions: [
       {
         action: "account-delete",
-        timestamp: 1760718467000,
+        startedAt: 1760718467000,
+        completedAt: 1760718467000,
         success: true,
         details: {},
       },
