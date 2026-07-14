@@ -49,6 +49,14 @@ export interface AMCActionErrorDetails {
     code: number;
     description: string;
   };
+  accountInterventionsStatus?: {
+    state: {
+      blocked: boolean;
+      reproveIdentity: boolean;
+      resetPassword: boolean;
+      suspended: boolean;
+    };
+  };
 }
 
 type AMCScopesValues = (typeof AMCScopes)[keyof typeof AMCScopes];
@@ -64,6 +72,13 @@ export type AMCAuthorizeResponse =
   | PasskeysCreateResponse
   | AccountDeleteResponse;
 
+export type AccountInterventionType =
+  | "none"
+  | "blocked"
+  | "reprove-identity"
+  | "reset-password"
+  | "suspended";
+
 export interface ParsedBody {
   sub: string;
   response: AMCAuthorizeResponse;
@@ -71,6 +86,7 @@ export interface ParsedBody {
   redirect_uri: string;
   email: string;
   scope: AMCScopesValues;
+  "account-interventions"?: AccountInterventionType;
 }
 
 export interface JwksConfig {

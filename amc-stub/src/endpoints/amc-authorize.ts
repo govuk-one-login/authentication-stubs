@@ -15,7 +15,9 @@ import {
   AMCAuthorizationResult,
   AMCAuthorizeResponse,
   AMCAction,
+  AMCActionErrorDetails,
   ParsedBody,
+  AccountInterventionType,
 } from "../types/types.ts";
 import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
 
@@ -125,7 +127,8 @@ async function post(event: APIGatewayProxyEvent) {
     parsedBody.sub,
     parsedBody.response,
     parsedBody.email,
-    parsedBody.scope
+    parsedBody.scope,
+    parsedBody["account-interventions"]
   );
 
   try {
@@ -161,34 +164,20 @@ function buildAMCOutcome(
   sub: string,
   response: AMCAuthorizeResponse,
   email: string,
-  scope: AMCScopes
+  scope: AMCScopes,
+  accountInterventions?: AccountInterventionType
 ): AMCAuthorizationResult {
   const randomOutcomeId = base64url.encode(randomBytes(32));
   const isSuccess = response === "success";
-
-  let details = {};
-  if (!isSuccess) {
-    const errorDescription = responseToErrorDescriptionMap[scope]?.[response];
-    if (!errorDescription) {
-      throw new CodedError(
-        500,
-        `Cannot find error description for response: ${response}`
-      );
-    }
-    details = {
-      error: {
-        code: 1001,
-        description: errorDescription,
-      },
-    };
-  }
 
   const action: AMCAction = {
     action: scope,
     startedAt: Date.now(),
     completedAt: Date.now(),
     success: isSuccess,
-    details,
+    details: isSuccess
+      ? {}
+      : buildErrorDetails(scope, response, accountInterventions),
   };
 
   return {
@@ -201,14 +190,56 @@ function buildAMCOutcome(
   };
 }
 
-const responseToErrorDescriptionMap: Record<
-  AMCScopes,
-  Record<string, string>
-> = {
-  [AMCScopes.PASSKEY_CREATE]: {
-    failure: "JourneyFailed",
-    back: "UserBackedOutOfJourney",
-    skip: "UserAbortedJourney",
-  },
-  [AMCScopes.ACCOUNT_DELETE]: {},
-};
+function buildErrorDetails(
+  scope: AMCScopes,
+  response: AMCAuthorizeResponse,
+  accountInterventions?: AccountInterventionType
+): AMCActionErrorDetails {
+  if (accountInterventions && accountInterventions !== "none") {
+    return {
+      error: {
+        code: 1004,
+        description: "AccountHasInterventions",
+      },
+      accountInterventionsStatus: {
+        state: {
+          blocked: accountInterventions === "blocked",
+          reproveIdentity: accountInterventions === "reprove-identity",
+          resetPassword: accountInterventions === "reset-password",
+          suspended: accountInterventions === "suspended",
+        },
+      },
+    };
+  }
+
+  const errorDescription = getErrorDescription(scope, response);
+  return {
+    error: {
+      code: 1001,
+      description: errorDescription,
+    },
+  };
+}
+
+function getErrorDescription(
+  scope: AMCScopes,
+  response: AMCAuthorizeResponse
+): string {
+  const descriptions: Record<AMCScopes, Record<string, string>> = {
+    [AMCScopes.PASSKEY_CREATE]: {
+      failure: "JourneyFailed",
+      back: "UserBackedOutOfJourney",
+      skip: "UserAbortedJourney",
+    },
+    [AMCScopes.ACCOUNT_DELETE]: {},
+  };
+
+  const description = descriptions[scope]?.[response];
+  if (!description) {
+    throw new CodedError(
+      500,
+      `Cannot find error description for response: ${response}`
+    );
+  }
+  return description;
+}
