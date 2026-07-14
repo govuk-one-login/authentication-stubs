@@ -206,6 +206,7 @@ const responseToErrorDescriptionMap: Record<
   Record<string, string>
 > = {
   [AMCScopes.PASSKEY_CREATE]: {
+    failure: "JourneyFailed",
     back: "UserBackedOutOfJourney",
     skip: "UserAbortedJourney",
   },
