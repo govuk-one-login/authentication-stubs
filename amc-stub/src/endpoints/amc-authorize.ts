@@ -103,9 +103,13 @@ async function post(event: APIGatewayProxyEvent) {
     throw new CodedError(400, "Missing request body");
   }
 
-  const parsedBody = (event.body
-    ? Object.fromEntries(new URLSearchParams(event.body))
-    : {}) as unknown as ParsedBody;
+  const urlParams = new URLSearchParams(event.body);
+  const parsedBody = {
+    ...Object.fromEntries(urlParams),
+    "account-interventions": urlParams.getAll(
+      "account-interventions"
+    ) as AccountInterventionType[],
+  } as unknown as ParsedBody;
 
   const redirectUri = parsedBody["redirect_uri"];
   if (!redirectUri) {
@@ -165,7 +169,7 @@ function buildAMCOutcome(
   response: AMCAuthorizeResponse,
   email: string,
   scope: AMCScopes,
-  accountInterventions?: AccountInterventionType
+  accountInterventions?: AccountInterventionType[]
 ): AMCAuthorizationResult {
   const randomOutcomeId = base64url.encode(randomBytes(32));
   const isSuccess = response === "success";
@@ -193,9 +197,14 @@ function buildAMCOutcome(
 function buildErrorDetails(
   scope: AMCScopes,
   response: AMCAuthorizeResponse,
-  accountInterventions?: AccountInterventionType
+  accountInterventions?: AccountInterventionType[]
 ): AMCActionErrorDetails {
-  if (accountInterventions && accountInterventions !== "none") {
+  const hasInterventions =
+    accountInterventions &&
+    accountInterventions.length > 0 &&
+    !accountInterventions.every((i) => i === "none");
+
+  if (hasInterventions) {
     return {
       error: {
         code: 1004,
@@ -203,10 +212,10 @@ function buildErrorDetails(
       },
       accountInterventionsStatus: {
         state: {
-          blocked: accountInterventions === "blocked",
-          reproveIdentity: accountInterventions === "reprove-identity",
-          resetPassword: accountInterventions === "reset-password",
-          suspended: accountInterventions === "suspended",
+          blocked: accountInterventions.includes("blocked"),
+          reproveIdentity: accountInterventions.includes("reprove-identity"),
+          resetPassword: accountInterventions.includes("reset-password"),
+          suspended: accountInterventions.includes("suspended"),
         },
       },
     };

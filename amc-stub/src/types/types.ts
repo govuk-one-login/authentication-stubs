@@ -86,7 +86,7 @@ export interface ParsedBody {
   redirect_uri: string;
   email: string;
   scope: AMCScopesValues;
-  "account-interventions"?: AccountInterventionType;
+  "account-interventions"?: AccountInterventionType[];
 }
 
 export interface JwksConfig {

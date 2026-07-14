@@ -56,7 +56,7 @@ export default function renderAmcAuthorize(
   </fieldset>
   </div>
 
-  ${scope === AMCScopes.PASSKEY_CREATE ? getAccountInterventionTypeRadios() : ""}
+  ${scope === AMCScopes.PASSKEY_CREATE ? getAccountInterventionTypeCheckboxes() : ""}
 
   <button name="continue" value="continue" class="govuk-button">Continue</button>
   <input type="hidden" name="state" value=${decodedPayload.state}>
@@ -112,7 +112,7 @@ function getAccountDeleteResults() {
   `;
 }
 
-function getAccountInterventionTypeRadios() {
+function getAccountInterventionTypeCheckboxes() {
   return `
   <div class="govuk-form-group" id="account-interventions-group" style="display:none;">
   <fieldset class="govuk-fieldset">
@@ -121,29 +121,29 @@ function getAccountInterventionTypeRadios() {
             Account interventions type
         </h3>
     </legend>
-    <div class="govuk-hint">Optional. Only applies when response is not success.</div>
-    <div class="govuk-radios" data-module="govuk-radios">
-        <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="account-interventions-blocked" name="account-interventions" type="radio" value="blocked" checked>
-            <label class="govuk-label govuk-radios__label" for="account-interventions-blocked">
+    <div class="govuk-hint">Optional. Select one or more. Only applies when response is not success.</div>
+    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-blocked" name="account-interventions" type="checkbox" value="blocked">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-blocked">
                 Blocked
             </label>
         </div>
-        <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="account-interventions-reprove-identity" name="account-interventions" type="radio" value="reprove-identity">
-            <label class="govuk-label govuk-radios__label" for="account-interventions-reprove-identity">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-reprove-identity" name="account-interventions" type="checkbox" value="reprove-identity">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-reprove-identity">
                 Reprove identity
             </label>
         </div>
-        <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="account-interventions-reset-password" name="account-interventions" type="radio" value="reset-password">
-            <label class="govuk-label govuk-radios__label" for="account-interventions-reset-password">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-reset-password" name="account-interventions" type="checkbox" value="reset-password">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-reset-password">
                 Reset password
             </label>
         </div>
-        <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="account-interventions-suspended" name="account-interventions" type="radio" value="suspended">
-            <label class="govuk-label govuk-radios__label" for="account-interventions-suspended">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-suspended" name="account-interventions" type="checkbox" value="suspended">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-suspended">
                 Suspended
             </label>
         </div>
