@@ -75,7 +75,7 @@ const createRequestJWT = async (scope: string) => {
   const sub = "urn:fdc:gov.uk:2022:fake_common_subject_identifier";
   const now = Math.floor(Date.now() / 1000);
   const requestPayload = {
-    iss: "https://signin.account.gov.uk",
+    iss: "auth",
     client_id: "auth",
     aud: "https://manage.account.gov.uk/authorize",
     response_type: "code",
@@ -86,7 +86,7 @@ const createRequestJWT = async (scope: string) => {
     iat: now,
     exp: now + 3600,
     nbf: now,
-    access_token: await createAccessToken(sub, scope),
+    account_data_api_access_token: await createAccessToken(sub, scope),
     sub: sub,
     public_sub: "550e8400-e29b-41d4-a716-446655440000",
     email: "test@digital.cabinet-office.gov.uk",
@@ -104,12 +104,14 @@ const createRequestJWT = async (scope: string) => {
     .setProtectedHeader({
       alg: JoseAlgorithms.RSA_OAEP_256,
       enc: JoseAlgorithms.A256GCM,
+      kid: "test-key-id",
     })
     .encrypt(publicKey);
 };
 const scope = process.argv[2];
 const encryptedRequest = await createRequestJWT(scope);
-const localUrl = `http://localhost:3000/authorize?request=${encryptedRequest}`;
+const redirectUri = "https://signin.account.gov.uk/{callback_endpoint}";
+const localUrl = `http://localhost:3000/authorize?request=${encryptedRequest}&scope=${scope}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
 console.log(`Encrypted request:\n${encryptedRequest}\n`);
 console.log(`Local Authorization URL:\n${localUrl}\n`);
