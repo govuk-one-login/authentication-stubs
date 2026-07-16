@@ -251,6 +251,111 @@ describe("AMC Authorize Stub Test", () => {
       }
     });
 
+    it("should return 302 and store account intervention details for failure with intervention", async () => {
+      const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+
+      const params = new URLSearchParams();
+      params.append("redirect_uri", "https://signin.account.gov.uk/callback");
+      params.append("state", "test-state-789");
+      params.append("sub", "urn:fdc:gov.uk:2022:test-subject");
+      params.append("response", "failure");
+      params.append("scope", "passkey-create");
+      params.append("email", "testuser@test.null.local");
+      params.append("account-interventions", "suspended");
+      const body = params.toString();
+
+      const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+      const result = await handler(event);
+
+      expect(result.statusCode).to.eq(302);
+      expect(result.headers?.["Location"]).to.include("state=test-state-789");
+
+      const storedItem = putStub.firstCall.args[0].Item.authorization;
+      expect(storedItem.success).to.eq(false);
+      expect(storedItem.actions[0].success).to.eq(false);
+      expect(storedItem.actions[0].details.error.code).to.eq(1004);
+      expect(storedItem.actions[0].details.error.description).to.eq(
+        "AccountHasInterventions"
+      );
+      expect(
+        storedItem.actions[0].details.accountInterventionsStatus.state
+      ).to.deep.eq({
+        blocked: false,
+        reproveIdentity: false,
+        resetPassword: false,
+        suspended: true,
+      });
+    });
+
+    it("should return 302 and store multiple account intervention details for failure with multiple interventions", async () => {
+      const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+
+      const params = new URLSearchParams();
+      params.append("redirect_uri", "https://signin.account.gov.uk/callback");
+      params.append("state", "test-state-multi");
+      params.append("sub", "urn:fdc:gov.uk:2022:test-subject");
+      params.append("response", "failure");
+      params.append("scope", "passkey-create");
+      params.append("email", "testuser@test.null.local");
+      params.append("account-interventions", "blocked");
+      params.append("account-interventions", "suspended");
+      const body = params.toString();
+
+      const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+      const result = await handler(event);
+
+      expect(result.statusCode).to.eq(302);
+      expect(result.headers?.["Location"]).to.include("state=test-state-multi");
+
+      const storedItem = putStub.firstCall.args[0].Item.authorization;
+      expect(storedItem.success).to.eq(false);
+      expect(storedItem.actions[0].success).to.eq(false);
+      expect(storedItem.actions[0].details.error.code).to.eq(1004);
+      expect(storedItem.actions[0].details.error.description).to.eq(
+        "AccountHasInterventions"
+      );
+      expect(
+        storedItem.actions[0].details.accountInterventionsStatus.state
+      ).to.deep.eq({
+        blocked: true,
+        reproveIdentity: false,
+        resetPassword: false,
+        suspended: true,
+      });
+    });
+
+    it("should return 302 with standard error when failure has no account intervention", async () => {
+      const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+
+      const params = new URLSearchParams();
+      params.append("redirect_uri", "https://signin.account.gov.uk/callback");
+      params.append("state", "test-state-101");
+      params.append("sub", "urn:fdc:gov.uk:2022:test-subject");
+      params.append("response", "failure");
+      params.append("scope", "passkey-create");
+      params.append("email", "testuser@test.null.local");
+      params.append("account-interventions", "none");
+      const body = params.toString();
+
+      const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+      const result = await handler(event);
+
+      expect(result.statusCode).to.eq(302);
+
+      const storedItem = putStub.firstCall.args[0].Item.authorization;
+      expect(storedItem.success).to.eq(false);
+      expect(storedItem.actions[0].details.error.code).to.eq(1001);
+      expect(storedItem.actions[0].details.error.description).to.eq(
+        "JourneyFailed"
+      );
+      expect(storedItem.actions[0].details.accountInterventionsStatus).to.eq(
+        undefined
+      );
+    });
+
     it("should return 500 when failure response is invalid", async () => {
       const body = new URLSearchParams({
         redirect_uri: "https://signin.account.gov.uk/callback",

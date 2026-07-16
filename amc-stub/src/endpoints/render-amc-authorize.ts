@@ -55,6 +55,9 @@ export default function renderAmcAuthorize(
     </div>
   </fieldset>
   </div>
+
+  ${scope === AMCScopes.PASSKEY_CREATE ? getAccountInterventionTypeCheckboxes() : ""}
+
   <button name="continue" value="continue" class="govuk-button">Continue</button>
   <input type="hidden" name="state" value=${decodedPayload.state}>
   <input type="hidden" name="sub" value=${decodedPayload.sub}>
@@ -72,6 +75,13 @@ function getPasskeyCreateResults() {
             <input class="govuk-radios__input" id="success" name="response" type="radio" value="success" checked>
             <label class="govuk-label govuk-radios__label" for="success">
                 Success
+            </label>
+        </div>
+        
+    <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="account-interventions-failure" name="response" type="radio" value="account-interventions-failure">
+            <label class="govuk-label govuk-radios__label" for="account-interventions-failure">
+                Account Interventions Failure
             </label>
         </div>
 
@@ -99,6 +109,62 @@ function getAccountDeleteResults() {
                 Success
             </label>
         </div>
+  `;
+}
+
+function getAccountInterventionTypeCheckboxes() {
+  return `
+  <div class="govuk-form-group" id="account-interventions-group" style="display:none;">
+  <fieldset class="govuk-fieldset">
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">
+            Account interventions type
+        </h3>
+    </legend>
+    <div class="govuk-hint">Optional. Select one or more. Only applies when response is not success.</div>
+    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-blocked" name="account-interventions" type="checkbox" value="blocked">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-blocked">
+                Blocked
+            </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-reprove-identity" name="account-interventions" type="checkbox" value="reprove-identity">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-reprove-identity">
+                Reprove identity
+            </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-reset-password" name="account-interventions" type="checkbox" value="reset-password">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-reset-password">
+                Reset password
+            </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="account-interventions-suspended" name="account-interventions" type="checkbox" value="suspended">
+            <label class="govuk-label govuk-checkboxes__label" for="account-interventions-suspended">
+                Suspended
+            </label>
+        </div>
+    </div>
+  </fieldset>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var responseRadios = document.querySelectorAll('input[name="response"]');
+      var accountInterventionsGroup = document.getElementById('account-interventions-group');
+      function toggleAccountInterventionsGroup() {
+        var selected = document.querySelector('input[name="response"]:checked');
+        accountInterventionsGroup.style.display = (selected && selected.value === 'account-interventions-failure') ? '' : 'none';
+      }
+      responseRadios.forEach(function(radio) {
+        radio.addEventListener('change', toggleAccountInterventionsGroup);
+      });
+      toggleAccountInterventionsGroup();
+    });
+  </script>
   `;
 }
 
