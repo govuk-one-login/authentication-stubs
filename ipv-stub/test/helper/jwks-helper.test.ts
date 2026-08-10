@@ -1,8 +1,7 @@
-import * as jose from "jose";
-import keys from "../../src/data/keys.json";
+import { exportJWK, importSPKI } from "jose";
+import keys from "../../src/data/keys.json" with { type: "json" };
 import { getPublicSigningKey } from "../../src/helper/jwks-helper";
 import { expect } from "chai";
-import sinon from "sinon";
 import { describe } from "mocha";
 import { createSignedJwt } from "../test-helpers";
 import { CodedError } from "../../src/helper/result-helper";
@@ -11,44 +10,32 @@ const validSigningAlg = "ES256";
 const mockJwksEndpoint = "https://some-uri.com";
 const mockSigningKey = keys.authPublicSigningKeyIPV;
 
-let mockImportJWK: sinon.SinonStub;
-let mockImportSPKI: sinon.SinonStub;
+describe("JwksHelper", () => {
+  let originalFetch: typeof global.fetch;
 
-describe("JwksHelper", async () => {
   beforeEach(() => {
-    mockImportJWK = sinon.stub();
-    sinon.stub(jose, "importJWK").value(mockImportJWK);
-
-    mockImportSPKI = sinon.stub();
-    sinon.stub(jose, "importSPKI").value(mockImportSPKI);
+    originalFetch = global.fetch;
   });
 
   afterEach(() => {
-    sinon.restore();
+    global.fetch = originalFetch;
   });
 
-  it("gets the public signing key from JWKS uri", async () => {
-    const mockKeyLike = { type: "public", asymmetricKeyType: "ec" };
-    mockImportJWK.resolves(mockKeyLike);
-
+  it("fetches the public key from the JWKS endpoint when kid is present", async () => {
     const kid = "test-kid-123";
-    const mockJwks = {
-      keys: [
-        {
-          kty: "EC",
-          crv: "P-256",
-          x: "test-x",
-          y: "test-y",
-          kid,
-        },
-      ],
-    };
+    const publicKey = await importSPKI(mockSigningKey, validSigningAlg);
+    const jwk = await exportJWK(publicKey);
 
-    global.fetch = async () =>
-      ({
+    const mockJwks = { keys: [{ ...jwk, kid }] };
+
+    let fetchCalledWith: string | undefined;
+    global.fetch = async (url) => {
+      fetchCalledWith = url.toString();
+      return {
         ok: true,
         json: async () => mockJwks,
-      }) as Response;
+      } as Response;
+    };
 
     const validJws = await createSignedJwt(
       validSigningAlg,
@@ -59,62 +46,54 @@ describe("JwksHelper", async () => {
 
     const result = await getPublicSigningKey(validJws, mockJwksEndpoint);
 
-    expect(result).to.deep.equal(mockKeyLike);
-    expect(mockImportJWK.calledOnce).to.eq(true);
+    expect(fetchCalledWith).to.eq(mockJwksEndpoint);
+    expect(await exportJWK(result)).to.deep.eq(jwk);
   });
 
-  it("uses backup if there is no kid and a backup signing key present", async () => {
+  it("falls back to the backup signing key when no kid is in the JWT", async () => {
+    let fetchCalled = false;
+    global.fetch = async () => {
+      fetchCalled = true;
+      return { ok: true, json: async () => ({ keys: [] }) } as Response;
+    };
+
     const jwsWithNoKid = await createSignedJwt(
       validSigningAlg,
       { test: "payload" },
-      keys.authPrivateSigningKeyIPV
+      keys.authPrivateSigningKeyIPV,
+      undefined
     );
 
-    await getPublicSigningKey(jwsWithNoKid, mockJwksEndpoint, mockSigningKey);
+    const result = await getPublicSigningKey(
+      jwsWithNoKid,
+      mockJwksEndpoint,
+      mockSigningKey
+    );
 
-    expect(mockImportSPKI.calledOnce).to.eq(true);
-    expect(mockImportSPKI.calledWith(mockSigningKey)).to.eq(true);
-    expect(mockImportJWK.calledOnce).to.eq(false);
+    const expectedKey = await importSPKI(mockSigningKey, validSigningAlg);
+    expect(fetchCalled).to.eq(false);
+    expect(await exportJWK(result)).to.deep.eq(await exportJWK(expectedKey));
   });
 
-  it("uses backup if there is no jwks uri and a backup signing key present", async () => {
-    const mockKeyLike = { type: "public", asymmetricKeyType: "ec" };
-    mockImportJWK.resolves(mockKeyLike);
-
-    const kid = "test-kid-123";
-    const mockJwks = {
-      keys: [
-        {
-          kty: "EC",
-          crv: "P-256",
-          x: "test-x",
-          y: "test-y",
-          kid,
-        },
-      ],
-    };
-
-    global.fetch = async () =>
-      ({
-        ok: true,
-        json: async () => mockJwks,
-      }) as Response;
-
+  it("falls back to the backup signing key when no JWKS URI is provided", async () => {
     const validJws = await createSignedJwt(
       validSigningAlg,
       { test: "payload" },
       keys.authPrivateSigningKeyIPV,
-      kid
+      "some-kid"
     );
 
-    await getPublicSigningKey(validJws, undefined, mockSigningKey);
+    const result = await getPublicSigningKey(
+      validJws,
+      undefined,
+      mockSigningKey
+    );
 
-    expect(mockImportSPKI.calledOnce).to.eq(true);
-    expect(mockImportSPKI.calledWith(mockSigningKey)).to.eq(true);
-    expect(mockImportJWK.calledOnce).to.eq(false);
+    const expectedKey = await importSPKI(mockSigningKey, validSigningAlg);
+    expect(await exportJWK(result)).to.deep.eq(await exportJWK(expectedKey));
   });
 
-  it("throws an error if there is no kid and backup signing key", async () => {
+  it("throws when no kid is present and no backup signing key is provided", async () => {
     const jwsWithNoKid = await createSignedJwt(
       validSigningAlg,
       { test: "payload" },
@@ -125,24 +104,18 @@ describe("JwksHelper", async () => {
       await getPublicSigningKey(jwsWithNoKid, mockJwksEndpoint);
       expect.fail("Should have thrown an error");
     } catch (error) {
-      if (error instanceof CodedError) {
-        expect(error.message).to.include("Public signing key not found");
-      }
+      expect((error as CodedError).message).to.eq(
+        "Public signing key not found"
+      );
     }
   });
 
-  it("throws an error if there is no kid in JWKS response", async () => {
-    const mockJwks = {
-      keys: [
-        {
-          kty: "EC",
-          crv: "P-256",
-          x: "test-x",
-          y: "test-y",
-          kid: "someKid",
-        },
-      ],
-    };
+  it("throws when the kid does not match any key in the JWKS response", async () => {
+    const publicKey = await importSPKI(mockSigningKey, validSigningAlg);
+    const jwk = await exportJWK(publicKey);
+    jwk.kid = "someKid";
+
+    const mockJwks = { keys: [jwk] };
 
     global.fetch = async () =>
       ({
@@ -161,11 +134,9 @@ describe("JwksHelper", async () => {
       await getPublicSigningKey(jwsWithDifferentKid, mockJwksEndpoint);
       expect.fail("Should have thrown an error");
     } catch (error) {
-      if (error instanceof CodedError) {
-        expect(error.message).to.include(
-          "Key not found in JWKS for provided kid"
-        );
-      }
+      expect((error as CodedError).message).to.eq(
+        "Key not found in JWKS for provided kid"
+      );
     }
   });
 });
