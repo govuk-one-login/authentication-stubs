@@ -4,6 +4,12 @@ Transform:
   - AWS::LanguageExtensions
 Description: AMC Authentication Stub
 
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E3724 # Fn::If with AWS::NoValue is valid for conditional PermissionsBoundary in Globals
+
 Globals:
   Function:
     CodeSigningConfigArn: !If
@@ -431,7 +437,8 @@ Resources:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
       AlwaysDeploy: true
-      EndpointConfiguration: REGIONAL
+      EndpointConfiguration:
+        Type: REGIONAL
       Tags:
         FMSRegionalPolicy: "false"
         CustomPolicy: "apistub"
