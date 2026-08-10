@@ -7,7 +7,7 @@ import {
   exportJWK,
   CompactSign,
 } from "jose";
-import keys from "../../src/data/keys.json";
+import keys from "../../src/data/keys.json" with { type: "json" };
 import sinon from "sinon";
 import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
 import process from "node:process";

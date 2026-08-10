@@ -168,7 +168,7 @@ async function handle(
     return { statusCode: 400, body: "Missing reverification record." };
   }
 
-  const accessToken = base64url.encode(randomBytes(32));
+  const accessToken = base64url.encode(new Uint8Array(randomBytes(32)));
 
   // Claims
   const parsedClaims: Result<JwtPayload> = await parsePayload(
