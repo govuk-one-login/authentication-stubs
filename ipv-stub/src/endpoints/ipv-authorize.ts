@@ -104,7 +104,7 @@ async function post(
     throw new CodedError(500, "state not found");
   }
 
-  const authCode = base64url.encode(randomBytes(32));
+  const authCode = base64url.encode(new Uint8Array(randomBytes(32)));
   const sub = parsedBody["sub"];
 
   const url = new URL(redirectUri);
