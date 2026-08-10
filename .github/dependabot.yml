@@ -21,7 +21,7 @@ updates:
           - "*eslint*"
     ignore:
       - dependency-name: "@types/node"
-        versions: [ "> 20" ]
+        versions: [ "> 24" ]
       - dependency-name: "*"
         update-types:
           - "version-update:semver-patch"
@@ -43,7 +43,7 @@ updates:
           - "@aws-sdk/*"
     ignore:
       - dependency-name: "@types/node"
-        versions: [ "> 20" ]
+        versions: [ "> 24" ]
       - dependency-name: "*"
         update-types:
           - "version-update:semver-patch"
@@ -62,7 +62,7 @@ updates:
           - "*eslint*"
     ignore:
       - dependency-name: "@types/node"
-        versions: [ "> 22" ]
+        versions: [ "> 24" ]
       - dependency-name: "*"
         update-types:
           - "version-update:semver-patch"

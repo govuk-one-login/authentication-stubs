@@ -13,7 +13,7 @@
     "@types/aws-lambda": "8.10.161",
     "@types/express": "^5.0.3",
     "@types/jest": "30.0.0",
-    "@types/node": "20.17.6",
+    "@types/node": "24.13.3",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.31.0",
     "babel-jest": "30.4.1",
@@ -30,7 +30,7 @@
     "typescript": "5.8.3"
   },
   "engines": {
-    "node": ">=20.0.0 <21"
+    "node": "24.19.0"
   },
   "license": "MIT",
   "main": "index.js",

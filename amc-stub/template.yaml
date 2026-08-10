@@ -15,7 +15,7 @@ Globals:
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
     Timeout: 30
-    Runtime: nodejs22.x
+    Runtime: nodejs24.x
     Architectures:
       - x86_64
 
@@ -249,7 +249,7 @@ Resources:
           - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
-        Target: node22
+        Target: node24
 
   AMCStubTokenFunction:
     Type: AWS::Serverless::Function
@@ -306,7 +306,7 @@ Resources:
           - src/endpoints/amc-token.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   AMCStubJourneyOutcomeFunction:
     Type: AWS::Serverless::Function
@@ -342,7 +342,7 @@ Resources:
           - src/endpoints/amc-journey-outcome.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   AMCJwksFunction:
     Type: AWS::Serverless::Function
@@ -393,7 +393,7 @@ Resources:
           - src/endpoints/amc-jwks.ts
         Minify: true
         Sourcemap: true
-        Target: node22
+        Target: node24
 
   AMCJwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup

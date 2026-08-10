@@ -165,7 +165,7 @@ Globals:
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
     CodeUri: .
-    Runtime: nodejs20.x
+    Runtime: nodejs24.x
     Architectures:
       - arm64
 
@@ -415,7 +415,7 @@ Resources:
           - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   IPVStubAuthorizeLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -482,7 +482,7 @@ Resources:
           - src/endpoints/ipv-token.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   IPVStubTokenLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -524,7 +524,7 @@ Resources:
           - src/endpoints/ipv-reverification.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   IPVStubReverificationLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -569,7 +569,7 @@ Resources:
           - "@aws-sdk/client-kms"
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   IPVStubJwksLambdaLogGroup:
     Type: AWS::Logs::LogGroup
