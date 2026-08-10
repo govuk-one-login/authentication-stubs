@@ -46,7 +46,7 @@
     "mocha": "11.7.5",
     "prettier": "3.8.1",
     "sinon": "22.0.0",
-    "ts-node": "10.9.2",
+    "tsx": "4.23.12",
     "typescript": "6.0.2"
   },
   "engines": {
@@ -60,7 +60,7 @@
     ],
     "timeout": 20000,
     "recursive": true,
-    "loader": "ts-node/esm",
+    "import": "tsx",
     "exit": true
   },
   "overrides": {
