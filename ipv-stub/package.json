@@ -43,7 +43,7 @@
     "chai": "^4.3.6",
     "eslint": "^10.6.0",
     "eslint-plugin-no-only-tests": "^3.4.0",
-    "globals": "^17.7.0",
+    "globals": "^17.9.0",
     "mocha": "11.7.5",
     "prettier": "3.8.2",
     "sinon": "^22.0.0",
