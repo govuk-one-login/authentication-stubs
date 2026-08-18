@@ -1,4 +1,4 @@
-import chai from "chai";
+import { expect } from "chai";
 import { describe } from "mocha";
 import {
   importSPKI,
@@ -12,8 +12,6 @@ import sinon from "sinon";
 import { validateAuthorisationJwt } from "../../src/helper/jwt-validator";
 import process from "node:process";
 import { createSignedJwt } from "../test-helpers";
-
-const expect = chai.expect;
 
 const validSigningAlg = "ES256";
 
