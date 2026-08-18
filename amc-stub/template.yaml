@@ -4,6 +4,12 @@ Transform:
   - AWS::LanguageExtensions
 Description: AMC Authentication Stub
 
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E3724 # Fn::If with AWS::NoValue is valid for conditional PermissionsBoundary in Globals
+
 Globals:
   Function:
     CodeSigningConfigArn: !If
@@ -15,7 +21,7 @@ Globals:
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
     Timeout: 30
-    Runtime: nodejs22.x
+    Runtime: nodejs24.x
     Architectures:
       - x86_64
 
@@ -249,7 +255,7 @@ Resources:
           - "@aws-sdk/lib-dynamodb"
         Minify: true
         Sourcemap: true
-        Target: node22
+        Target: node24
 
   AMCStubTokenFunction:
     Type: AWS::Serverless::Function
@@ -306,7 +312,7 @@ Resources:
           - src/endpoints/amc-token.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   AMCStubJourneyOutcomeFunction:
     Type: AWS::Serverless::Function
@@ -342,7 +348,7 @@ Resources:
           - src/endpoints/amc-journey-outcome.ts
         Minify: true
         Sourcemap: true
-        Target: node20
+        Target: node24
 
   AMCJwksFunction:
     Type: AWS::Serverless::Function
@@ -393,7 +399,7 @@ Resources:
           - src/endpoints/amc-jwks.ts
         Minify: true
         Sourcemap: true
-        Target: node22
+        Target: node24
 
   AMCJwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -431,7 +437,8 @@ Resources:
       Name: !Sub ${AWS::StackName}-ApiGateway
       StageName: Live
       AlwaysDeploy: true
-      EndpointConfiguration: REGIONAL
+      EndpointConfiguration:
+        Type: REGIONAL
       Tags:
         FMSRegionalPolicy: "false"
         CustomPolicy: "apistub"

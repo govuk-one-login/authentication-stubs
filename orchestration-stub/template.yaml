@@ -99,7 +99,7 @@ Globals:
       - UsePermissionsBoundary
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
-    Runtime: nodejs20.x
+    Runtime: nodejs24.x
     Timeout: 30
     CodeUri: .
     Architectures:

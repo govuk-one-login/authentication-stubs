@@ -34,7 +34,7 @@
     "@types/chai": "5.2.3",
     "@types/jsonwebtoken": "9.0.7",
     "@types/mocha": "10.0.10",
-    "@types/node": "22.10.2",
+    "@types/node": "24.13.3",
     "@types/sinon": "21.0.1",
     "@typescript-eslint/eslint-plugin": "8.63.0",
     "@typescript-eslint/parser": "8.63.0",
@@ -46,11 +46,11 @@
     "mocha": "11.8.0",
     "prettier": "3.8.1",
     "sinon": "22.0.0",
-    "ts-node": "10.9.2",
+    "tsx": "4.23.12",
     "typescript": "6.0.2"
   },
   "engines": {
-    "node": "22.13.0"
+    "node": "24.19.0"
   },
   "mocha": {
     "diff": true,
@@ -60,7 +60,7 @@
     ],
     "timeout": 20000,
     "recursive": true,
-    "loader": "ts-node/esm",
+    "import": "tsx",
     "exit": true
   },
   "overrides": {

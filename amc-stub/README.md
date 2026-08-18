@@ -7,7 +7,7 @@ Account Management API for the SSAD flow (Self-Serve Account Deletion).
 ## Local Development
 
 ### Prerequisites
-- Node.js 22.12.0 (use `nvm use` to switch to the correct version)
+- Node.js 24.19.0 (use `nvm use` to switch to the correct version)
 - AWS SAM CLI version >= 1.150 (recommend the latest)
 - Docker (for LocalStack DynamoDB)
 
