@@ -24,8 +24,7 @@ import { processJoseError } from "../helper/error-helper";
 import process from "node:process";
 
 type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: APIGatewayProxyResult };
+  { ok: true; value: T } | { ok: false; error: APIGatewayProxyResult };
 
 function ok<T>(value: T): Result<T> {
   return { ok: true, value };
