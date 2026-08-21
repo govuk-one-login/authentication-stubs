@@ -1,4 +1,4 @@
-import { decodeProtectedHeader, importJWK, importSPKI, KeyLike } from "jose";
+import { CryptoKey, decodeProtectedHeader, importJWK, importSPKI } from "jose";
 import { CodedError } from "./result-helper";
 import { logger } from "./logger";
 
@@ -6,7 +6,7 @@ export async function getPublicSigningKey(
   jws: string,
   jwksUri?: string,
   backupSigningKey?: string
-): Promise<KeyLike> {
+): Promise<CryptoKey> {
   const header = decodeProtectedHeader(jws);
   const kid = header.kid;
 
@@ -16,18 +16,26 @@ export async function getPublicSigningKey(
     return await getPublicKeyFromBackup(backupSigningKey);
   }
 
-  return await getPublicKeyFromJwks(kid, jwksUri);
+  return await getPublicKeyFromJwks(kid, jwksUri, header.alg);
 }
 
 async function getPublicKeyFromJwks(
   kid: string,
-  jwksUri: string
-): Promise<KeyLike> {
+  jwksUri: string,
+  headerAlg?: string
+): Promise<CryptoKey> {
   const jwks = await fetchJwks(jwksUri);
   for (const k of jwks.keys) {
     if (k.kid === kid) {
+      const alg = k.alg ?? headerAlg;
+      if (!alg) {
+        throw new CodedError(
+          400,
+          "No alg on the JWKS key or the JWT protected header"
+        );
+      }
       logger.info(`using kid: ${kid}`);
-      return (await importJWK(k)) as KeyLike;
+      return (await importJWK(k, alg)) as CryptoKey;
     }
   }
 
