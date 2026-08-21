@@ -16,8 +16,7 @@ import { validateRequiredHeaders } from "../helpers/expected-headers-helper.ts";
 import { truncate } from "../helpers/truncate-helper.ts";
 
 type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: APIGatewayProxyResult };
+  { ok: true; value: T } | { ok: false; error: APIGatewayProxyResult };
 
 function ok<T>(value: T): Result<T> {
   return { ok: true, value };

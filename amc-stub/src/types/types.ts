@@ -69,15 +69,10 @@ type PasskeysCreateResponse = "success" | "back" | "skip";
 type AccountDeleteResponse = "success";
 
 export type AMCAuthorizeResponse =
-  | PasskeysCreateResponse
-  | AccountDeleteResponse;
+  PasskeysCreateResponse | AccountDeleteResponse;
 
 export type AccountInterventionType =
-  | "none"
-  | "blocked"
-  | "reprove-identity"
-  | "reset-password"
-  | "suspended";
+  "none" | "blocked" | "reprove-identity" | "reset-password" | "suspended";
 
 export interface ParsedBody {
   sub: string;

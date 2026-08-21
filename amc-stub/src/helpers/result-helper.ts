@@ -4,13 +4,7 @@ import { logger } from "../../logger.ts";
 type SuccessCode = 200 | 302;
 type ErrorCode = 400 | 405 | 500;
 type JsonEntity =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | object
-  | JsonEntity[];
+  string | number | boolean | null | undefined | object | JsonEntity[];
 type Headers = { [header: string]: boolean | number | string };
 
 export class CodedError extends Error {
