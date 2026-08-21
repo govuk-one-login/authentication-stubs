@@ -60,6 +60,9 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
     ignore:
       - dependency-name: "@types/node"
         versions: [ "> 24" ]
@@ -79,6 +82,9 @@ updates:
       npm-eslint-dependencies:
         patterns:
           - "*eslint*"
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
     ignore:
       - dependency-name: "@types/node"
         versions: [ "> 24" ]
