@@ -7,6 +7,7 @@ import { compactVerify, CryptoKey } from "jose";
 import process from "node:process";
 import { processJoseError } from "./error-helper";
 import { getPublicSigningKey } from "./jwks-helper";
+import { logger } from "./logger";
 
 export async function validateAuthorisationJwt(
   nestedJws: string
@@ -33,7 +34,9 @@ async function verifyAndDecodeJwt<T>(
 ): Promise<T> {
   let payload;
   try {
+    logger.info("Verifying JWS...");
     ({ payload } = await compactVerify(jws, publicJwk));
+    logger.info("Verified JWS successfully.");
   } catch (error) {
     processJoseError(error);
   }
