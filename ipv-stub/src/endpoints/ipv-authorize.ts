@@ -55,10 +55,12 @@ async function get(
 
   let plaintext, protectedHeader;
   try {
+    logger.info("Decrypting JAR...");
     ({ plaintext, protectedHeader } = await compactDecrypt(
       encryptedJwt,
       privateKey
     ));
+    logger.info("Decrypted JAR successfully");
   } catch (error) {
     processJoseError(error);
   }
@@ -67,9 +69,9 @@ async function get(
     throw new CodedError(500, "compactDecrypt returned undefined values");
   }
 
-  const encodedJwt = plaintext.toString();
+  const utf8Jws = new TextDecoder().decode(plaintext);
 
-  const parsedRequestOrError = await validateAuthorisationJwt(encodedJwt);
+  const parsedRequestOrError = await validateAuthorisationJwt(utf8Jws);
 
   if (typeof parsedRequestOrError === "string") {
     throw new CodedError(400, parsedRequestOrError);

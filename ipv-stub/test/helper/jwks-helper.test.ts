@@ -1,4 +1,4 @@
-import { exportJWK, importSPKI } from "jose";
+import { base64url, exportJWK, importSPKI } from "jose";
 import keys from "../../src/data/keys.json" with { type: "json" };
 import { getPublicSigningKey } from "../../src/helper/jwks-helper";
 import { expect } from "chai";
@@ -110,6 +110,48 @@ describe("JwksHelper", () => {
     }
   });
 
+  it("uses the alg on the JWKS key when the JWT header has none", async () => {
+    const kid = "test-kid-123";
+    const publicKey = await importSPKI(mockSigningKey, validSigningAlg);
+    const jwk = await exportJWK(publicKey);
+
+    global.fetch = async () =>
+      ({
+        ok: true,
+        json: async () => ({
+          keys: [{ ...jwk, kid, alg: validSigningAlg }],
+        }),
+      }) as Response;
+
+    const result = await getPublicSigningKey(
+      jwsWithHeader({ kid }),
+      mockJwksEndpoint
+    );
+
+    expect(await exportJWK(result)).to.deep.eq(jwk);
+  });
+
+  it("throws when neither the JWKS key nor the JWT header has an alg", async () => {
+    const kid = "test-kid-123";
+    const publicKey = await importSPKI(mockSigningKey, validSigningAlg);
+    const jwk = await exportJWK(publicKey);
+
+    global.fetch = async () =>
+      ({
+        ok: true,
+        json: async () => ({ keys: [{ ...jwk, kid }] }),
+      }) as Response;
+
+    try {
+      await getPublicSigningKey(jwsWithHeader({ kid }), mockJwksEndpoint);
+      expect.fail("Should have thrown an error");
+    } catch (error) {
+      expect((error as CodedError).message).to.eq(
+        "No alg on the JWKS key or the JWT protected header"
+      );
+    }
+  });
+
   it("throws when the kid does not match any key in the JWKS response", async () => {
     const publicKey = await importSPKI(mockSigningKey, validSigningAlg);
     const jwk = await exportJWK(publicKey);
@@ -140,3 +182,12 @@ describe("JwksHelper", () => {
     }
   });
 });
+
+function jwsWithHeader(header: Record<string, string>) {
+  const encoder = new TextEncoder();
+  return [
+    base64url.encode(encoder.encode(JSON.stringify(header))),
+    base64url.encode(encoder.encode("{}")),
+    "",
+  ].join(".");
+}
