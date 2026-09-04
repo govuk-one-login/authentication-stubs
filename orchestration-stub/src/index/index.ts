@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as jose from "jose";
-import { JWTPayload } from "jose";
+import { CryptoKey, JWTPayload } from "jose";
 import { getCookie, getOrCreatePersistentSessionId } from "../utils/cookie";
 import crypto from "node:crypto";
 import { downcaseHeaders } from "../utils/headers";
@@ -286,11 +286,11 @@ const jarPayload = (
 };
 
 const sandpitFrontendPublicKey = async () =>
-  await jose.importSPKI(process.env.AUTH_PUB_KEY!, "RS256");
+  await jose.importSPKI(process.env.AUTH_PUB_KEY!, "RSA-OAEP-256");
 
 const signRequestObject = async (
   payload: JWTPayload,
-  signingPrivKey: jose.KeyLike,
+  signingPrivKey: CryptoKey,
 ) => {
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: "ES256" })
@@ -303,7 +303,7 @@ const signRequestObject = async (
     .sign(signingPrivKey);
 };
 
-const encryptRequestObject = async (jws: string, encPubKey: jose.KeyLike) =>
+const encryptRequestObject = async (jws: string, encPubKey: CryptoKey) =>
   await new jose.CompactEncrypt(new TextEncoder().encode(jws))
     .setProtectedHeader({ cty: "JWT", alg: "RSA-OAEP-256", enc: "A256GCM" })
     .encrypt(encPubKey);
