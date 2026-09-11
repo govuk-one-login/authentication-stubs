@@ -4,7 +4,7 @@ export const renderGovukPage = (content: string): string => {
 
 <head>
   <meta charset="utf-8">
-  <title>GOV.UK - Orchestration Stub</title>
+  <title>GOV.UK - The best place to find government services and information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" href="https://assets.account.gov.uk/assets/stylesheets/all.css">
   <style>
