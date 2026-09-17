@@ -8,7 +8,6 @@ export type RequestParameters = {
   authenticated: boolean;
   channel: ChannelEnum;
   cookieConsent: string;
-  loginHint?: string;
 };
 
 export const parseRequestParameters = (
@@ -26,7 +25,6 @@ export const parseRequestParameters = (
     authenticated: parsedForm.authenticated === "yes",
     channel: getChannel(parsedForm.channel),
     cookieConsent: parsedForm["cookie-consent"] as string,
-    loginHint: parsedForm["login-hint"] as string | undefined,
   };
 };
 

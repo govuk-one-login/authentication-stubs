@@ -170,16 +170,6 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         </div>
     </fieldset>
     </div>
-    <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset">
-        <legend id="login-hint-legend" class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h2 class="govuk-fieldset__heading">
-                Login hint
-            </h2>
-        </legend>
-        <input name="login-hint" id="login-hint" class="govuk-input" maxlength="256" aria-labelledby="login-hint-legend">
-    </fieldset>
-    </div>
     <button class="govuk-button">Submit</button>
 </form>
 `;
@@ -278,9 +268,6 @@ const jarPayload = (
   }
   if (form.cookieConsent !== "none") {
     payload["cookie_consent"] = form.cookieConsent;
-  }
-  if (form.loginHint !== "") {
-    payload["login_hint"] = form.loginHint;
   }
   return payload;
 };
