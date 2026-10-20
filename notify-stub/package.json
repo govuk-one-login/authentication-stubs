@@ -12,7 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1110.0",
     "@aws-sdk/lib-dynamodb": "3.1110.0",
-    "pino": "10.3.1"
+    "pino": "10.4.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.145",
