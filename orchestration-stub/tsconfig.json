@@ -12,7 +12,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
-    "types": ["jest", "node"]
+    "types": ["node"]
   },
   "exclude": ["node_modules"]
 }

@@ -49,7 +49,8 @@ export default [
         ignores: [
             "eslint.config.js",
             ".aws-sam/",
-            "build/"
+            "build/",
+            "coverage/"
         ],
     },
 ];

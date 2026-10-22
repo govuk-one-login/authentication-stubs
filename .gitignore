@@ -32,6 +32,9 @@ node_modules
 dist/
 .infracost
 
+# Coverage
+coverage/
+
 *.pem
 *.key
 
