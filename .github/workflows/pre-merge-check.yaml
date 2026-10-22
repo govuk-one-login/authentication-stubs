@@ -77,7 +77,6 @@ jobs:
         run: npm run pretty-check
         working-directory: ${{ matrix.module }}
       - name: Run unit tests
-#       todo: add orch-stub unit tests to pre-merge-checks when any are created
-        if: matrix.module == 'ipv-stub' || matrix.module == 'amc-stub'
+        if: matrix.module == 'orchestration-stub' || matrix.module == 'ipv-stub' || matrix.module == 'amc-stub'
         run: npm run test-unit
         working-directory: ${{ matrix.module }}
