@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "install:all": "for d in orchestration-stub ipv-stub amc-stub notify-stub; do (cd \"$d\" && npm ci --ignore-scripts) || exit 1; done",
+    "test-unit": "for d in orchestration-stub ipv-stub amc-stub; do echo \"\\n=== $d ===\" && (cd \"$d\" && npm run test-unit) || exit 1; done",
+    "test-unit:coverage": "for d in orchestration-stub ipv-stub amc-stub; do echo \"\\n=== $d ===\" && (cd \"$d\" && npm run test-unit:coverage) || exit 1; done"
+  },
   "devDependencies": {
     "@types/node": "24.13.3"
   }
