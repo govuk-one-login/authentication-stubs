@@ -30,7 +30,7 @@
     "typescript": "5.8.3"
   },
   "engines": {
-    "node": "24.19.0"
+    "node": "24.22.1"
   },
   "license": "MIT",
   "main": "index.js",
