@@ -11,6 +11,7 @@ import {
   parseRequestParameters,
   RequestParameters,
 } from "../services/request-parameters";
+import { buildClaimPayload } from "../services/claims";
 
 const RP_STATE = "dwG_gAlpIuRK-6FKReKEnoNUZdwgy8BUxYKUaXmIXeY";
 
@@ -41,17 +42,6 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h2 class="govuk-fieldset__heading">
-                Reauthentication
-            </h2>
-        </legend>
-        <label for="reauthenticate" class="govuk-label">RP pairwise ID</label>
-        <input name="reauthenticate" id="reauthenticate" class="govuk-input">
-    </fieldset>
-    </div>
-    <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h2 class="govuk-fieldset__heading">
                 MFA
             </h2>
         </legend>
@@ -76,7 +66,7 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
         <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h2 class="govuk-fieldset__heading">
-                    Seamless login and uplift
+                    Silent login and uplift
                 </h2>
             </legend>
             <div class="govuk-radios" data-module="govuk-radios">
@@ -98,7 +88,85 @@ const get = (_event: APIGatewayProxyEvent): APIGatewayProxyResult => {
                         common subject identifier are set on the session
                     </div>
                 </div>
+            </div>
         </fieldset>
+    </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Reauthentication
+            </h2>
+        </legend>
+        <label for="reauthenticate" class="govuk-label">RP pairwise ID</label>
+        <input name="reauthenticate" id="reauthenticate" class="govuk-input">
+    </fieldset>
+    </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Scopes
+            </h2>
+        </legend>
+        <div class="govuk-hint">openid is always requested. Selecting scopes changes which userinfo claims are requested from auth.</div>
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="scope-email" name="scope" type="checkbox" value="email" checked>
+                <label class="govuk-label govuk-checkboxes__label" for="scope-email">email</label>
+            </div>
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="scope-phone" name="scope" type="checkbox" value="phone" checked>
+                <label class="govuk-label govuk-checkboxes__label" for="scope-phone">phone</label>
+            </div>
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="scope-am" name="scope" type="checkbox" value="am">
+                <label class="govuk-label govuk-checkboxes__label" for="scope-am">am (account management)</label>
+            </div>
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="scope-govuk-account" name="scope" type="checkbox" value="govuk-account">
+                <label class="govuk-label govuk-checkboxes__label" for="scope-govuk-account">govuk-account</label>
+            </div>
+        </div>
+    </fieldset>
+    </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Identity verification
+            </h2>
+        </legend>
+        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="identity-required-no" name="identity-required" type="radio" value="no" checked>
+                <label class="govuk-label govuk-radios__label" for="identity-required-no">Not required</label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="identity-required-yes" name="identity-required" type="radio" value="yes">
+                <label class="govuk-label govuk-radios__label" for="identity-required-yes">Required</label>
+            </div>
+        </div>
+    </fieldset>
+    </div>
+    <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h2 class="govuk-fieldset__heading">
+                Subject type
+            </h2>
+        </legend>
+        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="subject-type-pairwise" name="subject-type" type="radio" value="pairwise" checked>
+                <label class="govuk-label govuk-radios__label" for="subject-type-pairwise">pairwise</label>
+            </div>
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="subject-type-public" name="subject-type" type="radio" value="public">
+                <label class="govuk-label govuk-radios__label" for="subject-type-public">public</label>
+            </div>
+        </div>
+    </fieldset>
     </div>
     <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
@@ -223,18 +291,11 @@ const jarPayload = (
   sessionId: string,
   previousSessionId: string | undefined,
 ): JWTPayload => {
-  const claim = {
-    userinfo: {
-      salt: "",
-      email: "",
-      email_verified: "",
-      phone_number: "",
-      phone_number_verified: "",
-      local_account_id: "",
-      public_account_id: "",
-      legacy_account_id: "",
-    },
-  };
+  const claim = buildClaimPayload({
+    scopes: form.scopes,
+    identityRequired: form.identityRequired,
+    subjectType: form.subjectType,
+  });
   const payload: JWTPayload = {
     rp_client_id: process.env.RP_CLIENT_ID,
     rp_sector_host: process.env.RP_SECTOR_HOST,
@@ -248,14 +309,16 @@ const jarPayload = (
     state: sessionId,
     client_id: "orchestrationAuth",
     redirect_uri: `${process.env.STUB_URL}orchestration-redirect`,
-    claim: JSON.stringify(claim),
     authenticated: form.authenticated ?? false,
-    scope: "openid email phone",
+    scope: form.scopes.join(" "),
     requested_credential_strength: form.confidence,
     is_smoke_test: false,
-    subject_type: "pairwise",
-    is_identity_verification_required: false,
+    subject_type: form.subjectType,
+    is_identity_verification_required: form.identityRequired,
   };
+  if (claim !== undefined) {
+    payload["claim"] = JSON.stringify(claim);
+  }
   if (form["reauthenticate"] !== "") {
     payload["reauthenticate"] = form["reauthenticate"];
   }

@@ -1,6 +1,7 @@
 import querystring, { ParsedUrlQuery } from "querystring";
 import { CredentialTrustLevel } from "../types/credential-trust";
 import { ChannelEnum } from "../types/channel";
+import { SubjectTypeEnum } from "../types/subject-type";
 
 export type RequestParameters = {
   confidence: CredentialTrustLevel;
@@ -8,7 +9,19 @@ export type RequestParameters = {
   authenticated: boolean;
   channel: ChannelEnum;
   cookieConsent: string;
+  scopes: string[];
+  identityRequired: boolean;
+  subjectType: SubjectTypeEnum;
 };
+
+export const SELECTABLE_SCOPES = [
+  "email",
+  "phone",
+  "am",
+  "govuk-account",
+] as const;
+
+const DEFAULT_SCOPES = ["openid", "email", "phone"];
 
 export const parseRequestParameters = (
   body: string | null,
@@ -25,6 +38,9 @@ export const parseRequestParameters = (
     authenticated: parsedForm.authenticated === "yes",
     channel: getChannel(parsedForm.channel),
     cookieConsent: parsedForm["cookie-consent"] as string,
+    scopes: getScopes(parsedForm),
+    identityRequired: parsedForm["identity-required"] === "yes",
+    subjectType: getSubjectType(parsedForm["subject-type"]),
   };
 };
 
@@ -54,4 +70,31 @@ const getChannel = (channel: string | string[] | undefined): ChannelEnum => {
     return channel;
   }
   throw new Error("Unknown channel: " + channel);
+};
+
+const getScopes = (form: ParsedUrlQuery): string[] => {
+  const raw = form.scope;
+  if (raw === undefined) {
+    return [...DEFAULT_SCOPES];
+  }
+
+  const selected = (Array.isArray(raw) ? raw : [raw])
+    .filter((s): s is string => typeof s === "string" && s !== "")
+    .filter((s) => (SELECTABLE_SCOPES as readonly string[]).includes(s));
+
+  const scopes = new Set<string>(["openid", ...selected]);
+  return [...scopes];
+};
+
+const getSubjectType = (
+  subjectType: string | string[] | undefined,
+): SubjectTypeEnum => {
+  if (
+    subjectType === SubjectTypeEnum.PAIRWISE ||
+    subjectType === SubjectTypeEnum.PUBLIC
+  ) {
+    return subjectType;
+  }
+  // Default preserves the stub's original behaviour.
+  return SubjectTypeEnum.PAIRWISE;
 };
