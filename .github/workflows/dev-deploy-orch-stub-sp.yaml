@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up SAM cli
-        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v2
+        uses: aws-actions/setup-sam@341eee193f458fa5aae5d52c94b0c5cf3a1c5a52 # v2
         with:
           use-installer: true  # this caches installation but is only available on Linux x86-64 runners
 
