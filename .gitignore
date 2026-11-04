@@ -32,6 +32,9 @@ node_modules
 dist/
 .infracost
 
+# Coverage
+orchestration-stub/coverage
+
 *.pem
 *.key
 
