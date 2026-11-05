@@ -11,6 +11,8 @@ export const AuthUserInfoClaim = {
   PHONE_VERIFIED: "phone_number_verified",
   SALT: "salt",
   VERIFIED_MFA_METHOD_TYPE: "verified_mfa_method_type",
+  VERIFIED_PASSKEY: "verified_passkey",
+  LOGIN_TYPE: "login_type",
   NEW_ACCOUNT: "new_account",
   UPLIFT_REQUIRED: "uplift_required",
   ACHIEVED_CREDENTIAL_STRENGTH: "achieved_credential_strength",
@@ -42,6 +44,8 @@ export const buildUserInfoClaims = ({
   claims.add(AuthUserInfoClaim.EMAIL);
   claims.add(AuthUserInfoClaim.LOCAL_ACCOUNT_ID);
   claims.add(AuthUserInfoClaim.VERIFIED_MFA_METHOD_TYPE);
+  claims.add(AuthUserInfoClaim.VERIFIED_PASSKEY);
+  claims.add(AuthUserInfoClaim.LOGIN_TYPE);
   claims.add(AuthUserInfoClaim.UPLIFT_REQUIRED);
   claims.add(AuthUserInfoClaim.ACHIEVED_CREDENTIAL_STRENGTH);
 
