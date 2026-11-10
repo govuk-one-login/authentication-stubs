@@ -109,6 +109,20 @@ function getAccountDeleteResults() {
                 Success
             </label>
         </div>
+
+  <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="back" name="response" type="radio" value="back">
+            <label class="govuk-label govuk-radios__label" for="back">
+                Back
+            </label>
+        </div>
+
+  <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="abort" name="response" type="radio" value="abort">
+            <label class="govuk-label govuk-radios__label" for="abort">
+                Abort
+            </label>
+        </div>
   `;
 }
 
