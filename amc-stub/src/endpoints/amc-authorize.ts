@@ -240,7 +240,10 @@ function getErrorDescription(
       back: "UserBackedOutOfJourney",
       skip: "UserAbortedJourney",
     },
-    [AMCScopes.ACCOUNT_DELETE]: {},
+    [AMCScopes.ACCOUNT_DELETE]: {
+      back: "UserBackedOutOfJourney",
+      abort: "UserAbortedJourney",
+    },
   };
 
   const description = descriptions[scope]?.[response];

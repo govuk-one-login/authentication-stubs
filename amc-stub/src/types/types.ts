@@ -66,7 +66,7 @@ export type ScopeToResultsMap = {
 };
 
 type PasskeysCreateResponse = "success" | "back" | "skip";
-type AccountDeleteResponse = "success";
+type AccountDeleteResponse = "success" | "back" | "abort";
 
 export type AMCAuthorizeResponse =
   PasskeysCreateResponse | AccountDeleteResponse;

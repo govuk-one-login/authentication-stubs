@@ -52,6 +52,18 @@ describe("AMC Authorize Stub Test", () => {
       });
     });
 
+    it("should render Success, Back and Abort options for account-delete", async () => {
+      const event = await createSuccessfulTestEventForAMCScope(
+        AMCScopes.ACCOUNT_DELETE
+      );
+
+      const result = await handler(event);
+
+      expect(result.body).to.include('value="success"');
+      expect(result.body).to.include('value="back"');
+      expect(result.body).to.include('value="abort"');
+    });
+
     it("should return 400 when query string parameters are null", async () => {
       const event = createTestEvent(HttpMethod.GET, "/authorize", null, null);
 
@@ -354,6 +366,66 @@ describe("AMC Authorize Stub Test", () => {
       expect(storedItem.actions[0].details.accountInterventionsStatus).to.eq(
         undefined
       );
+    });
+
+    [
+      { response: "back", description: "UserBackedOutOfJourney" },
+      { response: "abort", description: "UserAbortedJourney" },
+    ].forEach(({ response, description }) => {
+      it(`should return 302 and store ${description} for account-delete ${response} response`, async () => {
+        const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+
+        const body = new URLSearchParams({
+          redirect_uri: "https://signin.account.gov.uk/callback",
+          state: "test-state-delete",
+          sub: "urn:fdc:gov.uk:2022:test-subject",
+          response,
+          scope: AMCScopes.ACCOUNT_DELETE,
+          email: "testuser@test.null.local",
+        }).toString();
+
+        const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+        const result = await handler(event);
+
+        expect(result.statusCode).to.eq(302);
+        expect(result.headers?.["Location"]).to.include(
+          "state=test-state-delete"
+        );
+
+        const storedItem = putStub.firstCall.args[0].Item.authorization;
+        expect(storedItem.success).to.eq(false);
+        expect(storedItem.scope).to.eq(AMCScopes.ACCOUNT_DELETE);
+        expect(storedItem.actions[0].action).to.eq(AMCScopes.ACCOUNT_DELETE);
+        expect(storedItem.actions[0].success).to.eq(false);
+        expect(storedItem.actions[0].details.error.code).to.eq(1001);
+        expect(storedItem.actions[0].details.error.description).to.eq(
+          description
+        );
+      });
+    });
+
+    it("should return 500 when account-delete response is skip", async () => {
+      const body = new URLSearchParams({
+        redirect_uri: "https://signin.account.gov.uk/callback",
+        state: "test-state-delete",
+        sub: "urn:fdc:gov.uk:2022:test-subject",
+        response: "skip",
+        scope: AMCScopes.ACCOUNT_DELETE,
+      }).toString();
+
+      const event = createTestEvent(HttpMethod.POST, "/authorize", body);
+
+      try {
+        await handler(event);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(Error);
+        expect((error as { code: number }).code).to.eq(500);
+        expect((error as Error).message).to.eq(
+          "Cannot find error description for response: skip"
+        );
+      }
     });
 
     it("should return 500 when failure response is invalid", async () => {
