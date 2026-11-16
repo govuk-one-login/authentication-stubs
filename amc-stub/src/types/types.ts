@@ -82,6 +82,9 @@ export interface ParsedBody {
   email: string;
   scope: AMCScopesValues;
   "account-interventions"?: AccountInterventionType[];
+  public_sub?: string;
+  account_data_api_access_token?: string;
+  "delete-account"?: string;
 }
 
 export interface JwksConfig {

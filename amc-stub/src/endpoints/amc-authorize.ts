@@ -2,11 +2,12 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { logger } from "../../logger.ts";
 import {
   CodedError,
+  errorResult,
   successfulHtmlResult,
   successfulJsonResult,
 } from "../helpers/result-helper.ts";
 import { AMCScopes, HttpMethod } from "../types/enums.ts";
-import { base64url, compactDecrypt, importPKCS8 } from "jose";
+import { base64url, compactDecrypt, decodeJwt, importPKCS8 } from "jose";
 import { processJoseError } from "../helpers/error-helper.ts";
 import { validateCompositeJWT } from "../helpers/jwt-validator.ts";
 import renderAmcAuthorize from "./render-amc-authorize.ts";
@@ -20,6 +21,7 @@ import {
   AccountInterventionType,
 } from "../types/types.ts";
 import { putAMCAuthorizationResultWithAuthCode } from "../../services/dynamodb-service.ts";
+import { deleteAccount } from "../../services/account-management-api-service.ts";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -89,10 +91,19 @@ async function get(event: APIGatewayProxyEvent) {
   }
 
   const scope = parsedRequestOrError.payload.scope as AMCScopes;
+  const { account_data_api_access_token: accountDataApiAccessToken } =
+    decodeJwt(encodedJwt);
 
   return successfulHtmlResult(
     200,
-    renderAmcAuthorize(protectedHeader.alg, parsedRequestOrError.payload, scope)
+    renderAmcAuthorize(
+      protectedHeader.alg,
+      parsedRequestOrError.payload,
+      scope,
+      typeof accountDataApiAccessToken === "string"
+        ? accountDataApiAccessToken
+        : undefined
+    )
   );
 }
 
@@ -119,6 +130,21 @@ async function post(event: APIGatewayProxyEvent) {
   const state = parsedBody.state;
   if (!state) {
     throw new CodedError(500, "state not found");
+  }
+
+  if (
+    parsedBody.scope === AMCScopes.ACCOUNT_DELETE &&
+    parsedBody.response === "success" &&
+    parsedBody["delete-account"] === "yes"
+  ) {
+    try {
+      await deleteAccount(
+        parsedBody.public_sub,
+        parsedBody.account_data_api_access_token
+      );
+    } catch (error) {
+      return errorResult(error);
+    }
   }
 
   const authCode = base64url.encode(randomBytes(32));

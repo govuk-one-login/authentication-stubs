@@ -7,7 +7,11 @@ import {
   importSPKI,
   JWTPayload,
 } from "jose";
-import { AMCScopes, JoseAlgorithms } from "../src/types/enums.ts";
+import {
+  ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
+  AMCScopes,
+  JoseAlgorithms,
+} from "../src/types/enums.ts";
 
 // This is the public key equivalent of the local private key in parameters.
 // Both have been committed deliberately to allow for local running and testing.
@@ -86,7 +90,12 @@ const createRequestJWT = async (scope: string) => {
     iat: now,
     exp: now + 3600,
     nbf: now,
-    account_data_api_access_token: await createAccessToken(sub, scope),
+    account_data_api_access_token: await createAccessToken(
+      sub,
+      scope === AMCScopes.ACCOUNT_DELETE
+        ? ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(" ")
+        : scope
+    ),
     sub: sub,
     public_sub: "550e8400-e29b-41d4-a716-446655440000",
     email: "test@digital.cabinet-office.gov.uk",
