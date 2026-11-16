@@ -9,6 +9,7 @@ import {
 } from "../test-helpers.ts";
 import { validateCompositeJWT } from "../../src/helpers/jwt-validator.ts";
 import {
+  ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
   AccountDataAccessTokenScopes,
   AMCScopes,
   SFADAccessTokenScopes,
@@ -280,36 +281,117 @@ describe("jwt validator tests", () => {
     );
   });
 
-  it("should return an error string if both access token fields are present", async () => {
+  it("should return an error string if both access token fields are present for scope passkey-create", async () => {
     const accessToken = await new AccessTokenBuilder(
       keys.authPrivateSigningKeyAuthAudience
-    ).build();
+    )
+      .withScope(AccountDataAccessTokenScopes.PASSKEY_CREATE)
+      .build();
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
       accessToken,
       accessToken
-    ).build();
+    )
+      .withScope(AMCScopes.PASSKEY_CREATE)
+      .build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
       "The authorization request JWT payload must contain only one access token"
     );
   });
 
-  it("should return an error when outer scope is account-delete but access token is in account_data_api_access_token", async () => {
-    const accessToken = await new AccessTokenBuilder(
-      keys.authPrivateSigningKeyAuthAudience
-    ).build();
+  it("should validate the composite JWT for scope account-delete with an account data access token", async () => {
     const JWT = await new CompositeJWTBuilder(
       keys.authPrivateSigningKeyAMCAudience,
       undefined,
-      accessToken
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope(ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES)
+        .build()
+    )
+      .withScope(AMCScopes.ACCOUNT_DELETE)
+      .build();
+
+    const result = await validateCompositeJWT(JWT);
+    expect(result).to.not.be.a("string");
+    const { payload } = result as {
+      payload: VerifiedAuthorizationRequestPayload;
+    };
+    expect(payload.account_data_api_access_token!.scope).to.equal(
+      ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(" ")
+    );
+    expect(payload.account_data_api_access_token!.sid).to.equal(
+      TEST_CONSTANTS.SESSION_ID
+    );
+    expect(payload.account_management_api_access_token).to.equal(undefined);
+  });
+
+  it("should validate the composite JWT for scope account-delete with both access tokens", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope(SFADAccessTokenScopes.ACCOUNT_DELETE)
+        .build(),
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope(ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES)
+        .build()
+    )
+      .withScope(AMCScopes.ACCOUNT_DELETE)
+      .build();
+
+    const result = await validateCompositeJWT(JWT);
+    expect(result).to.not.be.a("string");
+    const { payload } = result as {
+      payload: VerifiedAuthorizationRequestPayload;
+    };
+    expect(payload.account_management_api_access_token!.scope).to.equal(
+      SFADAccessTokenScopes.ACCOUNT_DELETE
+    );
+    expect(payload.account_data_api_access_token!.scope).to.equal(
+      ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(" ")
+    );
+  });
+
+  it("should return an error string if an account management access token for account-delete is invalid alongside an account data access token", async () => {
+    const JWT = await new CompositeJWTBuilder(
+      keys.authPrivateSigningKeyAMCAudience,
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope("INVALID_SCOPE")
+        .build(),
+      await new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+        .withScope(ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES)
+        .build()
     )
       .withScope(AMCScopes.ACCOUNT_DELETE)
       .build();
 
     expect(await validateCompositeJWT(JWT)).to.equal(
-      "The access token field does not match the outer scope. Expected account_management_api_access_token for scope account-delete"
+      "The access token payload contains invalid scopes"
     );
+  });
+
+  [
+    [AccountDataAccessTokenScopes.ACCOUNT_DELETE],
+    [AccountDataAccessTokenScopes.VERIFY_PASSWORD],
+    [AccountDataAccessTokenScopes.PASSKEY_CREATE],
+  ].forEach((scopes) => {
+    it(`should return an error when outer scope is account-delete and the account data access token only has ${scopes.join(" ")}`, async () => {
+      const accessToken = await new AccessTokenBuilder(
+        keys.authPrivateSigningKeyAuthAudience
+      )
+        .withScope(scopes)
+        .build();
+      const JWT = await new CompositeJWTBuilder(
+        keys.authPrivateSigningKeyAMCAudience,
+        undefined,
+        accessToken
+      )
+        .withScope(AMCScopes.ACCOUNT_DELETE)
+        .build();
+
+      expect(await validateCompositeJWT(JWT)).to.equal(
+        "The account data access token must contain the scopes account-delete, verify-password for scope account-delete"
+      );
+    });
   });
 
   it("should return an error when outer scope is passkey-create but access token is in account_management_api_access_token", async () => {

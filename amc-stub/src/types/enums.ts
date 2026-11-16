@@ -27,7 +27,14 @@ export enum AccountDataAccessTokenScopes {
   PASSKEY_RETRIEVE = "passkey-retrieve",
   PASSKEY_UPDATE = "passkey-update",
   PASSKEY_DELETE = "passkey-delete",
+  ACCOUNT_DELETE = "account-delete",
+  VERIFY_PASSWORD = "verify-password",
 }
+
+export const ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES: string[] = [
+  AccountDataAccessTokenScopes.ACCOUNT_DELETE,
+  AccountDataAccessTokenScopes.VERIFY_PASSWORD,
+];
 
 export enum SFADAccessTokenScopes {
   ACCOUNT_DELETE = "account-delete",
