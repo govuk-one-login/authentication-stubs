@@ -13,7 +13,8 @@ const scopeToResultsMap: ScopeToResultsMap = {
 export default function renderAmcAuthorize(
   decodedHeader: string,
   decodedPayload: VerifiedAuthorizationRequestPayload,
-  scope: AMCScopes
+  scope: AMCScopes,
+  accountDataApiAccessToken?: string
 ) {
   return renderPage(
     `<style>.json-formatter{font-family:monospace;white-space:pre-wrap;background:#f8f8f8;padding:10px;border:1px solid #ddd}</style>
@@ -57,6 +58,8 @@ export default function renderAmcAuthorize(
   </div>
 
   ${scope === AMCScopes.PASSKEY_CREATE ? getAccountInterventionTypeCheckboxes() : ""}
+
+  ${scope === AMCScopes.ACCOUNT_DELETE ? getAccountDeleteOptions(decodedPayload.public_sub, accountDataApiAccessToken) : ""}
 
   <button name="continue" value="continue" class="govuk-button">Continue</button>
   <input type="hidden" name="state" value=${decodedPayload.state}>
@@ -123,6 +126,43 @@ function getAccountDeleteResults() {
                 Abort
             </label>
         </div>
+  `;
+}
+
+function getAccountDeleteOptions(
+  publicSubjectId: string,
+  accountDataApiAccessToken?: string
+) {
+  if (!accountDataApiAccessToken) {
+    return `
+  <div class="govuk-inset-text">
+    No Account Data API access token was sent, so Success will not delete the account.
+  </div>
+  `;
+  }
+
+  return `
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      Choosing Success with "Delete this account and all its data in DynamoDB" ticked deletes the account you signed in with. Untick it to return a successful outcome without deleting the account.
+    </strong>
+  </div>
+
+  <div class="govuk-form-group">
+    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="delete-account" name="delete-account" type="checkbox" value="yes" checked>
+        <label class="govuk-label govuk-checkboxes__label" for="delete-account">
+          Delete this account and all its data in DynamoDB
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <input type="hidden" name="public_sub" value="${publicSubjectId}">
+  <input type="hidden" name="account_data_api_access_token" value="${accountDataApiAccessToken}">
   `;
 }
 

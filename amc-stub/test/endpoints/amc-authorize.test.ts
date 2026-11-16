@@ -5,8 +5,10 @@ import {
   AccessTokenBuilder,
   CompositeJWTBuilder,
   createTestEvent,
+  TEST_CONSTANTS,
 } from "../test-helpers.js";
 import {
+  ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
   AccountDataAccessTokenScopes,
   AMCScopes,
   HttpMethod,
@@ -62,6 +64,58 @@ describe("AMC Authorize Stub Test", () => {
       expect(result.body).to.include('value="success"');
       expect(result.body).to.include('value="back"');
       expect(result.body).to.include('value="abort"');
+    });
+
+    it("should render the delete checkbox ticked, the warning and the hidden fields for account-delete with an account data access token", async () => {
+      const { event, accountDataApiAccessToken } =
+        await createAccountDeleteTestEventWithAccountDataToken();
+
+      const result = await handler(event);
+
+      expect(result.body).to.include(
+        "Delete this account and all its data in DynamoDB"
+      );
+      expect(result.body).to.include(
+        'name="delete-account" type="checkbox" value="yes" checked'
+      );
+      expect(result.body).to.include("deletes the account you signed in with");
+      expect(result.body).to.include(
+        `<input type="hidden" name="public_sub" value="${TEST_CONSTANTS.PUBLIC_SUBJECT}">`
+      );
+      expect(result.body).to.include(
+        `<input type="hidden" name="account_data_api_access_token" value="${accountDataApiAccessToken}">`
+      );
+    });
+
+    it("should not render the delete checkbox for account-delete without an account data access token", async () => {
+      const event = await createSuccessfulTestEventForAMCScope(
+        AMCScopes.ACCOUNT_DELETE
+      );
+
+      const result = await handler(event);
+
+      expect(result.body).to.not.include(
+        "Delete this account and all its data in DynamoDB"
+      );
+      expect(result.body).to.include(
+        "No Account Data API access token was sent, so Success will not delete the account."
+      );
+      expect(result.body).to.not.include(
+        'name="account_data_api_access_token"'
+      );
+    });
+
+    it("should not render the delete checkbox for passkey-create", async () => {
+      const event = await createSuccessfulTestEventForAMCScope(
+        AMCScopes.PASSKEY_CREATE
+      );
+
+      const result = await handler(event);
+
+      expect(result.body).to.not.include(
+        "Delete this account and all its data in DynamoDB"
+      );
+      expect(result.body).to.not.include("Success will not delete the account");
     });
 
     it("should return 400 when query string parameters are null", async () => {
@@ -405,6 +459,147 @@ describe("AMC Authorize Stub Test", () => {
       });
     });
 
+    describe("account-delete success", () => {
+      const ACCOUNT_MANAGEMENT_API_URL = "https://amapi.example.com/test-stage";
+      let fetchStub: sinon.SinonStub;
+
+      beforeEach(() => {
+        process.env.ACCOUNT_MANAGEMENT_API_URL = ACCOUNT_MANAGEMENT_API_URL;
+        fetchStub = sinon
+          .stub(globalThis, "fetch")
+          .resolves(new Response(null, { status: 204 }));
+      });
+
+      afterEach(() => {
+        delete process.env.ACCOUNT_MANAGEMENT_API_URL;
+      });
+
+      const buildBody = async (
+        response: string,
+        deleteAccount: string | undefined
+      ) => {
+        const accountDataApiAccessToken =
+          await buildAccountDeleteAccountDataApiAccessToken();
+        const params = new URLSearchParams({
+          redirect_uri: "https://signin.account.gov.uk/callback",
+          state: "test-state-delete",
+          sub: "urn:fdc:gov.uk:2022:test-subject",
+          response,
+          scope: AMCScopes.ACCOUNT_DELETE,
+          email: "testuser@test.null.local",
+          public_sub: TEST_CONSTANTS.PUBLIC_SUBJECT,
+          account_data_api_access_token: accountDataApiAccessToken,
+        });
+        if (deleteAccount) {
+          params.append("delete-account", deleteAccount);
+        }
+        return { body: params.toString(), accountDataApiAccessToken };
+      };
+
+      it("should delete the account through the Account Management API and store a successful outcome when the checkbox is ticked", async () => {
+        const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+        const { body, accountDataApiAccessToken } = await buildBody(
+          "success",
+          "yes"
+        );
+
+        const result = await handler(
+          createTestEvent(HttpMethod.POST, "/authorize", body)
+        );
+
+        expect(result.statusCode).to.eq(302);
+        expect(fetchStub.calledOnce).to.eq(true);
+        const [url, init] = fetchStub.firstCall.args;
+        expect(url).to.eq(
+          `${ACCOUNT_MANAGEMENT_API_URL}/v1/accounts/${TEST_CONSTANTS.PUBLIC_SUBJECT}`
+        );
+        expect(init.method).to.eq("DELETE");
+        expect(init.headers).to.deep.eq({
+          "Content-Type": "application/json",
+          "X-ADAPI-AccessToken": accountDataApiAccessToken,
+          "Session-Id": TEST_CONSTANTS.SESSION_ID,
+        });
+        expect(JSON.parse(init.body)).to.deep.eq({
+          clientId: "amc",
+          reason: "USER_INITIATED",
+        });
+        const storedItem = putStub.firstCall.args[0].Item.authorization;
+        expect(storedItem.success).to.eq(true);
+      });
+
+      it("should not delete the account and should store a successful outcome when the checkbox is not ticked", async () => {
+        const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+        const { body } = await buildBody("success", undefined);
+
+        const result = await handler(
+          createTestEvent(HttpMethod.POST, "/authorize", body)
+        );
+
+        expect(result.statusCode).to.eq(302);
+        expect(fetchStub.called).to.eq(false);
+        const storedItem = putStub.firstCall.args[0].Item.authorization;
+        expect(storedItem.success).to.eq(true);
+      });
+
+      it("should return a 500 response when the Account Management API request fails", async () => {
+        fetchStub.rejects(new Error("connection reset"));
+        const { body } = await buildBody("success", "yes");
+
+        const result = await handler(
+          createTestEvent(HttpMethod.POST, "/authorize", body)
+        );
+
+        expect(result.statusCode).to.eq(500);
+        expect(JSON.parse(result.body)).to.deep.eq({
+          message: "Account deletion request failed: Error: connection reset",
+        });
+      });
+
+      ["back", "abort"].forEach((response) => {
+        it(`should not delete the account for ${response} when the checkbox is ticked`, async () => {
+          const { body } = await buildBody(response, "yes");
+
+          const result = await handler(
+            createTestEvent(HttpMethod.POST, "/authorize", body)
+          );
+
+          expect(result.statusCode).to.eq(302);
+          expect(fetchStub.called).to.eq(false);
+        });
+      });
+
+      it("should return a 500 response and not store an outcome when the Account Management API does not return 204", async () => {
+        const putStub = DynamoDBDocument.prototype.put as sinon.SinonStub;
+        fetchStub.resolves(new Response("error", { status: 500 }));
+        const { body } = await buildBody("success", "yes");
+
+        const result = await handler(
+          createTestEvent(HttpMethod.POST, "/authorize", body)
+        );
+
+        expect(result.statusCode).to.eq(500);
+        expect(JSON.parse(result.body)).to.deep.eq({
+          message: "Account deletion failed with status 500",
+        });
+        expect(putStub.called).to.eq(false);
+      });
+
+      it("should return a 500 response when the Account Management API URL is not set", async () => {
+        delete process.env.ACCOUNT_MANAGEMENT_API_URL;
+        const { body } = await buildBody("success", "yes");
+
+        const result = await handler(
+          createTestEvent(HttpMethod.POST, "/authorize", body)
+        );
+
+        expect(result.statusCode).to.eq(500);
+        expect(JSON.parse(result.body)).to.deep.eq({
+          message: "ACCOUNT_MANAGEMENT_API_URL not set",
+        });
+        expect(fetchStub.called).to.eq(false);
+      });
+    });
+
     it("should return 500 when account-delete response is skip", async () => {
       const body = new URLSearchParams({
         redirect_uri: "https://signin.account.gov.uk/callback",
@@ -493,6 +688,10 @@ async function createSuccessfulTestEventForAMCScope(amcScope: AMCScopes) {
 
   const compositeJWT = await builder.withScope(amcScope).build();
 
+  return encryptIntoTestEvent(compositeJWT, amcScope);
+}
+
+async function encryptIntoTestEvent(compositeJWT: string, amcScope: AMCScopes) {
   const publicKey = await importSPKI(
     keys.amcPublicEncryptionKey,
     "RSA-OAEP-256"
@@ -512,4 +711,29 @@ async function createSuccessfulTestEventForAMCScope(amcScope: AMCScopes) {
     scope: amcScope,
     redirect_uri: "https://example.com/callback",
   });
+}
+
+function buildAccountDeleteAccountDataApiAccessToken() {
+  return new AccessTokenBuilder(keys.authPrivateSigningKeyAuthAudience)
+    .withScope(ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES)
+    .build();
+}
+
+async function createAccountDeleteTestEventWithAccountDataToken() {
+  const accountDataApiAccessToken =
+    await buildAccountDeleteAccountDataApiAccessToken();
+
+  const compositeJWT = await new CompositeJWTBuilder(
+    keys.authPrivateSigningKeyAMCAudience,
+    undefined,
+    accountDataApiAccessToken
+  )
+    .withScope(AMCScopes.ACCOUNT_DELETE)
+    .build();
+
+  const event = await encryptIntoTestEvent(
+    compositeJWT,
+    AMCScopes.ACCOUNT_DELETE
+  );
+  return { event, accountDataApiAccessToken };
 }
