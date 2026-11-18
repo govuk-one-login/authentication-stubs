@@ -12,7 +12,6 @@ import {
   AccountDataAccessTokenScopes,
   AMCScopes,
   HttpMethod,
-  SFADAccessTokenScopes,
 } from "../../src/types/enums.ts";
 import keys from "../../data/keys.json" with { type: "json" };
 import { CompactEncrypt, importSPKI } from "jose";
@@ -87,24 +86,6 @@ describe("AMC Authorize Stub Test", () => {
       );
     });
 
-    it("should not render the delete checkbox for account-delete without an account data access token", async () => {
-      const event = await createSuccessfulTestEventForAMCScope(
-        AMCScopes.ACCOUNT_DELETE
-      );
-
-      const result = await handler(event);
-
-      expect(result.body).to.not.include(
-        "Delete this account and all its data in DynamoDB"
-      );
-      expect(result.body).to.include(
-        "No Account Data API access token was sent, so Success will not delete the account."
-      );
-      expect(result.body).to.not.include(
-        'name="account_data_api_access_token"'
-      );
-    });
-
     it("should not render the delete checkbox for passkey-create", async () => {
       const event = await createSuccessfulTestEventForAMCScope(
         AMCScopes.PASSKEY_CREATE
@@ -139,8 +120,7 @@ describe("AMC Authorize Stub Test", () => {
       ).build();
       const compositeJWT = await new CompositeJWTBuilder(
         keys.authPrivateSigningKeyAMCAudience,
-        accessToken,
-        undefined
+        accessToken
       ).build();
 
       const publicKey = await importSPKI(
@@ -663,30 +643,22 @@ describe("AMC Authorize Stub Test", () => {
 });
 
 async function createSuccessfulTestEventForAMCScope(amcScope: AMCScopes) {
+  if (amcScope === AMCScopes.ACCOUNT_DELETE) {
+    return (await createAccountDeleteTestEventWithAccountDataToken()).event;
+  }
+
   const accessToken = await new AccessTokenBuilder(
     keys.authPrivateSigningKeyAuthAudience
   )
-    .withScope(
-      amcScope === AMCScopes.ACCOUNT_DELETE
-        ? Object.values(SFADAccessTokenScopes)
-        : Object.values(AccountDataAccessTokenScopes)
-    )
+    .withScope(Object.values(AccountDataAccessTokenScopes))
     .build();
 
-  const builder =
-    amcScope === AMCScopes.ACCOUNT_DELETE
-      ? new CompositeJWTBuilder(
-          keys.authPrivateSigningKeyAMCAudience,
-          accessToken,
-          undefined
-        )
-      : new CompositeJWTBuilder(
-          keys.authPrivateSigningKeyAMCAudience,
-          undefined,
-          accessToken
-        );
-
-  const compositeJWT = await builder.withScope(amcScope).build();
+  const compositeJWT = await new CompositeJWTBuilder(
+    keys.authPrivateSigningKeyAMCAudience,
+    accessToken
+  )
+    .withScope(amcScope)
+    .build();
 
   return encryptIntoTestEvent(compositeJWT, amcScope);
 }
@@ -725,7 +697,6 @@ async function createAccountDeleteTestEventWithAccountDataToken() {
 
   const compositeJWT = await new CompositeJWTBuilder(
     keys.authPrivateSigningKeyAMCAudience,
-    undefined,
     accountDataApiAccessToken
   )
     .withScope(AMCScopes.ACCOUNT_DELETE)

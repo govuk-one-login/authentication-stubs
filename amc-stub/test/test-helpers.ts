@@ -7,7 +7,7 @@ import {
   AMCScopes,
   HttpMethod,
   JoseAlgorithms,
-  SFADAccessTokenScopes,
+  ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
 } from "../src/types/enums.ts";
 import {
   CompactJWSHeaderParameters,
@@ -71,7 +71,8 @@ export const createTestEvent = (
 
 export class AccessTokenBuilder {
   private sub: string | undefined = TEST_CONSTANTS.SUBJECT;
-  private scope: string | undefined = SFADAccessTokenScopes.ACCOUNT_DELETE;
+  private scope: string | undefined =
+    ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(" ");
   private iss: string | undefined = TEST_CONSTANTS.ACCESS_TOKEN_ISSUER;
   private aud: string | undefined = TEST_CONSTANTS.AUTH_AUDIENCE;
   private clientId: string | undefined = TEST_CONSTANTS.CLIENT_ID;
@@ -164,9 +165,10 @@ export class CompositeJWTBuilder {
   private publicSub: string | undefined = TEST_CONSTANTS.PUBLIC_SUBJECT;
   private readonly expiresIn = 300;
 
+  private accountManagementApiAccessToken: string | undefined = undefined;
+
   constructor(
     private readonly signingKey: string,
-    private readonly accountManagementApiAccessToken: string | undefined,
     private readonly accountDataApiAccessToken: string | undefined
   ) {}
 
@@ -213,6 +215,11 @@ export class CompositeJWTBuilder {
 
   withSubject(sub: string | undefined) {
     this.sub = sub;
+    return this;
+  }
+
+  withAccountManagementApiAccessToken(token: string | undefined) {
+    this.accountManagementApiAccessToken = token;
     return this;
   }
 

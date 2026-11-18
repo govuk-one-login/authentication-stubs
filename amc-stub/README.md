@@ -107,7 +107,7 @@ You should see an HTML page displaying the decrypted JAR header and payload.
 
 ### Account deletion (account-delete scope)
 
-When the request contains an `account_data_api_access_token` with the `account-delete` and `verify-password` scopes, the page shows a "Delete this account and all its data in DynamoDB" checkbox, ticked by default. Choosing Success with it ticked calls `DELETE {ACCOUNT_MANAGEMENT_API_URL}/v1/accounts/{public_sub}` with the token in the `X-ADAPI-AccessToken` header, which deletes the account. Untick it to return a successful outcome without deleting anything.
+The request must contain an `account_data_api_access_token` with the `account-delete` and `verify-password` scopes. The page shows a "Delete this account and all its data in DynamoDB" checkbox, ticked by default. Choosing Success with it ticked calls `DELETE {ACCOUNT_MANAGEMENT_API_URL}/v1/accounts/{public_sub}` with the token in the `X-ADAPI-AccessToken` header, which deletes the account. Untick it to return a successful outcome without deleting anything.
 
 `ACCOUNT_MANAGEMENT_API_URL` is set per environment in `template.yaml`. It is not set for local running, so ticking the checkbox locally returns an error.
 

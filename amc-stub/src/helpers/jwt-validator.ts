@@ -215,10 +215,6 @@ export async function validateCompositeJWT(
   const { payload: authorizationRequestPayload } =
     authorizationRequestResultOrError;
 
-  if (authorizationRequestPayload.scope === AMCScopes.ACCOUNT_DELETE) {
-    return validateAccountDeleteAccessTokens(authorizationRequestPayload);
-  }
-
   const { account_management_api_access_token, account_data_api_access_token } =
     authorizationRequestPayload;
 
@@ -243,61 +239,21 @@ export async function validateCompositeJWT(
     return accessTokenResultOrError;
   }
 
+  if (authorizationRequestPayload.scope === AMCScopes.ACCOUNT_DELETE) {
+    const tokenScopes = accessTokenResultOrError.payload.scope.split(" ");
+    if (
+      !ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.every((s) => tokenScopes.includes(s))
+    ) {
+      const error = `The account data access token must contain the scopes ${ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(", ")} for scope ${AMCScopes.ACCOUNT_DELETE}`;
+      logger.error({ payload: accessTokenResultOrError.payload }, error);
+      return error;
+    }
+  }
+
   return {
     payload: {
       ...authorizationRequestPayload,
       account_data_api_access_token: accessTokenResultOrError.payload,
     } as VerifiedAuthorizationRequestPayload,
   };
-}
-
-async function validateAccountDeleteAccessTokens(
-  authorizationRequestPayload: AuthorizationRequestPayload
-): Promise<{ payload: VerifiedAuthorizationRequestPayload } | string> {
-  const { account_management_api_access_token, account_data_api_access_token } =
-    authorizationRequestPayload;
-
-  if (!account_management_api_access_token && !account_data_api_access_token) {
-    return "The authorization request JWT payload must contain an access token";
-  }
-
-  const verifiedPayload = {
-    ...authorizationRequestPayload,
-  } as unknown as VerifiedAuthorizationRequestPayload;
-
-  if (account_management_api_access_token) {
-    const accountManagementResultOrError = await validateAccessToken(
-      account_management_api_access_token,
-      AccessTokenApi.ACCOUNT_MANAGEMENT
-    );
-    if (typeof accountManagementResultOrError === "string") {
-      return accountManagementResultOrError;
-    }
-    verifiedPayload.account_management_api_access_token =
-      accountManagementResultOrError.payload;
-  }
-
-  if (account_data_api_access_token) {
-    const accountDataResultOrError = await validateAccessToken(
-      account_data_api_access_token,
-      AccessTokenApi.ACCOUNT_DATA
-    );
-    if (typeof accountDataResultOrError === "string") {
-      return accountDataResultOrError;
-    }
-
-    const tokenScopes = accountDataResultOrError.payload.scope.split(" ");
-    if (
-      !ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.every((s) => tokenScopes.includes(s))
-    ) {
-      const error = `The account data access token must contain the scopes ${ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(", ")} for scope ${AMCScopes.ACCOUNT_DELETE}`;
-      logger.error({ payload: accountDataResultOrError.payload }, error);
-      return error;
-    }
-
-    verifiedPayload.account_data_api_access_token =
-      accountDataResultOrError.payload;
-  }
-
-  return { payload: verifiedPayload };
 }

@@ -18,8 +18,7 @@ interface BasePayload extends JWTPayload {
 }
 
 export interface VerifiedAuthorizationRequestPayload extends BasePayload {
-  account_management_api_access_token?: AccessTokenPayload;
-  account_data_api_access_token?: AccessTokenPayload;
+  account_data_api_access_token: AccessTokenPayload;
 }
 
 export interface AuthorizationRequestPayload extends BasePayload {
