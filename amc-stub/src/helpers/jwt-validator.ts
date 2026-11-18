@@ -1,49 +1,24 @@
 import { getPublicSigningKey } from "./jwks-helper.ts";
 import { jwtVerify, JWTVerifyResult } from "jose";
 import {
-  AccessTokenApiType,
   AccessTokenPayload,
   AuthorizationRequestPayload,
-  JwksConfig,
   VerifiedAuthorizationRequestPayload,
 } from "../types/types.ts";
 import {
   ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
-  AccessTokenApi,
   AccountDataAccessTokenScopes,
-  AccessTokenFieldName,
   AMCScopes,
-  SFADAccessTokenScopes,
 } from "../types/enums.ts";
 import { logger } from "../../logger.ts";
 
-const getAccessTokenConfig = () =>
-  new Map<AccessTokenApiType, JwksConfig>([
-    [
-      AccessTokenApi.ACCOUNT_MANAGEMENT,
-      {
-        jwksEndpoint: process.env.AMC_JWKS_ENDPOINT as string,
-        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
-      },
-    ],
-    [
-      AccessTokenApi.ACCOUNT_DATA,
-      {
-        jwksEndpoint: process.env.AD_JWKS_ENDPOINT as string,
-        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
-      },
-    ],
-  ]);
-
 async function validateAccessToken(
-  accessTokenJWT: string,
-  tokenType: AccessTokenApiType
+  accessTokenJWT: string
 ): Promise<JWTVerifyResult<AccessTokenPayload> | string> {
-  const accessTokenConfig = getAccessTokenConfig();
   const publicSigningKeyAuthAudience = await getPublicSigningKey(
     accessTokenJWT,
-    accessTokenConfig.get(tokenType)?.jwksEndpoint,
-    accessTokenConfig.get(tokenType)?.backupKey
+    process.env.AD_JWKS_ENDPOINT,
+    process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE
   );
 
   const verifiedJWT = await jwtVerify<AccessTokenPayload>(
@@ -51,12 +26,7 @@ async function validateAccessToken(
     publicSigningKeyAuthAudience
   );
 
-  const scopesByTokenType: Record<AccessTokenApi, string[]> = {
-    [AccessTokenApi.ACCOUNT_DATA]: Object.values(AccountDataAccessTokenScopes),
-    [AccessTokenApi.ACCOUNT_MANAGEMENT]: Object.values(SFADAccessTokenScopes),
-  };
-
-  const validScopes = scopesByTokenType[tokenType];
+  const validScopes: string[] = Object.values(AccountDataAccessTokenScopes);
 
   if (
     !verifiedJWT.payload.scope?.split(" ").every((s) => validScopes.includes(s))
@@ -215,10 +185,6 @@ export async function validateCompositeJWT(
   const { payload: authorizationRequestPayload } =
     authorizationRequestResultOrError;
 
-  if (authorizationRequestPayload.scope === AMCScopes.ACCOUNT_DELETE) {
-    return validateAccountDeleteAccessTokens(authorizationRequestPayload);
-  }
-
   const { account_management_api_access_token, account_data_api_access_token } =
     authorizationRequestPayload;
 
@@ -231,16 +197,26 @@ export async function validateCompositeJWT(
   }
 
   if (!account_data_api_access_token) {
-    return `The access token field does not match the outer scope. Expected ${AccessTokenFieldName.ACCOUNT_DATA} for scope ${authorizationRequestPayload.scope}`;
+    return `The access token field does not match the outer scope. Expected account_data_api_access_token for scope ${authorizationRequestPayload.scope}`;
   }
 
   const accessTokenResultOrError = await validateAccessToken(
-    account_data_api_access_token,
-    AccessTokenApi.ACCOUNT_DATA
+    account_data_api_access_token
   );
 
   if (typeof accessTokenResultOrError === "string") {
     return accessTokenResultOrError;
+  }
+
+  if (authorizationRequestPayload.scope === AMCScopes.ACCOUNT_DELETE) {
+    const tokenScopes = accessTokenResultOrError.payload.scope.split(" ");
+    if (
+      !ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.every((s) => tokenScopes.includes(s))
+    ) {
+      const error = `The account data access token must contain the scopes ${ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(", ")} for scope ${AMCScopes.ACCOUNT_DELETE}`;
+      logger.error({ payload: accessTokenResultOrError.payload }, error);
+      return error;
+    }
   }
 
   return {
@@ -249,55 +225,4 @@ export async function validateCompositeJWT(
       account_data_api_access_token: accessTokenResultOrError.payload,
     } as VerifiedAuthorizationRequestPayload,
   };
-}
-
-async function validateAccountDeleteAccessTokens(
-  authorizationRequestPayload: AuthorizationRequestPayload
-): Promise<{ payload: VerifiedAuthorizationRequestPayload } | string> {
-  const { account_management_api_access_token, account_data_api_access_token } =
-    authorizationRequestPayload;
-
-  if (!account_management_api_access_token && !account_data_api_access_token) {
-    return "The authorization request JWT payload must contain an access token";
-  }
-
-  const verifiedPayload = {
-    ...authorizationRequestPayload,
-  } as unknown as VerifiedAuthorizationRequestPayload;
-
-  if (account_management_api_access_token) {
-    const accountManagementResultOrError = await validateAccessToken(
-      account_management_api_access_token,
-      AccessTokenApi.ACCOUNT_MANAGEMENT
-    );
-    if (typeof accountManagementResultOrError === "string") {
-      return accountManagementResultOrError;
-    }
-    verifiedPayload.account_management_api_access_token =
-      accountManagementResultOrError.payload;
-  }
-
-  if (account_data_api_access_token) {
-    const accountDataResultOrError = await validateAccessToken(
-      account_data_api_access_token,
-      AccessTokenApi.ACCOUNT_DATA
-    );
-    if (typeof accountDataResultOrError === "string") {
-      return accountDataResultOrError;
-    }
-
-    const tokenScopes = accountDataResultOrError.payload.scope.split(" ");
-    if (
-      !ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.every((s) => tokenScopes.includes(s))
-    ) {
-      const error = `The account data access token must contain the scopes ${ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES.join(", ")} for scope ${AMCScopes.ACCOUNT_DELETE}`;
-      logger.error({ payload: accountDataResultOrError.payload }, error);
-      return error;
-    }
-
-    verifiedPayload.account_data_api_access_token =
-      accountDataResultOrError.payload;
-  }
-
-  return { payload: verifiedPayload };
 }

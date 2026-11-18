@@ -35,17 +35,3 @@ export const ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES: string[] = [
   AccountDataAccessTokenScopes.ACCOUNT_DELETE,
   AccountDataAccessTokenScopes.VERIFY_PASSWORD,
 ];
-
-export enum SFADAccessTokenScopes {
-  ACCOUNT_DELETE = "account-delete",
-}
-
-export enum AccessTokenApi {
-  ACCOUNT_MANAGEMENT = "account-management",
-  ACCOUNT_DATA = "account-data",
-}
-
-export enum AccessTokenFieldName {
-  ACCOUNT_MANAGEMENT = "account_management_api_access_token",
-  ACCOUNT_DATA = "account_data_api_access_token",
-}

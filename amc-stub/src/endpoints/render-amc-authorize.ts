@@ -14,7 +14,7 @@ export default function renderAmcAuthorize(
   decodedHeader: string,
   decodedPayload: VerifiedAuthorizationRequestPayload,
   scope: AMCScopes,
-  accountDataApiAccessToken?: string
+  accountDataApiAccessToken: string
 ) {
   return renderPage(
     `<style>.json-formatter{font-family:monospace;white-space:pre-wrap;background:#f8f8f8;padding:10px;border:1px solid #ddd}</style>
@@ -131,16 +131,8 @@ function getAccountDeleteResults() {
 
 function getAccountDeleteOptions(
   publicSubjectId: string,
-  accountDataApiAccessToken?: string
+  accountDataApiAccessToken: string
 ) {
-  if (!accountDataApiAccessToken) {
-    return `
-  <div class="govuk-inset-text">
-    No Account Data API access token was sent, so Success will not delete the account.
-  </div>
-  `;
-  }
-
   return `
   <div class="govuk-warning-text">
     <span class="govuk-warning-text__icon" aria-hidden="true">!</span>

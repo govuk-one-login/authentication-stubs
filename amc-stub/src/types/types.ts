@@ -1,5 +1,5 @@
 import { JWTPayload } from "jose";
-import { AccessTokenApi, AMCScopes } from "./enums.js";
+import { AMCScopes } from "./enums.js";
 
 export interface AccessTokenPayload extends JWTPayload {
   client_id: string;
@@ -18,8 +18,7 @@ interface BasePayload extends JWTPayload {
 }
 
 export interface VerifiedAuthorizationRequestPayload extends BasePayload {
-  account_management_api_access_token?: AccessTokenPayload;
-  account_data_api_access_token?: AccessTokenPayload;
+  account_data_api_access_token: AccessTokenPayload;
 }
 
 export interface AuthorizationRequestPayload extends BasePayload {
@@ -86,11 +85,3 @@ export interface ParsedBody {
   account_data_api_access_token?: string;
   "delete-account"?: string;
 }
-
-export interface JwksConfig {
-  jwksEndpoint: string;
-  backupKey: string;
-}
-
-export type AccessTokenApiType =
-  (typeof AccessTokenApi)[keyof typeof AccessTokenApi];
