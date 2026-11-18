@@ -91,8 +91,8 @@ async function get(event: APIGatewayProxyEvent) {
   }
 
   const scope = parsedRequestOrError.payload.scope as AMCScopes;
-  const { account_data_api_access_token: accountDataApiAccessToken } =
-    decodeJwt(encodedJwt);
+  const accountDataApiAccessToken = decodeJwt(encodedJwt)
+    .account_data_api_access_token as string;
 
   return successfulHtmlResult(
     200,
@@ -100,9 +100,7 @@ async function get(event: APIGatewayProxyEvent) {
       protectedHeader.alg,
       parsedRequestOrError.payload,
       scope,
-      typeof accountDataApiAccessToken === "string"
-        ? accountDataApiAccessToken
-        : undefined
+      accountDataApiAccessToken
     )
   );
 }
