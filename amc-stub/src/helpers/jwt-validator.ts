@@ -1,49 +1,24 @@
 import { getPublicSigningKey } from "./jwks-helper.ts";
 import { jwtVerify, JWTVerifyResult } from "jose";
 import {
-  AccessTokenApiType,
   AccessTokenPayload,
   AuthorizationRequestPayload,
-  JwksConfig,
   VerifiedAuthorizationRequestPayload,
 } from "../types/types.ts";
 import {
   ACCOUNT_DELETE_ACCOUNT_DATA_SCOPES,
-  AccessTokenApi,
   AccountDataAccessTokenScopes,
-  AccessTokenFieldName,
   AMCScopes,
-  SFADAccessTokenScopes,
 } from "../types/enums.ts";
 import { logger } from "../../logger.ts";
 
-const getAccessTokenConfig = () =>
-  new Map<AccessTokenApiType, JwksConfig>([
-    [
-      AccessTokenApi.ACCOUNT_MANAGEMENT,
-      {
-        jwksEndpoint: process.env.AMC_JWKS_ENDPOINT as string,
-        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
-      },
-    ],
-    [
-      AccessTokenApi.ACCOUNT_DATA,
-      {
-        jwksEndpoint: process.env.AD_JWKS_ENDPOINT as string,
-        backupKey: process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE as string,
-      },
-    ],
-  ]);
-
 async function validateAccessToken(
-  accessTokenJWT: string,
-  tokenType: AccessTokenApiType
+  accessTokenJWT: string
 ): Promise<JWTVerifyResult<AccessTokenPayload> | string> {
-  const accessTokenConfig = getAccessTokenConfig();
   const publicSigningKeyAuthAudience = await getPublicSigningKey(
     accessTokenJWT,
-    accessTokenConfig.get(tokenType)?.jwksEndpoint,
-    accessTokenConfig.get(tokenType)?.backupKey
+    process.env.AD_JWKS_ENDPOINT,
+    process.env.AUTH_PUBLIC_SIGNING_KEY_AUTH_AUDIENCE
   );
 
   const verifiedJWT = await jwtVerify<AccessTokenPayload>(
@@ -51,12 +26,7 @@ async function validateAccessToken(
     publicSigningKeyAuthAudience
   );
 
-  const scopesByTokenType: Record<AccessTokenApi, string[]> = {
-    [AccessTokenApi.ACCOUNT_DATA]: Object.values(AccountDataAccessTokenScopes),
-    [AccessTokenApi.ACCOUNT_MANAGEMENT]: Object.values(SFADAccessTokenScopes),
-  };
-
-  const validScopes = scopesByTokenType[tokenType];
+  const validScopes: string[] = Object.values(AccountDataAccessTokenScopes);
 
   if (
     !verifiedJWT.payload.scope?.split(" ").every((s) => validScopes.includes(s))
@@ -227,12 +197,11 @@ export async function validateCompositeJWT(
   }
 
   if (!account_data_api_access_token) {
-    return `The access token field does not match the outer scope. Expected ${AccessTokenFieldName.ACCOUNT_DATA} for scope ${authorizationRequestPayload.scope}`;
+    return `The access token field does not match the outer scope. Expected account_data_api_access_token for scope ${authorizationRequestPayload.scope}`;
   }
 
   const accessTokenResultOrError = await validateAccessToken(
-    account_data_api_access_token,
-    AccessTokenApi.ACCOUNT_DATA
+    account_data_api_access_token
   );
 
   if (typeof accessTokenResultOrError === "string") {
