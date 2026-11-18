@@ -9,6 +9,8 @@ const ALWAYS = [
   AuthUserInfoClaim.EMAIL,
   AuthUserInfoClaim.LOCAL_ACCOUNT_ID,
   AuthUserInfoClaim.VERIFIED_MFA_METHOD_TYPE,
+  AuthUserInfoClaim.VERIFIED_PASSKEY,
+  AuthUserInfoClaim.LOGIN_TYPE,
   AuthUserInfoClaim.UPLIFT_REQUIRED,
   AuthUserInfoClaim.ACHIEVED_CREDENTIAL_STRENGTH,
 ];
