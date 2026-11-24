@@ -7,7 +7,7 @@ import { truncate } from "../helper/result-helper";
 const client =
   process.env.ENVIRONMENT === "local"
     ? new DynamoDBClient({
-        endpoint: "http://host.docker.internal:4566",
+        endpoint: process.env.DYNAMODB_ENDPOINT,
         region: "localhost", // Set a dummy region for local development
       })
     : new DynamoDBClient({});
