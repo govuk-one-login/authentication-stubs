@@ -59,7 +59,7 @@ export default function renderAmcAuthorize(
 
   ${scope === AMCScopes.PASSKEY_CREATE ? getAccountInterventionTypeCheckboxes() : ""}
 
-  ${scope === AMCScopes.ACCOUNT_DELETE ? getAccountDeleteOptions(decodedPayload.public_sub, accountDataApiAccessToken) : ""}
+  ${scope === AMCScopes.ACCOUNT_DELETE && process.env.ENVIRONMENT !== "local" ? getAccountDeleteOptions(decodedPayload.public_sub, accountDataApiAccessToken) : ""}
 
   <button name="continue" value="continue" class="govuk-button">Continue</button>
   <input type="hidden" name="state" value=${decodedPayload.state}>
