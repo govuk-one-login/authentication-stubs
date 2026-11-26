@@ -5,8 +5,8 @@ import { AMCAuthorizationResult } from "../src/types/types.ts";
 const client =
   process.env.ENVIRONMENT === "local"
     ? new DynamoDBClient({
-        endpoint: "http://host.docker.internal:4567",
-        region: "eu-west-2",
+        endpoint: process.env.DYNAMODB_ENDPOINT,
+        region: "localhost", // Set a dummy region for local development
       })
     : new DynamoDBClient({});
 
