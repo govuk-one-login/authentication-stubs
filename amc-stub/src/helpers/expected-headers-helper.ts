@@ -11,6 +11,13 @@ const REQUIRED_HEADERS = [
   "user-language",
 ];
 
+const REQUIRED_HEADERS_LOCAL = [
+  "di-persistent-session-id",
+  "client-session-id",
+  "session-id",
+  "user-language",
+];
+
 export function validateRequiredHeaders(
   event: APIGatewayProxyEvent
 ): APIGatewayProxyResult | null {
@@ -24,8 +31,12 @@ export function validateRequiredHeaders(
   }
 
   const missingHeaders: string[] = [];
+  const requiredHeaders =
+    process.env.ENVIRONMENT === "local"
+      ? REQUIRED_HEADERS_LOCAL
+      : REQUIRED_HEADERS;
 
-  for (const header of REQUIRED_HEADERS) {
+  for (const header of requiredHeaders) {
     if (!lowerCaseHeaders[header]) {
       missingHeaders.push(header);
     }
@@ -39,7 +50,7 @@ export function validateRequiredHeaders(
   }
 
   logger.info("headers are:");
-  for (const header of REQUIRED_HEADERS) {
+  for (const header of requiredHeaders) {
     logger.info(
       `${header}::${shouldObfuscate(header) ? truncate(lowerCaseHeaders[header]!) : lowerCaseHeaders[header]}`
     );
